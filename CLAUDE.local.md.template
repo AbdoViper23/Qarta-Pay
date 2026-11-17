@@ -1,0 +1,62 @@
+# CLAUDE.local.md — private team context (NOT in git)
+
+Copy this file to `CLAUDE.local.md` and fill it in. It is git-ignored. Claude Code loads it automatically alongside `CLAUDE.md`.
+
+Put here: public addresses, account status, answers from QIE/Reloadly, operational notes.
+Do NOT put here: private keys, mnemonics, API secrets, passwords. Those go only in `.env` files or the hosting secret store.
+
+## Team
+
+- Team name on hackathon.qie.digital:
+- Members and who owns what (contracts / backend / frontend / growth):
+- On-call contact during demo week:
+
+## Wallet addresses (public addresses only)
+
+| Role | Address | Where the key lives |
+|------|---------|---------------------|
+| owner (cold) | 0x | |
+| deployer | 0x | Foundry keystore `qarta-deployer` on ___'s machine |
+| quoteSigner | 0x | hosting secret store |
+| fulfiller | 0x | hosting secret store |
+| treasury | 0x | |
+| test user (testnet) | 0x | |
+
+## Deployments
+
+| Network | QartaCheckout | Deploy block | Notes |
+|---------|---------------|--------------|-------|
+| testnet 1983 | 0x | | mocks: QUSDC 0x…, feed 0x… |
+| mainnet 1990 | 0x | | verified: yes/no |
+
+## Accounts and status
+
+- Reloadly: account email ___ ; sandbox works: yes/no ; sales contacted on ___ ; reply: ___ ; live approved: yes/no ; float funded: $___
+- QIE Pass partner keys: requested on ___ ; sandbox key received: yes/no ; production: yes/no
+- Hosting: API at ___ ; DB at ___ ; web at ___ ; domain ___
+- Telegram alert chat: ___
+
+## Answers received (move into docs/ when confirmed, keep the raw note here)
+
+- AI-assisted development allowed? →
+- Traction milestone thresholds →
+- QIEDex router ABI / fork →
+- QIE ID resolution ABI →
+- Oracle heartbeat →
+- EVM version / EIP-1559 →
+
+## Business decisions
+
+- Launch countries:
+- Gift card brands at launch:
+- Margin / spread / cashback (bps):
+- Limits (per order / per wallet per day / global per day):
+- Refund policy wording:
+
+## Runbook (fill as we go)
+
+- How to pause sales:
+- How to top up the Reloadly float:
+- How to sweep treasury QIE → QUSDC:
+- How to handle a `NEEDS_REVIEW` order:
+- How to rotate quoteSigner / fulfiller:

@@ -1,0 +1,32 @@
+# secrets — never commit (see docs/11-SECURITY-AND-SECRETS.md)
+.env
+.env.*
+!.env.example
+secrets/
+*.keystore
+keystore/
+keystores/
+*.pem
+*.key
+CLAUDE.local.md
+
+# dependencies and build output
+node_modules/
+dist/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# foundry
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+
+# local tooling
+.claude/settings.local.json
+.DS_Store
+*.log
+.idea/
+.vscode/

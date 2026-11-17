@@ -1,0 +1,52 @@
+{
+  "note": "Hand-assembled on 17 Nov 2026. Not published ABIs. Each signature was confirmed by a live read-only call on QIE Mainnet; see docs/probe-results.md. The entries are human-readable signatures; the text after // is a note, not part of the signature.",
+  "QIEDexRouter": {
+    "address": "0x08cd2e72e156D8563B4351eb4065C262A9f553Ef",
+    "functions": [
+      "function factory() view returns (address)",
+      "function WETH() view returns (address)",
+      "function getAmountsOut(uint256 amountIn, address[] path) view returns (uint256[] amounts)",
+      "function swapExactETHForTokens(uint256 amountOutMin, address[] path, address to, uint256 deadline) payable returns (uint256[] amounts)"
+    ]
+  },
+  "QIEDexFactory": {
+    "address": "0x8E23128a5511223bE6c0d64106e2D4508C08398C",
+    "functions": [
+      "function getPair(address tokenA, address tokenB) view returns (address pair)",
+      "function allPairsLength() view returns (uint256)"
+    ]
+  },
+  "QIEDexPairWqieQusdc": {
+    "address": "0x73a3cCF7da7e473ed2e9994aE764f0E30f4e4DFe",
+    "functions": [
+      "function token0() view returns (address)",
+      "function token1() view returns (address)",
+      "function getReserves() view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast)"
+    ]
+  },
+  "QieReverseResolver": {
+    "address": "0x76ec8ed377cC0d36D1B48027ac7892Ec6799171E",
+    "functions": [
+      "function resolve(address wallet) view returns (string name)",
+      "function defaultDomain(address wallet) view returns (string name)"
+    ]
+  },
+  "QieNameRegistry": {
+    "addresses": [
+      "0x26cCB3fABd6db18834987134d715Ba2346CE7223",
+      "0x1D69d75AD7b77b91C3760F84faC52E651710f62e"
+    ],
+    "functions": [
+      "function resolver(string name) view returns (uint256 tokenId, address owner)",
+      "function userDomain(address wallet) view returns (string name)  // Registry B (0x1D69…f62e) only; reverts on Registry A",
+      "function domainExist(string name) view returns (bool)",
+      "function domainInfo(string name) view returns ((string name, address nft, address owner, uint256 registeredAt, uint256 tokenId))"
+    ]
+  },
+  "QieNameNft": {
+    "address": "0x9aab56e7727af53A3131985BFB16d845319b7bdc",
+    "functions": [
+      "function ownerOf(uint256 tokenId) view returns (address)"
+    ]
+  }
+}

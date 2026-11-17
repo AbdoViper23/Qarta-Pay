@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "qie-blockchain-docs": {
+      "type": "http",
+      "url": "https://docs.qie.digital/~gitbook/mcp"
+    }
+  }
+}

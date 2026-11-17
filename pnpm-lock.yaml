@@ -231,8 +231,8 @@ importers:
   contracts:
     devDependencies:
       '@openzeppelin/contracts':
-        specifier: ^5.6.1
-        version: 5.6.1
+        specifier: 5.1.0
+        version: 5.1.0
       forge-std:
         specifier: github:foundry-rs/forge-std#v1.17.0
         version: https://codeload.github.com/foundry-rs/forge-std/tar.gz/f3dae6e6ee381f25eb6a246f7da9b85c91a68219
@@ -763,8 +763,8 @@ packages:
     resolution: {integrity: sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A==}
     engines: {node: ^14.21.3 || >=16}
 
-  '@openzeppelin/contracts@5.6.1':
-    resolution: {integrity: sha512-Ly6SlsVJ3mj+b18W3R8gNufB7dTICT105fJhodGAGgyC2oqnBAhqSiNDJ8V8DLY05cCz81GLI0CU5vNYA1EC/w==}
+  '@openzeppelin/contracts@5.1.0':
+    resolution: {integrity: sha512-p1ULhl7BXzjjbha5aqst+QMLY+4/LCWADXOCsmLHRM77AqiPjnd9vvUN9sosUfhL9JGKpZ0TjEGxgvnizmWGSA==}
 
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
@@ -2141,7 +2141,7 @@ snapshots:
 
   '@noble/hashes@1.8.0': {}
 
-  '@openzeppelin/contracts@5.6.1': {}
+  '@openzeppelin/contracts@5.1.0': {}
 
   '@oxc-project/types@0.156.0': {}
 

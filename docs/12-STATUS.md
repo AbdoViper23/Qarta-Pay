@@ -10,8 +10,25 @@ Last updated: **17 Nov 2026** (end of Step 1).
 |--------------------------|-------|
 | Day 0 human tasks | **Not done yet.** See "Waiting on a human" below |
 | Step 1 — scaffold and probe | **Done**, except the items that need credentials or a funded key (listed below) |
-| Step 2 — contract + sweep script | **Not started. Waits for the team's go-ahead.** |
+| Step 2 — contract + sweep script | **In progress** (approved 17 Nov 2026). See "Step 2 progress" below |
 | Steps 3–7 | Not started |
+
+## Step 2 progress (17 Nov 2026, session stopped mid-step)
+
+Done and committed:
+- `contracts/src/QartaCheckout.sol` with the oracle guard, per-token `totalEscrowed`, owner `rescue` limited to non-escrowed funds, immutable `refundTimeout` (30 min – 7 days), `renounceOwnership` disabled, `hashQuote` view.
+- Mocks: `MockERC20` (6 decimals), `MockAggregatorV3`, `MockRouter`.
+- `contracts/test/QartaCheckout.t.sol`: 66 unit and fuzz tests pass.
+- OpenZeppelin pinned to **5.1.0**: 5.6 uses `mcopy` (Cancun), which QIE does not support.
+
+Still to do in Step 2, in this order:
+1. Invariant test (handler with ghost sums: balance and `totalEscrowed` per token equal the sum of `Paid` orders; an order leaves `Paid` once).
+2. `script/SweepTreasury.s.sol` (logic in a function taking a params struct), unit tests against the mocks, `test/fork/SweepTreasury.t.sol`.
+3. Fork test for `QartaCheckout`: real QUSDC payment, real feed (warp to just after `updatedAt`, the feed can be over 24 h old).
+4. `script/Deploy.s.sol`; anvil rehearsal of pay → settle, pay → refund, one native pay rejected by the guard.
+5. Export the ABI from `contracts/out` to `packages/shared`, add the `Quote` EIP-712 types and one fixed digest vector asserted in Foundry and vitest.
+6. Record in `04-SMART-CONTRACTS.md` the deviations: immutable `refundTimeout`, `totalEscrowed`, `rescue`, zero-amount rejection, OZ 5.1.0. Update the README integrations rows. Try `slither`.
+7. Testnet deploy needs a funded key (human).
 
 ## What exists in the repo
 

@@ -1,0 +1,15 @@
+node_modules
+pnpm-lock.yaml
+dist
+.next
+coverage
+contracts/out
+contracts/cache
+contracts/broadcast
+contracts/lib
+# recorded supplier responses and explorer ABIs stay byte-for-byte
+apps/api/test/fixtures
+packages/shared/abi/*.json
+# specs are written by hand
+docs
+*.md

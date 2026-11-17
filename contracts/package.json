@@ -1,0 +1,14 @@
+{
+  "name": "contracts",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test --no-match-path 'test/fork/*'",
+    "test:fork": "forge test --match-path 'test/fork/*' --fork-url $QIE_MAINNET_RPC"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^5.6.1",
+    "forge-std": "github:foundry-rs/forge-std#v1.17.0"
+  }
+}

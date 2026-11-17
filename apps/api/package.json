@@ -1,0 +1,18 @@
+{
+  "name": "api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=.env src/main.ts",
+    "start": "tsx --env-file=.env src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "smoke:reloadly": "tsx --env-file=.env scripts/reloadly-smoke.ts"
+  },
+  "dependencies": {
+    "@qarta/shared": "workspace:*",
+    "fastify": "^5.12.8",
+    "zod": "^4.6.7"
+  }
+}

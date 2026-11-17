@@ -1,0 +1,27 @@
+{
+  "chainId": 1990,
+  "name": "QIE Mainnet",
+  "nativeCurrency": { "name": "QIE", "symbol": "QIE", "decimals": 18 },
+  "rpcUrls": [
+    "https://rpc1mainnet.qie.digital",
+    "https://rpc2mainnet.qie.digital",
+    "https://rpc5mainnet.qie.digital",
+    "https://rpc4mainnet.qie.digital",
+    "https://rpc3mainnet.qie.digital"
+  ],
+  "explorerUrl": "https://mainnet.qie.digital",
+  "getLogsMaxBlockRange": 10000,
+  "addresses": {
+    "qartaCheckout": null,
+    "qusdc": "0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5",
+    "wqie": "0x0087904D95BEe9E5F24dc8852804b547981A9139",
+    "qieUsdFeed": "0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17",
+    "qiedexRouter": "0x08cd2e72e156D8563B4351eb4065C262A9f553Ef",
+    "qiedexFactory": "0x8E23128a5511223bE6c0d64106e2D4508C08398C",
+    "qiedexWqieQusdcPair": "0x73a3cCF7da7e473ed2e9994aE764f0E30f4e4DFe",
+    "qieReverseResolver": "0x76ec8ed377cC0d36D1B48027ac7892Ec6799171E",
+    "qieNameRegistryA": "0x26cCB3fABd6db18834987134d715Ba2346CE7223",
+    "qieNameRegistryB": "0x1D69d75AD7b77b91C3760F84faC52E651710f62e",
+    "qieNameNft": "0x9aab56e7727af53A3131985BFB16d845319b7bdc"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "chainId": 1983,
+  "name": "QIE Testnet",
+  "nativeCurrency": { "name": "QIE", "symbol": "QIE", "decimals": 18 },
+  "rpcUrls": ["https://rpc1testnet.qie.digital"],
+  "explorerUrl": "https://testnet.qie.digital",
+  "getLogsMaxBlockRange": 10000,
+  "addresses": {
+    "qartaCheckout": null,
+    "qusdc": null,
+    "wqie": null,
+    "qieUsdFeed": null,
+    "qiedexRouter": null,
+    "qiedexFactory": null,
+    "qiedexWqieQusdcPair": null,
+    "qieReverseResolver": null,
+    "qieNameRegistryA": null,
+    "qieNameRegistryB": null,
+    "qieNameNft": null
+  }
+}

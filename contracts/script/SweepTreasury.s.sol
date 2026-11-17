@@ -30,9 +30,9 @@ interface ISweepToken {
 /// The swap goes from the treasury to the treasury and never touches QartaCheckout.
 ///
 /// Simulation (agent may run this, nothing is broadcast):
-///   forge script script/SweepTreasury.s.sol --fork-url $QIE_MAINNET_RPC --sender $TREASURY_ADDRESS -vvvv
+///   forge script script/SweepTreasury.s.sol:SweepTreasury --fork-url $QIE_MAINNET_RPC --sender $TREASURY_ADDRESS -vvvv
 /// Mainnet (human only, after reading the simulation):
-///   forge script script/SweepTreasury.s.sol --rpc-url $QIE_MAINNET_RPC --account qarta-treasury \
+///   forge script script/SweepTreasury.s.sol:SweepTreasury --rpc-url $QIE_MAINNET_RPC --account qarta-treasury \
 ///     --sender $TREASURY_ADDRESS --broadcast
 contract SweepTreasury is Script {
     struct Params {

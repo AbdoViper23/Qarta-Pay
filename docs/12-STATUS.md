@@ -22,7 +22,8 @@ Done:
 - Mocks: `MockERC20` (6 decimals), `MockAggregatorV3`, `MockRouter`.
 - `script/SweepTreasury.s.sol`: oracle-bound `minOut`, all checks before anything is sent, treasury → treasury only, refuses any `--sender` other than `TREASURY_ADDRESS`.
 - `script/Deploy.s.sol`: deploys (with mocks when `DEPLOY_MOCKS=true`, refused on chain 1990) and starts the two-step ownership handover.
-- `script/rehearse.sh`: the Step 2 acceptance sequence on a local anvil. Passed.
+- `script/rehearse.sh`: the Step 2 acceptance sequence on a local anvil, including the two-step ownership handover. Passed.
+- `SweepTreasury.s.sol` run with `forge script --unlocked --sender <treasury> --broadcast` on an anvil fork: swap succeeded; a wrong `--sender` was refused.
 - Tests: 66 unit/fuzz, 3 invariants (0 reverts, `fail_on_revert`), 13 sweep tests, 1 EIP-712 vector, 12 fork tests pinned to block 11961896. All pass.
 - `packages/shared`: generated `qartaCheckoutAbi`, EIP-712 `Quote` types; the same digest vector is asserted by Foundry and vitest.
 
@@ -31,8 +32,9 @@ Testnet deploy (human runs it; needs `cast wallet import qarta-deployer --intera
 ```bash
 cd contracts
 export QUOTE_SIGNER_ADDRESS=0x… FULFILLER_ADDRESS=0x… TREASURY_ADDRESS=0x… OWNER_ADDRESS=0x… DEPLOY_MOCKS=true
-forge script script/Deploy.s.sol --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer \
+forge script script/Deploy.s.sol:Deploy --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer \
   --sender <deployer address> --broadcast
+# the script asserts owner == deployer and pendingOwner == OWNER_ADDRESS
 # verify (also tests the Blockscout verifier):
 forge verify-contract <QartaCheckout address> src/QartaCheckout.sol:QartaCheckout --verifier blockscout \
   --verifier-url https://testnet.qie.digital/api/ --chain-id 1983 --guess-constructor-args

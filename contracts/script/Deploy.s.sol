@@ -47,6 +47,9 @@ contract Deploy is Script {
         if (c.deployMocks && block.chainid == 1990) revert("Deploy: mocks on QIE mainnet");
 
         vm.startBroadcast();
+        // The broadcaster (from --sender / --account) becomes the initial owner. Read it from the
+        // cheatcode instead of trusting msg.sender of run(), which depends on how forge was invoked.
+        (, address deployer,) = vm.readCallers();
         if (c.deployMocks) {
             MockERC20 token = new MockERC20("Mock QUSDC", "QUSDC");
             // $0.15 per QIE, 8 decimals like the real feed.
@@ -57,7 +60,7 @@ contract Deploy is Script {
             console2.log("MockAggregatorV3 (feed) ", c.feed);
         }
         checkout = new QartaCheckout(
-            msg.sender,
+            deployer,
             c.quoteSigner,
             c.fulfiller,
             c.treasury,
@@ -71,6 +74,9 @@ contract Deploy is Script {
         // Step one of the ownership handover; the cold wallet must call acceptOwnership().
         if (c.pendingOwner != address(0)) checkout.transferOwnership(c.pendingOwner);
         vm.stopBroadcast();
+
+        require(checkout.owner() == deployer, "Deploy: owner is not the broadcaster");
+        require(checkout.pendingOwner() == c.pendingOwner, "Deploy: pending owner not set");
 
         console2.log("QartaCheckout           ", address(checkout));
         console2.log("deploy block            ", block.number);

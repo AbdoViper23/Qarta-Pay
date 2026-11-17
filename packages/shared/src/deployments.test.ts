@@ -37,10 +37,10 @@ describe('addresses', () => {
     expect(new Set(values).size).toBe(values.length);
   });
 
-  it('has no ecosystem addresses on testnet (mocks are deployed in Step 2)', () => {
-    expect(Object.values(qieTestnetConfig.addresses).every((address) => address === null)).toBe(
-      true,
-    );
+  it('has no QIEDex or QIE ID addresses on testnet (they do not exist there)', () => {
+    // qartaCheckout, qusdc and qieUsdFeed are filled with our own deployment and mocks.
+    const { qartaCheckout: _c, qusdc: _q, qieUsdFeed: _f, ...absent } = qieTestnetConfig.addresses;
+    expect(Object.values(absent).every((address) => address === null)).toBe(true);
   });
 
   it('requireAddress returns a configured address and throws for a missing one', () => {

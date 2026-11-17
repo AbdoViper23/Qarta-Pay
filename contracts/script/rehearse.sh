@@ -14,20 +14,28 @@ anvil --port 8546 --silent & ANVIL=$!
 trap 'kill $ANVIL 2>/dev/null' EXIT
 sleep 2
 
-# anvil's well-known development accounts (public; worthless outside a local node)
-DEPLOYER_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-SIGNER_KEY=0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
-FULFILLER_KEY=0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
-PAYER_KEY=0x7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6
+# anvil's development accounts, derived from its public test mnemonic (worthless outside a local node)
+MNEMONIC="test test test test test test test test test test test junk"
+DEPLOYER_KEY=$(cast wallet private-key "$MNEMONIC" 0)
+SIGNER_KEY=$(cast wallet private-key "$MNEMONIC" 1)
+FULFILLER_KEY=$(cast wallet private-key "$MNEMONIC" 2)
+PAYER_KEY=$(cast wallet private-key "$MNEMONIC" 3)
+OWNER_KEY=$(cast wallet private-key "$MNEMONIC" 4)
 addr() { cast wallet address --private-key "$1"; }
-SIGNER=$(addr $SIGNER_KEY); FULFILLER=$(addr $FULFILLER_KEY); PAYER=$(addr $PAYER_KEY)
+DEPLOYER=$(addr $DEPLOYER_KEY); SIGNER=$(addr $SIGNER_KEY); FULFILLER=$(addr $FULFILLER_KEY); PAYER=$(addr $PAYER_KEY); OWNER=$(addr $OWNER_KEY)
 TREASURY=0x000000000000000000000000000000000000bEEF
 
-export QUOTE_SIGNER_ADDRESS=$SIGNER FULFILLER_ADDRESS=$FULFILLER TREASURY_ADDRESS=$TREASURY DEPLOY_MOCKS=true
-OUT=$(forge script script/Deploy.s.sol --rpc-url $RPC --private-key $DEPLOYER_KEY --broadcast 2>&1)
+export QUOTE_SIGNER_ADDRESS=$SIGNER FULFILLER_ADDRESS=$FULFILLER TREASURY_ADDRESS=$TREASURY OWNER_ADDRESS=$OWNER DEPLOY_MOCKS=true
+OUT=$(forge script script/Deploy.s.sol:Deploy --rpc-url $RPC --private-key $DEPLOYER_KEY --broadcast 2>&1)
 CHECKOUT=$(echo "$OUT" | awk '/^  QartaCheckout /{print $2}')
 QUSDC=$(echo "$OUT" | awk '/MockERC20 \(QUSDC\)/{print $3}')
 echo "QartaCheckout $CHECKOUT   mock QUSDC $QUSDC"
+
+# Ownership: deployer owns it until the cold wallet accepts (two-step).
+[ "$(cast call --rpc-url $RPC $CHECKOUT 'owner()(address)')" = "$DEPLOYER" ] || { echo "owner is not the deployer"; exit 1; }
+cast send --rpc-url $RPC --private-key $OWNER_KEY $CHECKOUT "acceptOwnership()" >/dev/null
+[ "$(cast call --rpc-url $RPC $CHECKOUT 'owner()(address)')" = "$OWNER" ] || { echo "acceptOwnership failed"; exit 1; }
+echo "0. ownership handed over: owner $OWNER"
 
 send() { cast send --rpc-url $RPC "$@" >/dev/null; }
 call() { cast call --rpc-url $RPC "$@"; }

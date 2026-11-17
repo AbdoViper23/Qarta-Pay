@@ -143,9 +143,11 @@ Running it:
 
 ```bash
 # 1. Simulation on a mainnet fork (agent may run this; nothing is broadcast)
-forge script script/SweepTreasury.s.sol --fork-url $QIE_MAINNET_RPC --sender $TREASURY_ADDRESS -vvvv
-# 2. Mainnet (human only, after reviewing the simulation output)
-forge script script/SweepTreasury.s.sol --rpc-url $QIE_MAINNET_RPC --account qarta-treasury --broadcast
+forge script script/SweepTreasury.s.sol:SweepTreasury --fork-url $QIE_MAINNET_RPC --sender $TREASURY_ADDRESS -vvvv
+# 2. Mainnet (human only, after reviewing the simulation output). --sender must equal TREASURY_ADDRESS,
+#    the script refuses any other sender.
+forge script script/SweepTreasury.s.sol:SweepTreasury --rpc-url $QIE_MAINNET_RPC --account qarta-treasury \
+  --sender $TREASURY_ADDRESS --broadcast
 ```
 
 Gate (separate from the in-tx swap decision rule below): the sweep ships when the fork test performs a real swap against the QIEDex router and the treasury receives at least `minOut` QUSDC. If the router does not answer `getAmountsOut` or an exact-native-in swap on the fork, the sweep cannot ship. Write the finding in `10-OPEN-QUESTIONS.md`. The treasury then swaps by hand in the QIEDex web UI. QIEDEX is still covered by the price cross-check (it needs only the pair's `getReserves()`, `token0()`, `token1()`) and the "Get QUSDC" link.
@@ -242,7 +244,9 @@ Fork (`--fork-url $QIE_MAINNET_RPC`):
 
 Tests (`forge test`): 66 unit and fuzz tests (`test/QartaCheckout.t.sol`), 3 invariants over random pay/settle/refund/claim/time sequences with `fail_on_revert` (`test/QartaCheckout.invariant.t.sol`), 13 sweep-script tests against the mocks (`test/SweepTreasury.t.sol`), and a fixed EIP-712 vector (`test/QuoteDigest.t.sol`) that `packages/shared/src/eip712.test.ts` also asserts. Fork tests (`pnpm --filter contracts test:fork`, pinned to block 11961896): real QUSDC pay/settle/refund, the real feed accepting a correctly priced and rejecting an under-priced native quote, and the sweep swapping on the real QIEDex router.
 
-At the pinned block a 130 QIE sweep chunk was quoted 584 bps below the oracle, inside the 700 bps default.
+At the pinned block a 130 QIE sweep chunk was quoted 584 bps below the oracle, inside the 700 bps default. The script was also run end to end with `forge script --unlocked --sender <treasury> --broadcast` on an anvil fork of that block: 130 QIE in, 18.967263 QUSDC received (min out 18.732496); a different `--sender` was refused with `SweepWrongSender`.
+
+Fork block: the public RPC served state at least 960,000 blocks old (about 40 days) on 17 Nov 2026. Override the pin with `FORK_BLOCK=<n>`; the strict 700 bps sweep test is tied to the default pin and may legitimately fail on another block (it then says to revisit the slippage and chunk size).
 
 `script/rehearse.sh` runs the "Done when" sequence of `09-PLAN.md` Step 2 on a local anvil: pay → settle, pay → refund, an under-priced native pay rejected by the guard, a correctly priced one accepted.
 

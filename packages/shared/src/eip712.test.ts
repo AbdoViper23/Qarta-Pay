@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { hashTypedData, recoverTypedDataAddress } from 'viem';
-import { privateKeyToAccount } from 'viem/accounts';
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { quoteDomain, quoteTypes, type Quote } from './eip712';
 
 // Same vector as contracts/test/QuoteDigest.t.sol. If either side changes, both tests fail.
@@ -40,10 +40,7 @@ describe('Quote EIP-712', () => {
   });
 
   it('a viem signature recovers to the signer', async () => {
-    // Throwaway test key (anvil account #1); never used outside tests.
-    const account = privateKeyToAccount(
-      '0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d',
-    );
+    const account = privateKeyToAccount(generatePrivateKey()); // fresh throwaway key per run
     const args = {
       domain: quoteDomain(1990, VERIFYING_CONTRACT),
       types: quoteTypes,

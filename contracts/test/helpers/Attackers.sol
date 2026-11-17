@@ -36,7 +36,10 @@ contract ReentrantPayer {
 
 /// @notice A payer contract that cannot receive native coin.
 contract RejectingPayer {
-    function pay(QartaCheckout checkout, QartaCheckout.Quote calldata q, bytes calldata sig) external payable {
+    function pay(QartaCheckout checkout, QartaCheckout.Quote calldata q, bytes calldata sig)
+        external
+        payable
+    {
         checkout.pay{value: msg.value}(q, sig);
     }
 }

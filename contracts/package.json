@@ -5,7 +5,9 @@
   "scripts": {
     "build": "forge build",
     "test": "forge test --no-match-path 'test/fork/*'",
-    "test:fork": "forge test --match-path 'test/fork/*' --fork-url $QIE_MAINNET_RPC"
+    "test:fork": "forge test --match-path 'test/fork/*' --fork-url ${QIE_MAINNET_RPC:-https://rpc2mainnet.qie.digital} --fork-block-number ${FORK_BLOCK:-11961896} --fork-retries 5 --fork-retry-backoff 3000",
+    "export-abi": "forge build && node script/export-abi.mjs",
+    "rehearse": "bash script/rehearse.sh"
   },
   "devDependencies": {
     "@openzeppelin/contracts": "5.1.0",

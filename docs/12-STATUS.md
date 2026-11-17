@@ -10,25 +10,37 @@ Last updated: **17 Nov 2026** (end of Step 1).
 |--------------------------|-------|
 | Day 0 human tasks | **Not done yet.** See "Waiting on a human" below |
 | Step 1 — scaffold and probe | **Done**, except the items that need credentials or a funded key (listed below) |
-| Step 2 — contract + sweep script | **In progress** (approved 17 Nov 2026). See "Step 2 progress" below |
+| Step 2 — contract + sweep script | **Agent work done**; waits for the testnet deploy and the human review. See "Step 2 status" below |
 | Steps 3–7 | Not started |
 
-## Step 2 progress (17 Nov 2026, session stopped mid-step)
+## Step 2 status (17 Nov 2026)
 
-Done and committed:
-- `contracts/src/QartaCheckout.sol` with the oracle guard, per-token `totalEscrowed`, owner `rescue` limited to non-escrowed funds, immutable `refundTimeout` (30 min – 7 days), `renounceOwnership` disabled, `hashQuote` view.
+Agent work is **done**. "Done when" in `09-PLAN.md` is **not met yet**, because two items need a human: the testnet deploy (needs a funded key) and the line-by-line review of the contract and the sweep script.
+
+Done:
+- `contracts/src/QartaCheckout.sol` per `04-SMART-CONTRACTS.md`; additions and slither triage are in its "Implementation notes".
 - Mocks: `MockERC20` (6 decimals), `MockAggregatorV3`, `MockRouter`.
-- `contracts/test/QartaCheckout.t.sol`: 66 unit and fuzz tests pass.
-- OpenZeppelin pinned to **5.1.0**: 5.6 uses `mcopy` (Cancun), which QIE does not support.
+- `script/SweepTreasury.s.sol`: oracle-bound `minOut`, all checks before anything is sent, treasury → treasury only, refuses any `--sender` other than `TREASURY_ADDRESS`.
+- `script/Deploy.s.sol`: deploys (with mocks when `DEPLOY_MOCKS=true`, refused on chain 1990) and starts the two-step ownership handover.
+- `script/rehearse.sh`: the Step 2 acceptance sequence on a local anvil. Passed.
+- Tests: 66 unit/fuzz, 3 invariants (0 reverts, `fail_on_revert`), 13 sweep tests, 1 EIP-712 vector, 12 fork tests pinned to block 11961896. All pass.
+- `packages/shared`: generated `qartaCheckoutAbi`, EIP-712 `Quote` types; the same digest vector is asserted by Foundry and vitest.
 
-Still to do in Step 2, in this order:
-1. Invariant test (handler with ghost sums: balance and `totalEscrowed` per token equal the sum of `Paid` orders; an order leaves `Paid` once).
-2. `script/SweepTreasury.s.sol` (logic in a function taking a params struct), unit tests against the mocks, `test/fork/SweepTreasury.t.sol`.
-3. Fork test for `QartaCheckout`: real QUSDC payment, real feed (warp to just after `updatedAt`, the feed can be over 24 h old).
-4. `script/Deploy.s.sol`; anvil rehearsal of pay → settle, pay → refund, one native pay rejected by the guard.
-5. Export the ABI from `contracts/out` to `packages/shared`, add the `Quote` EIP-712 types and one fixed digest vector asserted in Foundry and vitest.
-6. Record in `04-SMART-CONTRACTS.md` the deviations: immutable `refundTimeout`, `totalEscrowed`, `rescue`, zero-amount rejection, OZ 5.1.0. Update the README integrations rows. Try `slither`.
-7. Testnet deploy needs a funded key (human).
+Testnet deploy (human runs it; needs `cast wallet import qarta-deployer --interactive` and faucet funds):
+
+```bash
+cd contracts
+export QUOTE_SIGNER_ADDRESS=0x… FULFILLER_ADDRESS=0x… TREASURY_ADDRESS=0x… OWNER_ADDRESS=0x… DEPLOY_MOCKS=true
+forge script script/Deploy.s.sol --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer \
+  --sender <deployer address> --broadcast
+# verify (also tests the Blockscout verifier):
+forge verify-contract <QartaCheckout address> src/QartaCheckout.sol:QartaCheckout --verifier blockscout \
+  --verifier-url https://testnet.qie.digital/api/ --chain-id 1983 --guess-constructor-args
+# owner handover: the OWNER_ADDRESS wallet calls acceptOwnership()
+cast send <QartaCheckout address> "acceptOwnership()" --rpc-url https://rpc1testnet.qie.digital --account qarta-owner
+```
+
+Then record the addresses and the deploy block in `CLAUDE.local.md` and `packages/shared/config/qie-testnet.json` (`qartaCheckout`, `qusdc`, `qieUsdFeed`), and run the pay → settle / pay → refund / guard-rejection sequence on testnet (same steps as `script/rehearse.sh`, with keystore accounts instead of anvil keys).
 
 ## What exists in the repo
 
@@ -40,7 +52,7 @@ Still to do in Step 2, in this order:
 | `packages/shared/config/*.json` | Chain config and contract addresses (mainnet confirmed on-chain; testnet empty until mocks are deployed) |
 | `packages/shared/src/` | viem chain definitions, zod-validated address book, ABIs for the functions we use |
 | `packages/shared/abi/` | ABIs as collected: two verified ones from the explorer, and hand-assembled signatures for the unverified QIEDex and QIE ID contracts |
-| `contracts/` | Foundry project (solc 0.8.24, `paris`, OpenZeppelin v5.6 and forge-std v1.17 installed through pnpm, no git submodules). Holds a toolchain test and a mainnet fork test. **No `QartaCheckout` yet** |
+| `contracts/` | Foundry project (solc 0.8.24, `paris`, OpenZeppelin **5.1.0** and forge-std v1.17 installed through pnpm, no git submodules). `QartaCheckout`, mocks, sweep and deploy scripts, unit/invariant/fork tests |
 | `contracts/script/probe.sh` | The read-only mainnet probe checklist as one script |
 | `apps/api/` | Fastify skeleton with `/healthz`, Reloadly endpoint config, fixture scrubber, and the sandbox smoke script |
 | `apps/web/` | Next.js skeleton (placeholder page). No wallet code, no Tailwind yet |
@@ -101,5 +113,8 @@ Ordered by when the work needs it.
 | Before submission | Create the GitHub repo and push; register the team on `hackathon.qie.digital`; domain and hosting |
 
 ## Next step for whoever continues
+
+(Superseded) The note below was written at the end of Step 1. Current next step: the human review and testnet deploy of Step 2, then Step 3 (backend) once the team confirms.
+
 
 Step 2 of `09-PLAN.md`: `QartaCheckout` per `04-SMART-CONTRACTS.md`, with the decided oracle values, plus mocks, the full test list, `SweepTreasury.s.sol` and its fork test. **Do not start it until the team confirms.** Follow the corrected `pay` order in `04-SMART-CONTRACTS.md`: the escrow is written before the ERC-20 transfer, then the received balance is checked.

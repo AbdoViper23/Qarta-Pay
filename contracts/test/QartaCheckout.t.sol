@@ -13,7 +13,11 @@ contract QartaCheckoutTest is CheckoutFixture {
     bytes32 internal constant ORDER = keccak256("order-1");
 
     event OrderPaid(
-        bytes32 indexed orderId, address indexed payer, address indexed token, uint256 amount, uint256 usdAmount
+        bytes32 indexed orderId,
+        address indexed payer,
+        address indexed token,
+        uint256 amount,
+        uint256 usdAmount
     );
     event OrderSettled(bytes32 indexed orderId);
     event OrderRefunded(bytes32 indexed orderId, address indexed to, uint256 amount, bool byPayer);
@@ -29,7 +33,8 @@ contract QartaCheckoutTest is CheckoutFixture {
         vm.prank(payer);
         checkout.pay(q, sig);
 
-        (address p, address token, uint256 amount, uint64 paidAt, QartaCheckout.Status status) = checkout.orders(ORDER);
+        (address p, address token, uint256 amount, uint64 paidAt, QartaCheckout.Status status) =
+            checkout.orders(ORDER);
         assertEq(p, payer);
         assertEq(token, address(qusdc));
         assertEq(amount, 10e6);
@@ -211,7 +216,16 @@ contract QartaCheckoutTest is CheckoutFixture {
 
     function test_RevertWhen_SignatureFromOtherContract() public {
         QartaCheckout other = new QartaCheckout(
-            owner, quoteSigner, fulfiller, treasury, address(qusdc), address(feed), MAX_ORACLE_AGE, TOLERANCE_BPS, true, REFUND_TIMEOUT
+            owner,
+            quoteSigner,
+            fulfiller,
+            treasury,
+            address(qusdc),
+            address(feed),
+            MAX_ORACLE_AGE,
+            TOLERANCE_BPS,
+            true,
+            REFUND_TIMEOUT
         );
         QartaCheckout.Quote memory q = _qusdcQuote(ORDER);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(quoteSignerKey, other.hashQuote(q));
@@ -614,7 +628,8 @@ contract QartaCheckoutTest is CheckoutFixture {
     }
 
     function test_OracleSettersOnlyOwner() public {
-        bytes memory unauthorized = abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger);
+        bytes memory unauthorized =
+            abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger);
         vm.startPrank(stranger);
         vm.expectRevert(unauthorized);
         checkout.setOracle(address(feed));
@@ -698,7 +713,8 @@ contract QartaCheckoutTest is CheckoutFixture {
         checkout.setOracle(address(0));
         vm.stopPrank();
 
-        bytes memory unauthorized = abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger);
+        bytes memory unauthorized =
+            abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, stranger);
         vm.startPrank(stranger);
         vm.expectRevert(unauthorized);
         checkout.setFulfiller(stranger);
@@ -790,25 +806,40 @@ contract QartaCheckoutTest is CheckoutFixture {
 
     function test_ConstructorValidation() public {
         vm.expectRevert(QartaCheckout.InvalidRefundTimeout.selector);
-        new QartaCheckout(owner, quoteSigner, fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 29 minutes);
+        new QartaCheckout(
+            owner, quoteSigner, fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 29 minutes
+        );
         vm.expectRevert(QartaCheckout.InvalidRefundTimeout.selector);
-        new QartaCheckout(owner, quoteSigner, fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 7 days + 1);
+        new QartaCheckout(
+            owner, quoteSigner, fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 7 days + 1
+        );
         vm.expectRevert(QartaCheckout.ZeroAddress.selector);
-        new QartaCheckout(owner, address(0), fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 2 hours);
+        new QartaCheckout(
+            owner, address(0), fulfiller, treasury, address(qusdc), address(feed), 1, 1, true, 2 hours
+        );
         vm.expectRevert(QartaCheckout.ZeroAddress.selector);
-        new QartaCheckout(owner, quoteSigner, address(0), treasury, address(qusdc), address(feed), 1, 1, true, 2 hours);
+        new QartaCheckout(
+            owner, quoteSigner, address(0), treasury, address(qusdc), address(feed), 1, 1, true, 2 hours
+        );
         vm.expectRevert(QartaCheckout.ZeroAddress.selector);
-        new QartaCheckout(owner, quoteSigner, fulfiller, address(0), address(qusdc), address(feed), 1, 1, true, 2 hours);
+        new QartaCheckout(
+            owner, quoteSigner, fulfiller, address(0), address(qusdc), address(feed), 1, 1, true, 2 hours
+        );
         vm.expectRevert(QartaCheckout.ZeroAddress.selector);
-        new QartaCheckout(owner, quoteSigner, fulfiller, treasury, address(0), address(feed), 1, 1, true, 2 hours);
+        new QartaCheckout(
+            owner, quoteSigner, fulfiller, treasury, address(0), address(feed), 1, 1, true, 2 hours
+        );
         // The guard cannot start enabled without a feed.
         vm.expectRevert(QartaCheckout.OracleNotSet.selector);
-        new QartaCheckout(owner, quoteSigner, fulfiller, treasury, address(qusdc), address(0), 1, 1, true, 2 hours);
+        new QartaCheckout(
+            owner, quoteSigner, fulfiller, treasury, address(qusdc), address(0), 1, 1, true, 2 hours
+        );
     }
 
     function test_DeployWithoutOracleAndGuardOff() public {
-        QartaCheckout bare =
-            new QartaCheckout(owner, quoteSigner, fulfiller, treasury, address(qusdc), address(0), 0, 0, false, 2 hours);
+        QartaCheckout bare = new QartaCheckout(
+            owner, quoteSigner, fulfiller, treasury, address(qusdc), address(0), 0, 0, false, 2 hours
+        );
         assertEq(bare.oracle(), address(0));
         assertFalse(bare.oracleGuardEnabled());
         vm.prank(owner);
@@ -845,7 +876,10 @@ contract QartaCheckoutTest is CheckoutFixture {
         vm.prank(payer);
         if (!acceptable) vm.expectRevert(QartaCheckout.PriceBelowOracle.selector);
         checkout.pay{value: amountWei}(q, sig);
-        assertEq(uint8(_status(ORDER)), acceptable ? uint8(QartaCheckout.Status.Paid) : uint8(QartaCheckout.Status.None));
+        assertEq(
+            uint8(_status(ORDER)),
+            acceptable ? uint8(QartaCheckout.Status.Paid) : uint8(QartaCheckout.Status.None)
+        );
     }
 
     function testFuzz_PayThenRefundRestoresBalances(uint64 amount, bool native, bool byPayer) public {

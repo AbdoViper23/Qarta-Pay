@@ -13,3 +13,5 @@ packages/shared/abi/*.json
 # specs are written by hand
 docs
 *.md
+# generated from the Foundry build
+packages/shared/src/abi/qartaCheckout.ts

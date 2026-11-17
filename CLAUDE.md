@@ -34,7 +34,9 @@ pnpm install
 pnpm lint && pnpm typecheck
 pnpm test                               # all workspaces, including the Foundry unit tests
 cd contracts && forge build && forge test -vvv
-cd contracts && forge test --fork-url $QIE_MAINNET_RPC --match-path "test/fork/*"
+pnpm --filter contracts test:fork        # mainnet fork tests, pinned to FORK_BLOCK (default 11961896)
+pnpm --filter contracts rehearse         # pay->settle, pay->refund, guard rejection on a local anvil
+pnpm --filter contracts export-abi       # regenerate packages/shared/src/abi/qartaCheckout.ts after contract changes
 cd contracts && forge script script/SweepTreasury.s.sol --fork-url $QIE_MAINNET_RPC --sender $TREASURY_ADDRESS -vvvv   # simulation only; mainnet --broadcast is human-only
 bash contracts/script/probe.sh          # read-only mainnet probe checklist
 pnpm --filter api dev                   # needs apps/api/.env (test creds)

@@ -220,6 +220,43 @@ Fork (`--fork-url $QIE_MAINNET_RPC`):
   `forge verify-contract <addr> src/QartaCheckout.sol:QartaCheckout --verifier blockscout --verifier-url https://mainnet.qie.digital/api/ --chain-id 1990` **[UNVERIFIED: command not run yet; test on testnet with `https://testnet.qie.digital/api/` and `--chain-id 1983`]**; fall back to the explorer's manual "verify contract" form with flattened source (`forge flatten`).
 - Record addresses in `packages/shared/src/deployments.ts` and in the README.
 
+## Implementation notes (Step 2, 17 Nov 2026)
+
+`contracts/src/QartaCheckout.sol` follows this spec with these additions and choices. Each one is covered by a test.
+
+| Item | What the code does | Why |
+|------|--------------------|-----|
+| OpenZeppelin version | Pinned to **5.1.0** | 5.6 uses `mcopy` (Cancun), which QIE does not support. 5.1.0 is also what QUSDC on mainnet was built with |
+| `refundTimeout` | `immutable`, set in the constructor, must be 30 min – 7 days | The backend's fulfilment cutoff is derived from it; it must not change under live orders |
+| `totalEscrowed[token]` | Per-token sum of all `Paid` orders | Lets `rescue` prove it never touches escrow, and backs the invariant test |
+| `rescue(token, to, amount)` | Owner may take at most `rescuable(token)` = balance − `totalEscrowed` | Recovers tokens sent by mistake without any path to escrowed funds |
+| `amount == 0` | Rejected with `ZeroAmount()` | An empty order would block its `orderId` for nothing |
+| Native coin sent without `pay` | Rejected (no `receive`/`fallback`) | Stray QIE can still be forced in; `rescue` handles it |
+| Oracle timestamp in the future | Treated as stale (`OracleStale()`) | Avoids an underflow panic and is as untrustworthy as an old answer |
+| Oracle guard on with no feed | Constructor and `setOracleGuardEnabled(true)` revert with `OracleNotSet()` | The guard can never be "on" but unable to run |
+| `oracleToleranceBps` | At most 5,000 | A typo cannot turn the floor into nothing |
+| `renounceOwnership` | Disabled | Without an owner a leaked signer or fulfiller key could never be rotated |
+| Signature check | `ECDSA.tryRecover`; malleable high-`s` signatures and wrong lengths fail as `InvalidSignature()` | Covered by tests |
+| `hashQuote(q)` | Public view returning the EIP-712 digest | The backend and tests sign exactly what the contract checks |
+| `pay` order | Checks → escrow write → ERC-20 transfer → received-balance check → event | Checks-effects-interactions (corrected order above) |
+
+Tests (`forge test`): 66 unit and fuzz tests (`test/QartaCheckout.t.sol`), 3 invariants over random pay/settle/refund/claim/time sequences with `fail_on_revert` (`test/QartaCheckout.invariant.t.sol`), 13 sweep-script tests against the mocks (`test/SweepTreasury.t.sol`), and a fixed EIP-712 vector (`test/QuoteDigest.t.sol`) that `packages/shared/src/eip712.test.ts` also asserts. Fork tests (`pnpm --filter contracts test:fork`, pinned to block 11961896): real QUSDC pay/settle/refund, the real feed accepting a correctly priced and rejecting an under-priced native quote, and the sweep swapping on the real QIEDex router.
+
+At the pinned block a 130 QIE sweep chunk was quoted 584 bps below the oracle, inside the 700 bps default.
+
+`script/rehearse.sh` runs the "Done when" sequence of `09-PLAN.md` Step 2 on a local anvil: pay → settle, pay → refund, an under-priced native pay rejected by the guard, a correctly priced one accepted.
+
+### Slither (0.11, 17 Nov 2026) — 9 findings, all accepted
+
+| Finding | Verdict |
+|---------|---------|
+| `arbitrary-send-eth` in `_send` | Intended. The recipient is always the treasury, the order's payer, or the owner's `rescue` target |
+| `divide-before-multiply` in the oracle guard | Intended. `paidUsd6` is rounded down before the comparison, which errs against the payer by at most $0.000001 |
+| `unused-return` on `tryRecover` and `latestRoundData` | Intended. Only the needed fields are read |
+| `timestamp` (3) | Intended. Quote expiry, refund timeout and feed age are minutes to hours; validator drift does not matter |
+| `cyclomatic-complexity` of `pay` | Accepted. The branches are the listed checks |
+| `low-level-calls` in `_send` | Intended. Native transfers use `call` with the result checked |
+
 ## Out of scope
 
 Upgradeability (no proxies; redeploy and point the backend at the new address if needed), own token, on-chain cashback.

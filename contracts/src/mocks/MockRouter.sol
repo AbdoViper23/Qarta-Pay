@@ -27,18 +27,23 @@ contract MockRouter {
         executedRate = executedRate_;
     }
 
-    function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts) {
+    function getAmountsOut(uint256 amountIn, address[] calldata path)
+        external
+        view
+        returns (uint256[] memory amounts)
+    {
         _checkPath(path);
         amounts = new uint256[](2);
         amounts[0] = amountIn;
         amounts[1] = amountIn * quotedRate / 1e18;
     }
 
-    function swapExactETHForTokens(uint256 amountOutMin, address[] calldata path, address to, uint256 deadline)
-        external
-        payable
-        returns (uint256[] memory amounts)
-    {
+    function swapExactETHForTokens(
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to,
+        uint256 deadline
+    ) external payable returns (uint256[] memory amounts) {
         _checkPath(path);
         require(block.timestamp <= deadline, "MockRouter: EXPIRED");
         amounts = new uint256[](2);

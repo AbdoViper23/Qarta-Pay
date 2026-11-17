@@ -100,7 +100,11 @@ contract QartaCheckout is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
     // ----------------------------------------------------------------- events
 
     event OrderPaid(
-        bytes32 indexed orderId, address indexed payer, address indexed token, uint256 amount, uint256 usdAmount
+        bytes32 indexed orderId,
+        address indexed payer,
+        address indexed token,
+        uint256 amount,
+        uint256 usdAmount
     );
     event OrderSettled(bytes32 indexed orderId);
     event OrderRefunded(bytes32 indexed orderId, address indexed to, uint256 amount, bool byPayer);
@@ -271,7 +275,9 @@ contract QartaCheckout is Ownable2Step, Pausable, ReentrancyGuard, EIP712 {
     /// @return the digest to sign
     function hashQuote(Quote calldata q) public view returns (bytes32) {
         return _hashTypedDataV4(
-            keccak256(abi.encode(QUOTE_TYPEHASH, q.orderId, q.payer, q.token, q.amount, q.usdAmount, q.expiry))
+            keccak256(
+                abi.encode(QUOTE_TYPEHASH, q.orderId, q.payer, q.token, q.amount, q.usdAmount, q.expiry)
+            )
         );
     }
 

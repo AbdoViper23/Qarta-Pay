@@ -5,6 +5,7 @@ import {Script, console2} from "forge-std/Script.sol";
 import {QartaCheckout} from "../src/QartaCheckout.sol";
 import {MockERC20} from "../src/mocks/MockERC20.sol";
 import {MockAggregatorV3} from "../src/mocks/MockAggregatorV3.sol";
+import {MockPair} from "../src/mocks/MockPair.sol";
 
 /// @title Deploy
 /// @notice Deploys QartaCheckout. All values come from the environment (contracts/.env.example).
@@ -56,8 +57,14 @@ contract Deploy is Script {
             MockAggregatorV3 mockFeed = new MockAggregatorV3(8, 15_000_000);
             c.qusdc = address(token);
             c.feed = address(mockFeed);
+            // WQIE/QUSDC pool at the same $0.15: 100,000 QIE and 15,000 QUSDC. The "WQIE" side is
+            // a plain address: the backend's cross-check only reads token0/token1/getReserves.
+            address mockWqie = address(uint160(uint256(keccak256("qarta.mock.wqie"))));
+            MockPair pair = new MockPair(mockWqie, c.qusdc, 100_000e18, 15_000e6);
             console2.log("MockERC20 (QUSDC)       ", c.qusdc);
             console2.log("MockAggregatorV3 (feed) ", c.feed);
+            console2.log("MockPair (WQIE/QUSDC)   ", address(pair));
+            console2.log("mock WQIE address       ", mockWqie);
         }
         checkout = new QartaCheckout(
             deployer,

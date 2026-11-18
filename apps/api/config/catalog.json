@@ -1,0 +1,18 @@
+{
+  "note": "Curated launch catalog (docs/08-RELOADLY-REFERENCE.md). Pin productIds once the sandbox shows the real ones; until then products are allowed by brand name.",
+  "airtimeCountries": ["NG", "GH", "KE", "ZA", "PH", "IN", "EG"],
+  "giftCardCountries": ["US"],
+  "giftCardBrands": [
+    "Amazon",
+    "Google Play",
+    "Steam",
+    "PlayStation",
+    "Xbox",
+    "Netflix",
+    "Spotify",
+    "Apple",
+    "Uber",
+    "Airbnb"
+  ],
+  "giftCardProductIds": []
+}

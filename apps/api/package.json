@@ -11,8 +11,18 @@
     "smoke:reloadly": "tsx --env-file=.env scripts/reloadly-smoke.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.4.3",
+    "@fastify/rate-limit": "^11.2.2",
     "@qarta/shared": "workspace:*",
     "fastify": "^5.12.8",
+    "libphonenumber-js": "^1.13.16",
+    "pg": "^8.23.1",
+    "pino": "^10.4.0",
+    "viem": "^2.58.0",
     "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "embedded-postgres": "17.11.0-beta.19"
   }
 }

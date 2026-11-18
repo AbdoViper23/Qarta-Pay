@@ -5,3 +5,5 @@ packages:
 allowBuilds:
   '@embedded-postgres/linux-x64': true
   esbuild: true
+overrides:
+  viem: 2.58.0

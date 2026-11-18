@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+/* Colour tokens: warm, trustworthy, plain. Dark mode follows the system. */
+@theme {
+  --color-bg: #faf7f2;
+  --color-surface: #ffffff;
+  --color-ink: #1d2320;
+  --color-muted: #5f6b66;
+  --color-line: #e6e0d6;
+  --color-brand: #0f6b57;
+  --color-brand-ink: #ffffff;
+  --color-brand-soft: #e3f1ec;
+  --color-accent: #c9781f;
+  --color-danger: #b42318;
+  --color-danger-soft: #fdecea;
+  --color-ok: #16794a;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121614;
+    --color-surface: #1b211e;
+    --color-ink: #eef2ef;
+    --color-muted: #a3afa9;
+    --color-line: #2c3531;
+    --color-brand: #3fb894;
+    --color-brand-ink: #0b1411;
+    --color-brand-soft: #173029;
+    --color-accent: #e8a35a;
+    --color-danger: #ff8a7a;
+    --color-danger-soft: #3a1d1a;
+    --color-ok: #5fd39a;
+  }
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}

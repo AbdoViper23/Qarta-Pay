@@ -10,7 +10,8 @@
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test"
+    "test": "pnpm -r --if-present test",
+    "dev:local": "bash scripts/dev-local.sh"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

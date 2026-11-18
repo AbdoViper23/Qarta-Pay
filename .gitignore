@@ -30,3 +30,6 @@ contracts/broadcast/
 *.log
 .idea/
 .vscode/
+
+# local data (embedded Postgres)
+.data/

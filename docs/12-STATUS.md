@@ -65,6 +65,8 @@ Not verified yet: the Reloadly client against the real sandbox (only against a f
 
 ## Waiting on a human — in the order the work needs it
 
+Click-by-click instructions for each task: `14-HUMAN-SETUP-GUIDE.md`.
+
 | # | Needed for | Task |
 |---|------------|------|
 | 1 | Run the backend against the real supplier | Create `apps/api/.env` from `apps/api/.env.example` with Reloadly **test** credentials (`RELOADLY_ENV=sandbox`), then run `pnpm --filter api smoke:reloadly` and send the agent the console output (it prints only status codes and field names). Read the fixtures diff before committing it |

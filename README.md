@@ -89,6 +89,7 @@ Deploying to testnet/mainnet and operating the service: `docs/13-RUNBOOK.md`. Cu
 | 11 | `docs/11-SECURITY-AND-SECRETS.md` | Key roles, secret handling, what never goes in git |
 | 12 | `docs/12-STATUS.md` | Current status, decisions taken, handoff notes, what waits on a human |
 | 13 | `docs/13-RUNBOOK.md` | Deploy (testnet, mainnet), hosting, daily operations, treasury sweep |
+| 14 | `docs/14-HUMAN-SETUP-GUIDE.md` | Step-by-step guide (Arabic) for the human tasks: accounts, wallets, faucet, hosting, submission |
 | — | `docs/research-notes.md`, `docs/probe-results.md` | Evidence: researched answers with sources, and raw on-chain probe output |
 
 Agent instructions live in `CLAUDE.md`. Private, uncommitted context lives in `CLAUDE.local.md` (create it from `CLAUDE.local.md.template`). The first prompt to give Claude Code is in `KICKOFF-PROMPT.md`.

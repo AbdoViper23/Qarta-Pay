@@ -2,6 +2,12 @@
 
 Next.js (App Router) + wagmi v2 + viem + Tailwind. Mobile-first: most target users are on phones.
 
+## As built (Step 4, 18 Nov 2026)
+
+Next.js 16 (App Router), wagmi 3, viem, Tailwind 4. Pages in `apps/web/src/app/`: `/`, `/airtime`, `/giftcards`, `/orders/[id]`, `/history`, `/stats`, `/about`, `/powered-by-qie`. Checkout logic: `apps/web/src/components/Checkout.tsx`; wallet chip: `components/WalletButton.tsx`; error sentences: `lib/errors.ts`; Sign-In: `lib/siwe.ts`.
+
+Differences from the spec: no WalletConnect (QIE Wallet support for it is unknown); data bundles are not offered; QUSDC is the default pay token. The app runs on one chain set by `NEXT_PUBLIC_CHAIN_ID` (1990, 1983 or 31337 for local anvil). Not yet done: a test on a real phone and in the QIE Wallet mobile browser (human task).
+
 ## Screens
 
 1. **Home** — two big actions: "Top up a phone", "Buy a gift card". Connected wallet chip, QIE and QUSDC balances, and a "Get QUSDC" link next to the QUSDC balance.

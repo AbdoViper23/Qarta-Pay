@@ -4,7 +4,7 @@ Qarta Pay is a storefront on **QIE Mainnet** where users pay in QUSDC or native 
 
 ## Read before coding
 
-0. `docs/12-STATUS.md` — where the work stands today, decisions taken, what is blocked on whom. Update it at the end of every session.
+0. `docs/12-STATUS.md` — where the work stands today, decisions taken, what is blocked on whom. Update it at the end of every session. `docs/13-RUNBOOK.md` has the deploy and operations commands.
 1. `docs/09-PLAN.md` — what to build next and when a step counts as done
 2. `docs/03-ARCHITECTURE.md` — system design and the order state machine
 3. The doc for the area you are touching: `04` contracts, `05` backend, `06` frontend
@@ -20,7 +20,7 @@ Docs tag facts as `[VERIFIED]`, `[THIRD-PARTY]` or `[UNVERIFIED]`. Before buildi
 
 ```
 contracts/         Foundry — QartaCheckout, mocks, tests, scripts (OpenZeppelin and forge-std come from pnpm, not git submodules)
-apps/api/          Fastify + Prisma + viem — API, indexer, fulfilment worker
+apps/api/          Fastify + PostgreSQL (pg, SQL migrations) + viem — API, indexer, fulfilment worker
 apps/web/          Next.js + wagmi — storefront
 packages/shared/   ABI, EIP-712 types, chain config (config/*.json), zod schemas
 docs/              specs and references
@@ -32,7 +32,7 @@ docs/              specs and references
 export PATH="$PATH:$HOME/.foundry/bin"   # forge, cast, anvil
 pnpm install
 pnpm lint && pnpm typecheck
-pnpm test                               # all workspaces, including the Foundry unit tests
+pnpm test                               # all workspaces: Foundry unit tests, API unit + integration (anvil + embedded Postgres; needs `forge build` first), web
 cd contracts && forge build && forge test -vvv --no-match-path "test/fork/*"   # unit, fuzz, invariant
 pnpm --filter contracts test:fork        # mainnet fork tests, pinned to FORK_BLOCK (default 11961896)
 pnpm --filter contracts rehearse         # pay->settle, pay->refund, guard rejection on a local anvil
@@ -41,7 +41,9 @@ cd contracts && forge script script/SweepTreasury.s.sol:SweepTreasury --fork-url
 bash contracts/script/probe.sh          # read-only mainnet probe checklist
 pnpm --filter api dev                   # needs apps/api/.env (test creds)
 pnpm --filter api smoke:reloadly        # Reloadly SANDBOX smoke test; records scrubbed fixtures
-pnpm --filter api prisma migrate dev
+pnpm dev:local                          # whole stack on this machine: anvil + mocks + Postgres + API (fake supplier) + web
+pnpm --filter api db:dev                # embedded PostgreSQL for local dev (no Docker); prints DATABASE_URL
+pnpm --filter api review list           # orders in NEEDS_REVIEW; see docs/13-RUNBOOK.md
 pnpm --filter web dev
 ```
 

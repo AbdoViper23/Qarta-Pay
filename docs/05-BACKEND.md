@@ -1,6 +1,40 @@
 # 05 — Backend
 
-Node 20 + TypeScript + Fastify + Prisma (PostgreSQL) + viem + zod. One service with three internal modules: **API**, **indexer**, **fulfilment worker**.
+Node 22 + TypeScript + Fastify + PostgreSQL (`pg`, SQL migrations) + viem + zod. One service with three internal modules: **API**, **indexer**, **fulfilment worker**.
+
+## As built (Step 3, 18 Nov 2026)
+
+| Module | File |
+|--------|------|
+| Config (zod, every env var) | `apps/api/src/config.ts` |
+| Orders repository, status transitions with preconditions | `apps/api/src/db/orders.ts`, `apps/api/src/db/migrations/001_init.sql` |
+| Supplier interface, Reloadly client, fake supplier | `apps/api/src/supplier/` |
+| Curated catalog (`config/catalog.json`) | `apps/api/src/catalog/catalog.ts` |
+| Pricing rules, quote service, EIP-712 signing | `apps/api/src/quotes/` |
+| Oracle read, QIEDex cross-check, price cache | `apps/api/src/pricing/` |
+| `.qie` names | `apps/api/src/identity/qie-name.ts` |
+| Indexer | `apps/api/src/indexer/indexer.ts` |
+| Fulfilment worker | `apps/api/src/worker/fulfilment.ts` |
+| settle / refund sender | `apps/api/src/chain/checkout-writer.ts` |
+| SIWE sessions, gift card code encryption | `apps/api/src/auth/siwe.ts`, `apps/api/src/codes.ts` |
+| HTTP routes, wiring, loops | `apps/api/src/server.ts`, `apps/api/src/runtime.ts`, `apps/api/src/main.ts` |
+| Operator tool for NEEDS_REVIEW | `apps/api/scripts/review.ts` |
+
+Differences from the spec below, each deliberate:
+
+- `POST /v1/quotes` takes `amount` (airtime, in the operator's sender currency, which must be USD) or `unitPrice` (gift card face value), not `faceValue`/`faceCurrency`.
+- Supplier cost ignores the supplier's discount, so the cost is never under-estimated. Gift card cost = sender price + `senderFee`.
+- Gift card products are sold only if `senderCurrency` is USD and they have fixed denominations; `RANGE` products are skipped until their sandbox behaviour is known.
+- Phone numbers are validated with `libphonenumber-js` and sent to Reloadly as E.164 digits without `+` (Reloadly's accepted format is **[UNVERIFIED]** until the sandbox run).
+- The indexer also accepts `OrderPaid` for an order already marked `EXPIRED` (the expiry sweep may run before a late-indexed payment; the contract itself refuses expired quotes).
+- An `OrderRefunded` by the payer while an order is `FULFILLING` or `DELIVERED` moves it to `NEEDS_REVIEW` with an alert (possible loss).
+- Before every settle/refund the worker reads the on-chain escrow status, so a replay never sends a doomed transaction.
+- Supplier errors are split in two: an HTTP 4xx other than 401/404/408/429 is a definite rejection (refund); anything else is an unknown outcome (look up, then `NEEDS_REVIEW`).
+- After an unconfirmed supplier call, the worker looks the order up by `customIdentifier` (airtime report filter from the official spec; gift card report paged and matched client-side). No record after 2 minutes → `NEEDS_REVIEW`; it never resends.
+- `/v1/webhooks/reloadly` is not built (optional; polling covers it).
+- `/v1/orders` (history) takes the wallet from the SIWE session, not from a query parameter.
+
+Tests (`pnpm --filter api test`): unit tests for money, pricing, cross-check, names, code encryption, the Reloadly client (fake fetch) and the scrubber; integration tests that deploy the real contract and mocks on anvil, use a real PostgreSQL, and cover: QUSDC airtime happy path, native-QIE gift card with SIWE code reveal, supplier REFUNDED, supplier rejection, network error after the call, crash between supplier call and DB write, unknown outcome, supplier stuck in PROCESSING, fulfilment cutoff, OrderPaid not matching the quote, replay of indexed blocks, QIE price = min(oracle, pool), QIE quotes refused on deviation while QUSDC works, limits, payer self-refund.
 
 ## HTTP API (v1)
 

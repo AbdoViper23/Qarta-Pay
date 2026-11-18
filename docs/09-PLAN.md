@@ -51,7 +51,9 @@ The sandbox script passes.
 
 ## Step 3 (20–22 Nov) — backend [agent]
 
-1. Prisma schema + migrations.
+Status 18 Nov 2026: built and tested on anvil with the fake supplier (`05-BACKEND.md` "As built"). Not yet run on testnet with the Reloadly sandbox: needs the testnet deploy and sandbox credentials.
+
+1. Database schema + migrations (built with `pg` + SQL, see `05-BACKEND.md` "As built").
 2. Reloadly client (typed, token cache, retries with idempotent lookups).
 3. Catalog endpoints with caching and the curated list.
 4. `POST /v1/quotes` with pricing, limits, balance check, EIP-712 signing.
@@ -63,6 +65,8 @@ The sandbox script passes.
 **Done when:** on testnet + sandbox, a scripted run does quote → pay → delivered → settled, and a forced supplier failure ends in an on-chain refund, with no manual steps. A QIE quote is refused when the (mocked) pool price is off by more than the threshold, while a QUSDC quote still succeeds. A fork read of the real WQIE/QUSDC pair returns a deviation value. `/v1/identity` returns the name for the known `.qie` wallet on a fork. (If the Step 1 probe failed for the pair or the resolver, the fallback from `05` is implemented and recorded in `10-OPEN-QUESTIONS.md` instead.)
 
 ## Step 4 (21–24 Nov, overlaps step 3) — frontend [agent]
+
+Status 18 Nov 2026: built; full flow checked against the local stack (`pnpm dev:local`). Not yet tested by a non-developer on a phone.
 
 1. Wallet connect (QIE Wallet first, then MetaMask), network switch/add.
 2. Wallet chip and history header show the `.qie` name (short address fallback).
@@ -120,7 +124,7 @@ Each day: raise limits gradually if no incidents; top up the Reloadly float; [hu
 No QIE integration is cut before data bundles.
 
 1. Telegram bot
-2. Data bundles (keep plain airtime)
+2. Data bundles (keep plain airtime) — **cut on 18 Nov 2026**: airtime and gift cards ship first; data bundles need operator-specific plan handling
 3. QIEDex in-tx swap (QIEDEX stays covered by the sweep, cross-check and Get QUSDC link)
 4. Cashback payout (keep eligibility + accrual display)
 5. Gift-to-`name.qie` (QIE ID stays covered by name display)

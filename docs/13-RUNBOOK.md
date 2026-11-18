@@ -1,0 +1,115 @@
+# 13 — Runbook: deploy and operate
+
+Exact commands for the human steps. Nothing here is run by the coding agent on mainnet (CLAUDE.md). Values in `<angle brackets>` are yours; addresses go in `CLAUDE.local.md`, keys never go in any file.
+
+```bash
+export PATH="$PATH:$HOME/.foundry/bin"
+cd contracts
+```
+
+## 0. Keys (once)
+
+Five different wallets (`docs/11-SECURITY-AND-SECRETS.md`): owner (cold), deployer, quoteSigner, fulfiller, treasury.
+
+```bash
+cast wallet import qarta-deployer --interactive    # asks for the private key and a password
+cast wallet import qarta-treasury --interactive    # used only by the sweep script
+cast wallet import qarta-owner --interactive       # only if the owner is not a hardware wallet
+```
+
+The quoteSigner and fulfiller keys go only into the API host's secret store (`QUOTE_SIGNER_KEY`, `FULFILLER_KEY`). Fund the fulfiller with a little QIE for gas (settle/refund cost a fraction of a cent).
+
+## 1. Testnet (chain 1983)
+
+Testnet has no QUSDC, oracle or QIEDex, so the deploy script brings mocks (`DEPLOY_MOCKS=true`).
+
+```bash
+# fund the deployer from https://www.qie.digital/faucet first
+export QUOTE_SIGNER_ADDRESS=<signer> FULFILLER_ADDRESS=<fulfiller> TREASURY_ADDRESS=<treasury> OWNER_ADDRESS=<owner>
+DEPLOY_MOCKS=true forge script script/Deploy.s.sol:Deploy \
+  --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer --sender <deployer> --broadcast
+```
+
+The output prints `QartaCheckout`, `MockERC20 (QUSDC)`, `MockAggregatorV3 (feed)`, `MockPair (WQIE/QUSDC)`, `mock WQIE address` and the deploy block. Then:
+
+```bash
+# verify the source (also tests the Blockscout verifier)
+forge verify-contract <QartaCheckout> src/QartaCheckout.sol:QartaCheckout --verifier blockscout \
+  --verifier-url https://testnet.qie.digital/api/ --chain-id 1983 --guess-constructor-args
+# second step of the ownership handover, from the owner wallet
+cast send <QartaCheckout> "acceptOwnership()" --rpc-url https://rpc1testnet.qie.digital --account qarta-owner
+# give a test wallet some mock QUSDC (anyone can mint the mock)
+cast send <MockERC20> "mint(address,uint256)" <your wallet> 1000000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer
+```
+
+API env for testnet: `CHAIN_ID=1983`, `RPC_URLS=https://rpc1testnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK=<deploy block>`, `QUSDC_ADDRESS=<MockERC20>`, `QIE_USD_FEED=<MockAggregatorV3>`, `QIEDEX_WQIE_QUSDC_PAIR=<MockPair>`, `WQIE_ADDRESS=<mock WQIE address>`, `RELOADLY_ENV=sandbox`. Web: `NEXT_PUBLIC_CHAIN_ID=1983`.
+
+QIE Wallet hides testnet until it is enabled in its settings.
+
+## 2. Mainnet (chain 1990) — human only
+
+Checklist before running it: contract reviewed line by line by the team; testnet run done; Reloadly live account approved and funded.
+
+```bash
+export QUOTE_SIGNER_ADDRESS=<signer> FULFILLER_ADDRESS=<fulfiller> TREASURY_ADDRESS=<treasury> OWNER_ADDRESS=<owner cold wallet>
+export QUSDC_ADDRESS=0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5
+export QIE_USD_FEED=0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17
+export MAX_ORACLE_AGE_S=86400 ORACLE_TOLERANCE_BPS=1000 ORACLE_GUARD_ENABLED=true REFUND_TIMEOUT_S=7200 DEPLOY_MOCKS=false
+
+# 1. simulate (no --broadcast): read the printed addresses and owner
+forge script script/Deploy.s.sol:Deploy --rpc-url https://rpc1mainnet.qie.digital --sender <deployer>
+# 2. deploy
+forge script script/Deploy.s.sol:Deploy --rpc-url https://rpc1mainnet.qie.digital \
+  --account qarta-deployer --sender <deployer> --broadcast
+# 3. verify
+forge verify-contract <QartaCheckout> src/QartaCheckout.sol:QartaCheckout --verifier blockscout \
+  --verifier-url https://mainnet.qie.digital/api/ --chain-id 1990 --guess-constructor-args
+# 4. owner accepts from the cold wallet
+cast send <QartaCheckout> "acceptOwnership()" --rpc-url https://rpc1mainnet.qie.digital --account qarta-owner
+cast call <QartaCheckout> "owner()(address)" --rpc-url https://rpc1mainnet.qie.digital   # must print the cold wallet
+```
+
+Then record the address in `packages/shared/config/qie-mainnet.json` (`qartaCheckout`), the README integrations table, and `CLAUDE.local.md` (with the deploy block).
+
+If a broadcast is rejected for the transaction type, add `--legacy`.
+
+## 3. Hosting
+
+| Piece | Where | Settings |
+|-------|-------|----------|
+| PostgreSQL | any managed Postgres (Railway, Render, Neon, Supabase) | copy its URL into `DATABASE_URL` |
+| API (API + indexer + worker, one process) | Railway / Render / Fly with `apps/api/Dockerfile`, built from the repo root | every variable of `apps/api/.env.example`, as secrets; one instance only |
+| Web | Vercel, root directory `apps/web` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CHAIN_ID=1990`, `NEXT_PUBLIC_QIEDEX_SWAP_URL` |
+
+The API migrates the database on start. Set `WEB_ORIGIN` to the exact web URL (CORS and Sign-In use it). Start with `MAX_ORDER_USD=10` and raise it as the float grows.
+
+Mainnet API values: `CHAIN_ID=1990`, `RPC_URLS=https://rpc1mainnet.qie.digital,https://rpc2mainnet.qie.digital,https://rpc5mainnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK`, `RELOADLY_ENV=live` with the live credentials. The QIE addresses come from `packages/shared/config/qie-mainnet.json`; leave their overrides empty.
+
+## 4. Daily operations
+
+| Task | How |
+|------|-----|
+| Pause sales (keeps refunds working) | API: `SALES_PAUSED=true` and restart. Contract (stronger): owner calls `cast send <QartaCheckout> "pause()" --account qarta-owner --rpc-url …` |
+| Health | `GET /healthz` (indexer lag, supplier balance), alerts in the Telegram chat (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) |
+| Orders needing a human | `pnpm --filter api review list`, check the order at the supplier (Reloadly dashboard, search the order id as custom identifier), then `review delivered <id>` or `review refund <id>`. Never refund an order the supplier delivered |
+| Top up the Reloadly float | Reloadly dashboard → wallet. Alerts fire below `SUPPLIER_MIN_BALANCE_USD` |
+| Fulfiller gas | Send QIE to the fulfiller address. Alerts fire below `FULFILLER_MIN_BALANCE_WEI` |
+| Treasury sweep QIE → QUSDC | below |
+| Oracle feed stale for long | QIE quotes stop by themselves (`ORACLE_MAX_AGE_S`); QUSDC keeps working. Owner may `setOracleGuardEnabled(false)` only if needed; record every toggle here |
+| Rotate a leaked signer or fulfiller | owner: `setQuoteSigner(<new>)` / `setFulfiller(<new>)`, then update the API secret and restart |
+
+### Treasury sweep
+
+```bash
+export TREASURY_ADDRESS=<treasury> QIEDEX_ROUTER=0x08cd2e72e156D8563B4351eb4065C262A9f553Ef \
+  WQIE_ADDRESS=0x0087904D95BEe9E5F24dc8852804b547981A9139 QUSDC_ADDRESS=0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5 \
+  QIE_USD_FEED=0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17 \
+  SWEEP_AMOUNT_WEI=130000000000000000000 SWEEP_GAS_RESERVE_WEI=1000000000000000000 SWEEP_MAX_SLIPPAGE_BPS=700
+# simulate on a fork and read the planned min out
+forge script script/SweepTreasury.s.sol:SweepTreasury --fork-url https://rpc1mainnet.qie.digital --sender $TREASURY_ADDRESS -vvvv
+# broadcast
+forge script script/SweepTreasury.s.sol:SweepTreasury --rpc-url https://rpc1mainnet.qie.digital \
+  --account qarta-treasury --sender $TREASURY_ADDRESS --broadcast
+```
+
+Chunks of about 130 QIE move the pool under 1%. If the script aborts with `SweepPoolOffPrice`, the pool is too far below the oracle: wait or use a smaller chunk.

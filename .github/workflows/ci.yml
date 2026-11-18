@@ -20,10 +20,16 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The API integration tests deploy the real contract on anvil, so they need Foundry
+      # and the contract build artifacts.
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: forge build
+        working-directory: contracts
       - run: pnpm lint
       - run: pnpm typecheck
-      # Contract tests run in the "contracts" job, where Foundry is installed.
+      # Contract tests run in the "contracts" job.
       - run: pnpm -r --if-present --filter '!contracts' test
+      - run: pnpm --filter web build
       - run: pnpm audit --audit-level high
         continue-on-error: true
 

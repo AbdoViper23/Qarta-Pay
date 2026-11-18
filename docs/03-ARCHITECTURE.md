@@ -34,7 +34,7 @@ qarta-pay/
 │   ├── test/
 │   └── script/           # Deploy.s.sol, Probe.s.sol, SweepTreasury.s.sol
 ├── apps/
-│   ├── api/              # Node 22, TypeScript, Fastify, Prisma, viem
+│   ├── api/              # Node 22, TypeScript, Fastify, PostgreSQL (pg), viem
 │   └── web/              # Next.js (App Router), wagmi, viem, Tailwind
 ├── packages/
 │   └── shared/           # ABI, EIP-712 types, chain config, zod schemas
@@ -48,7 +48,8 @@ qarta-pay/
 |-------|--------|--------|
 | Contracts | Solidity 0.8.24, Foundry, OpenZeppelin v5 | Fast tests, fork testing against mainnet |
 | EVM target | `evm_version = "paris"` | QIE's supported opcode set is undocumented; `paris` avoids PUSH0/Cancun opcodes. Revisit only if confirmed. |
-| Backend | Node 22 (`engines >=20`), TypeScript, Fastify, Prisma, PostgreSQL, viem, zod | Small, typed, one deployable |
+| Backend | Node 22 (`engines >=20`), TypeScript, Fastify, PostgreSQL via `pg` with hand-written SQL migrations, viem, zod | Small, typed, one deployable. Plain SQL keeps the status preconditions (`UPDATE … WHERE status = …`) visible in the code, which is easier to explain in the demo than an ORM. Chosen over Prisma on 18 Nov 2026 |
+| Local DB and tests | `embedded-postgres` (a real PostgreSQL binary from npm) | No Docker or system Postgres needed; the integration tests run a real Postgres |
 | Frontend | Next.js, wagmi v2, viem, Tailwind | QIE Wallet docs give wagmi/viem examples |
 | Hosting | API + Postgres on Railway/Render/Fly; web on Vercel | No ops work |
 | Jobs | DB-backed (`orders.status` + `next_attempt_at`), polled by the worker | No Redis needed; crash-safe |
@@ -78,7 +79,11 @@ Rules:
 - Fulfilment cutoff: the worker makes no new supplier call after `paidAt + refundTimeout − 45 min`. An order that was paid but never sent to the supplier by then is refunded on-chain. Without this, a late delivery could race the payer's `claimRefund`.
 - On-chain safety net: if the backend never settles or refunds, the payer can call `claimRefund(orderId)` after `REFUND_TIMEOUT`. The backend therefore must call `settle` promptly after delivery (it is the only thing that closes that window).
 
-## Data model (Prisma, minimal)
+## Data model
+
+As built: `apps/api/src/db/migrations/001_init.sql` (tables `orders`, `indexer_cursor`, `wallet_profile`, `auth_nonce`). Differences from the sketch below: no `DATA` kind yet (data bundles were cut, see `09-PLAN.md`), daily limits are computed from `orders` instead of a `DailyLimit` table, cashback columns are not created until P1, and `orders` also stores `supplier_attempted_at` (written before every supplier call), `delivered_at`, `refunded_by_payer` and `review_reason`.
+
+Original sketch:
 
 ```
 Order

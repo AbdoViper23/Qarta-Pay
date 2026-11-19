@@ -4,8 +4,8 @@ import {
   defineChain,
   fallback,
   http,
-  type Account,
   type Chain,
+  type LocalAccount,
   type PublicClient,
   type Transport,
   type WalletClient,
@@ -16,8 +16,8 @@ import type { AppConfig } from '../config';
 export type Clients = {
   chain: Chain;
   publicClient: PublicClient<Transport, Chain>;
-  fulfiller: WalletClient<Transport, Chain, Account>;
-  quoteSigner: Account;
+  fulfiller: WalletClient<Transport, Chain, LocalAccount>;
+  quoteSigner: LocalAccount;
 };
 
 /**

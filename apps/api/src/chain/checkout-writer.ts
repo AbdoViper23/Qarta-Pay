@@ -1,5 +1,5 @@
 import { qartaCheckoutAbi } from '@qarta/shared';
-import type { Address, Hex } from 'viem';
+import { encodeFunctionData, type Address, type Hex } from 'viem';
 import type { Clients } from './clients';
 
 /** On-chain escrow status, as in QartaCheckout.Status. */
@@ -64,14 +64,41 @@ export class CheckoutWriter {
 
   private send(functionName: 'settle' | 'refund', orderId: Hex): Promise<Hex> {
     const run = async () => {
-      const { request } = await this.clients.publicClient.simulateContract({
+      const { publicClient, fulfiller, chain } = this.clients;
+      const call = {
         address: this.checkout,
         abi: qartaCheckoutAbi,
         functionName,
         args: [orderId],
-        account: this.clients.fulfiller.account,
+        account: fulfiller.account,
+      } as const;
+      // Fails with the contract's revert reason before anything is signed.
+      await publicClient.simulateContract(call);
+      // Sign the transaction ourselves with explicit gas, fees and nonce. viem's own prepare
+      // step asks the node for eth_fillTransaction, and QIE nodes (testnet and mainnet) answer
+      // it with the intrinsic gas only (~21,500): every settle/refund ran out of gas
+      // (docs/probe-results.md, 19 Nov 2026).
+      // The estimate takes the bare address: given a local account, viem estimates through
+      // eth_fillTransaction too.
+      const [gas, fees, nonce] = await Promise.all([
+        publicClient.estimateContractGas({ ...call, account: fulfiller.account.address }),
+        publicClient.estimateFeesPerGas(),
+        publicClient.getTransactionCount({
+          address: fulfiller.account.address,
+          blockTag: 'pending',
+        }),
+      ]);
+      const signed = await fulfiller.account.signTransaction({
+        type: 'eip1559',
+        chainId: chain.id,
+        to: this.checkout,
+        data: encodeFunctionData({ abi: qartaCheckoutAbi, functionName, args: [orderId] }),
+        gas: (gas * 13n) / 10n,
+        maxFeePerGas: fees.maxFeePerGas * 2n,
+        maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
+        nonce,
       });
-      const hash = await this.clients.fulfiller.writeContract(request);
+      const hash = await publicClient.sendRawTransaction({ serializedTransaction: signed });
       const receipt = await this.clients.publicClient.waitForTransactionReceipt({
         hash,
         timeout: 120_000,

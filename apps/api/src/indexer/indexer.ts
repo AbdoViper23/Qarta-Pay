@@ -5,7 +5,6 @@ import { getOrder, transition } from '../db/orders';
 import { withTransaction, type Db } from '../db/pool';
 import type { Logger } from '../log';
 
-const CURSOR_ID = 'checkout';
 const CHUNK = 1_000n; // QIE RPCs accept up to 10,000 blocks per eth_getLogs
 
 /**
@@ -25,10 +24,18 @@ export class Indexer {
     private readonly alerter: Alerter,
   ) {}
 
+  /**
+   * One cursor per chain and contract, so a database that followed another deployment
+   * (anvil, an older testnet contract) never makes the indexer start at the wrong block.
+   */
+  get cursorId(): string {
+    return `${this.client.chain?.id ?? 'unknown'}:${this.checkout.toLowerCase()}`;
+  }
+
   async lastProcessedBlock(): Promise<bigint> {
     const result = await this.db.query<{ last_block: bigint }>(
       'select last_block from indexer_cursor where id = $1',
-      [CURSOR_ID],
+      [this.cursorId],
     );
     return result.rows[0]?.last_block ?? this.startBlock - 1n;
   }
@@ -54,7 +61,7 @@ export class Indexer {
       await this.db.query(
         `insert into indexer_cursor (id, last_block) values ($1, $2)
          on conflict (id) do update set last_block = excluded.last_block`,
-        [CURSOR_ID, to.toString()],
+        [this.cursorId, to.toString()],
       );
       from = to + 1n;
     }

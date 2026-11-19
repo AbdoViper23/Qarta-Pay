@@ -2,15 +2,15 @@
 
 Read this first if you are picking the project up, human or agent. It says where the work stands, what was decided, and what is blocked on whom. Update it at the end of every working session.
 
-Last updated: **18 Nov 2026**.
+Last updated: **19 Nov 2026**.
 
 ## Where we are
 
 | Plan step (`09-PLAN.md`) | State |
 |--------------------------|-------|
 | Step 1 — scaffold and probe | Done, except the Reloadly sandbox run (needs test credentials) |
-| Step 2 — contract + sweep script | Code and tests done. Waits for: testnet deploy (funded key), team review of the contract and sweep script |
-| Step 3 — backend | Built and tested end to end on anvil with the fake supplier. Waits for: testnet deploy + Reloadly sandbox credentials to run it against the real supplier |
+| Step 2 — contract + sweep script | Code and tests done. **Deployed and verified on testnet** (19 Nov, `probe-results.md` §7). Waits for: team review of the contract and sweep script |
+| Step 3 — backend | Tested end to end on anvil and **on testnet** (fake supplier): QUSDC and QIE orders settled, failed delivery refunded on-chain. Waits for: Reloadly sandbox credentials to run it against the real supplier |
 | Step 4 — frontend | Built; full flow checked against the local stack. Waits for: a non-developer test on a phone, and a test inside QIE Wallet |
 | Step 5 — mainnet go-live | Commands ready in `13-RUNBOOK.md`. Waits for: Reloadly live approval and float, wallets, hosting, domain |
 | Steps 6–7 — launch, P1, submission | Not started. P1 (cashback, gift to `name.qie`, Telegram bot) is not built |
@@ -70,8 +70,8 @@ Click-by-click instructions for each task: `14-HUMAN-SETUP-GUIDE.md`.
 | # | Needed for | Task |
 |---|------------|------|
 | 1 | Run the backend against the real supplier | Create `apps/api/.env` from `apps/api/.env.example` with Reloadly **test** credentials (`RELOADLY_ENV=sandbox`), then run `pnpm --filter api smoke:reloadly` and send the agent the console output (it prints only status codes and field names). Read the fixtures diff before committing it |
-| 2 | Testnet deploy | `cast wallet import qarta-deployer --interactive`, fund it from the faucet, then `13-RUNBOOK.md` §1 |
-| 3 | Testnet deploy | Create the five wallets; write their **addresses** in `CLAUDE.local.md` (from `CLAUDE.local.md.template`) |
+| 2 | ~~Testnet deploy~~ | Done 19 Nov 2026 with throwaway testnet wallets (addresses in `CLAUDE.local.md`). Mainnet needs **new** wallets with strong passwords |
+| 3 | Web on testnet | Open the web app against the testnet API in a browser wallet and buy once (`13-RUNBOOK.md` §1, "Try it on testnet") |
 | 4 | Step 2 sign-off | Read `contracts/src/QartaCheckout.sol` and `contracts/script/SweepTreasury.s.sol` line by line; the team must be able to explain them in the demo |
 | 5 | Step 4 sign-off | Try the flow on a phone; open the site inside the QIE Wallet app and report whether it connects |
 | 6 | Go-live | Email `sales@reloadly.com` (Platform Client approval), get live credentials, fund the float |
@@ -84,5 +84,5 @@ Click-by-click instructions for each task: `14-HUMAN-SETUP-GUIDE.md`.
 ## Next step for whoever continues
 
 1. As soon as item 1 above is done: run the smoke script, fix any Reloadly field the real responses contradict (the client's zod schemas will say), record fixtures, then run the API against the sandbox on testnet.
-2. After the testnet deploy: run the full flow on testnet (`13-RUNBOOK.md` §1 values), then fill `packages/shared/config/qie-testnet.json`.
+2. Testnet is deployed and `packages/shared/config/qie-testnet.json` holds the addresses. Re-run `scripts/testnet-buy.sh` after any backend change that touches the chain. If QIE quotes on testnet say the oracle is stale, refresh the mock feed (`13-RUNBOOK.md` §1).
 3. P1 in plan order once go-live is done: cashback (`.qie` eligibility first), gift to `name.qie` (forward lookup is ready in `07-QIE-REFERENCE.md`), Telegram receipts.

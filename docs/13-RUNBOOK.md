@@ -42,7 +42,30 @@ cast send <QartaCheckout> "acceptOwnership()" --rpc-url https://rpc1testnet.qie.
 cast send <MockERC20> "mint(address,uint256)" <your wallet> 1000000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer
 ```
 
-API env for testnet: `CHAIN_ID=1983`, `RPC_URLS=https://rpc1testnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK=<deploy block>`, `QUSDC_ADDRESS=<MockERC20>`, `QIE_USD_FEED=<MockAggregatorV3>`, `QIEDEX_WQIE_QUSDC_PAIR=<MockPair>`, `WQIE_ADDRESS=<mock WQIE address>`, `RELOADLY_ENV=sandbox`. Web: `NEXT_PUBLIC_CHAIN_ID=1983`.
+API env for testnet: `CHAIN_ID=1983`, `RPC_URLS=https://rpc1testnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK=<deploy block>`, `RELOADLY_ENV=sandbox`. The mock addresses come from `packages/shared/config/qie-testnet.json`; set `QUSDC_ADDRESS`, `QIE_USD_FEED`, `QIEDEX_WQIE_QUSDC_PAIR`, `WQIE_ADDRESS` only after a new deploy, until that file is updated. Web: `NEXT_PUBLIC_CHAIN_ID=1983`.
+
+**Current testnet deployment (19 Nov 2026):** `QartaCheckout` `0x07522573bE0C3C7E9A6D48Eda0a38D8408724f62`, `START_BLOCK=9863130`; mocks in `qie-testnet.json` and `docs/probe-results.md` §7. The mock price is $5 per QIE so the faucet's 2 QIE a day can pay for test orders.
+
+### Try it on testnet
+
+```bash
+# API on testnet with the fake supplier (until Reloadly sandbox credentials are in apps/api/.env)
+cd apps/api && CHAIN_ID=1983 CHECKOUT_ADDRESS=0x07522573bE0C3C7E9A6D48Eda0a38D8408724f62 START_BLOCK=9863130 SUPPLIER=fake pnpm start
+# one purchase from a keystore wallet: QUSDC, QIE, or a failed delivery (refund path)
+API=http://127.0.0.1:4000 ACCOUNT=qarta-deployer PAY_TOKEN=QUSDC bash scripts/testnet-buy.sh
+API=http://127.0.0.1:4000 ACCOUNT=qarta-deployer PAY_TOKEN=QIE bash scripts/testnet-buy.sh
+API=http://127.0.0.1:4000 ACCOUNT=qarta-deployer PHONE=08031230000 bash scripts/testnet-buy.sh
+# web: apps/web/.env.local with NEXT_PUBLIC_API_URL=http://localhost:4000 and NEXT_PUBLIC_CHAIN_ID=1983, then
+pnpm --filter web dev
+```
+
+The mock feed goes stale after `MAX_ORACLE_AGE_S` (24 h): QIE quotes stop and the contract rejects QIE payments. Refresh it (anyone may call the mock):
+
+```bash
+cast send 0x25998aaDd5992c3480204DE1BBf2e631809c7c77 "setAnswer(int256)" 500000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer
+```
+
+Test QUSDC for any wallet: `cast send 0x52259E57Ba961292a23AB4F78D3C815d84030B42 "mint(address,uint256)" <wallet> 100000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer` (100 QUSDC).
 
 QIE Wallet hides testnet until it is enabled in its settings.
 

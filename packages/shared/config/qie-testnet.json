@@ -1,18 +1,22 @@
 {
   "chainId": 1983,
   "name": "QIE Testnet",
-  "nativeCurrency": { "name": "QIE", "symbol": "QIE", "decimals": 18 },
+  "nativeCurrency": {
+    "name": "QIE",
+    "symbol": "QIE",
+    "decimals": 18
+  },
   "rpcUrls": ["https://rpc1testnet.qie.digital"],
   "explorerUrl": "https://testnet.qie.digital",
   "getLogsMaxBlockRange": 10000,
   "addresses": {
-    "qartaCheckout": null,
-    "qusdc": null,
-    "wqie": null,
-    "qieUsdFeed": null,
+    "qartaCheckout": "0x07522573bE0C3C7E9A6D48Eda0a38D8408724f62",
+    "qusdc": "0x52259E57Ba961292a23AB4F78D3C815d84030B42",
+    "wqie": "0x6a95d72e73580668b4F64142765570be19220260",
+    "qieUsdFeed": "0x25998aaDd5992c3480204DE1BBf2e631809c7c77",
     "qiedexRouter": null,
     "qiedexFactory": null,
-    "qiedexWqieQusdcPair": null,
+    "qiedexWqieQusdcPair": "0xBF820b92DdBd846A0F50993366Eb6A592A856F91",
     "qieReverseResolver": null,
     "qieNameRegistryA": null,
     "qieNameRegistryB": null,

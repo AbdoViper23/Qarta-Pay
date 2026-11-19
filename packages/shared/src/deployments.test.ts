@@ -38,8 +38,16 @@ describe('addresses', () => {
   });
 
   it('has no QIEDex or QIE ID addresses on testnet (they do not exist there)', () => {
-    // qartaCheckout, qusdc and qieUsdFeed are filled with our own deployment and mocks.
-    const { qartaCheckout: _c, qusdc: _q, qieUsdFeed: _f, ...absent } = qieTestnetConfig.addresses;
+    // Our own deployment and mocks fill qartaCheckout, qusdc, qieUsdFeed, the mock pair and its
+    // WQIE token address; the real QIEDex router/factory and QIE ID contracts stay absent.
+    const {
+      qartaCheckout: _c,
+      qusdc: _q,
+      qieUsdFeed: _f,
+      qiedexWqieQusdcPair: _p,
+      wqie: _w,
+      ...absent
+    } = qieTestnetConfig.addresses;
     expect(Object.values(absent).every((address) => address === null)).toBe(true);
   });
 
@@ -48,7 +56,8 @@ describe('addresses', () => {
     expect(() => requireAddress(1990, 'qartaCheckout')).toThrow(
       'No qartaCheckout address configured for chain 1990',
     );
-    expect(() => requireAddress(1983, 'qusdc')).toThrow();
+    expect(requireAddress(1983, 'qusdc')).toBe('0x52259E57Ba961292a23AB4F78D3C815d84030B42');
+    expect(() => requireAddress(1983, 'qiedexRouter')).toThrow();
   });
 
   it('matches the addresses recorded with the probed signatures', () => {

@@ -3,6 +3,7 @@ import {
   createPublicClient,
   createTestClient,
   createWalletClient,
+  custom,
   erc20Abi,
   http,
   parseAbi,
@@ -13,6 +14,7 @@ import { mnemonicToAccount } from 'viem/accounts';
 import { foundry } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { ChainStatus, CheckoutWriter } from '../../src/chain/checkout-writer';
 import { loadConfig } from '../../src/config';
 import { getOrder, transition, type OrderStatus } from '../../src/db/orders';
 import type { Db } from '../../src/db/pool';
@@ -449,6 +451,43 @@ describe('failure paths', () => {
     expect((await db.query('select id, status, updated_at from orders order by id')).rows).toEqual(
       snapshot,
     );
+  });
+  it('settle does not trust eth_fillTransaction gas (QIE nodes return intrinsic gas only)', async () => {
+    const q = await quote(airtime('8911'));
+    await pay(q);
+    // A transport that answers like a QIE node: eth_fillTransaction with gas 0x5448.
+    const qieLike = custom({
+      async request({ method, params }) {
+        const result = await publicClient().request({ method, params } as never);
+        if (method === 'eth_fillTransaction') {
+          const filled = result as { tx: Record<string, unknown> };
+          return { ...filled, tx: { ...filled.tx, gas: '0x5448' } };
+        }
+        return result;
+      },
+    });
+    const writer = new CheckoutWriter(
+      {
+        chain: foundry,
+        publicClient: createPublicClient({ chain: foundry, transport: qieLike }),
+        fulfiller: createWalletClient({ chain: foundry, account: fulfiller, transport: qieLike }),
+        quoteSigner,
+      },
+      checkout,
+    );
+    const hash = await writer.settle(q.quote.orderId);
+    expect((await publicClient().getTransactionReceipt({ hash })).status).toBe('success');
+    expect(await writer.chainStatus(q.quote.orderId)).toBe(ChainStatus.Settled);
+  });
+
+  it('a cursor left by another deployment does not move the start block', async () => {
+    await db.query(
+      `insert into indexer_cursor (id, last_block) values ('1983:0x0000000000000000000000000000000000000001', 1)`,
+    );
+    expect(await runtime.indexer.lastProcessedBlock()).toBeGreaterThan(1n);
+    const ids = (await db.query<{ id: string }>('select id from indexer_cursor order by id')).rows;
+    expect(ids.map((r) => r.id)).toContain(runtime.indexer.cursorId);
+    expect(runtime.indexer.cursorId).toBe(`31337:${checkout.toLowerCase()}`);
   });
 });
 

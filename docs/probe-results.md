@@ -282,12 +282,37 @@ eth_getCode QUSDC / QIE-USD feed / QIEDex router / reverse resolver  →  "0x" f
 
 None of the mainnet contracts exist on testnet. Testnet needs our own mocks for QUSDC, the feed, the router and the resolver, as the plan already assumes.
 
+### Testnet deployment, 19 Nov 2026 `[VERIFIED]`
+
+`DEPLOY_MOCKS=true forge script script/Deploy.s.sol:Deploy … --broadcast` from the deployer keystore. All five receipts `status 1`, blocks 9863130–9863131; the whole deploy cost about 0.00000000007 QIE (base fee 7 wei).
+
+| Contract | Address |
+|----------|---------|
+| QartaCheckout | `0x07522573bE0C3C7E9A6D48Eda0a38D8408724f62` (verified: `forge verify-contract … --verifier blockscout --verifier-url https://testnet.qie.digital/api/` → `Pass - Verified`) |
+| MockERC20 (QUSDC) | `0x52259E57Ba961292a23AB4F78D3C815d84030B42` |
+| MockAggregatorV3 (QIE/USD) | `0x25998aaDd5992c3480204DE1BBf2e631809c7c77` |
+| MockPair (WQIE/QUSDC) | `0xBF820b92DdBd846A0F50993366Eb6A592A856F91` |
+| mock WQIE (address only, no code) | `0x6a95d72e73580668b4F64142765570be19220260` |
+
+`acceptOwnership()` from the owner wallet succeeded; `owner()` returns the owner, `pendingOwner()` is zero. The mock price was then set to **$5 per QIE** (feed `setAnswer(500000000)`, pair reserves 100,000 WQIE / 500,000 QUSDC), so the faucet's 2 QIE a day can pay for test orders. Testnet only; mainnet reads the real feed and pool.
+
+End to end on testnet through the API (fake supplier, `scripts/testnet-buy.sh`): airtime paid in QUSDC → `SETTLED`; paid in native QIE → `SETTLED`; failed delivery (phone ending 0000) → on-chain `refund`, payer's QUSDC balance back to the exact value before.
+
+### `eth_fillTransaction` returns intrinsic gas only (testnet and mainnet) `[VERIFIED]`
+
+viem 2.58 prepares a transaction from a local key by calling `eth_fillTransaction` when gas, fees or nonce are missing (`prepareTransactionRequest`), and `estimateGas` with a local account goes the same way. QIE nodes answer it, but the `gas` they fill is the intrinsic cost only:
+
+```
+testnet, settle(bytes32) from the fulfiller:  eth_fillTransaction gas 0x5448 (21,576)   eth_estimateGas 0x1431e (82,718)
+mainnet, QUSDC approve (read-only):            eth_fillTransaction gas 0x536c (21,356)   eth_estimateGas 0xb681 (46,721)
+```
+
+The first testnet settle therefore ran out of gas (tx `0x8160…e684`: gasLimit = gasUsed = 21,576, status 0). Fix in `apps/api/src/chain/checkout-writer.ts`: estimate with the bare address (`eth_estimateGas`), sign with explicit gas (+30%), fees and nonce, and send with `eth_sendRawTransaction`. Regression test: `flow.test.ts` "settle does not trust eth_fillTransaction gas", which fails on the old code. Browser wallets are not affected: viem sends `eth_sendTransaction` and the wallet estimates gas itself. Foundry (`forge script`, `cast send`) estimates with `eth_estimateGas` and is not affected either.
+
 ## 8. Not done, and why
 
 | Item | Reason |
 |------|--------|
-| Deploy a `shanghai`-compiled contract to testnet | Needs a funded testnet key. The `eth_call` evidence above already shows PUSH0 executes. |
-| Test `forge verify-contract` on testnet | Needs a deployed contract, so the same funded key. |
 | Reloadly sandbox calls and fixtures | Needs `RELOADLY_CLIENT_ID` and `RELOADLY_CLIENT_SECRET` in `apps/api/.env`. |
 | Testnet faucet | `https://www.qie.digital/faucet` is a JS page; requesting funds from a script was not attempted. |
 

@@ -1,0 +1,26 @@
+name: Background jobs
+
+# Vercel's free plan runs crons once a day. This calls the API's job endpoint every 30 minutes
+# so orders whose buyer closed the tab still move on (docs/13-RUNBOOK.md §3).
+# Needs the repository secrets JOBS_URL (https://<domain>/api/v1/jobs/run) and CRON_SECRET;
+# without them it does nothing.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Run one pass
+        env:
+          JOBS_URL: ${{ secrets.JOBS_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$JOBS_URL" ] || [ -z "$CRON_SECRET" ]; then echo "secrets not set, skipping"; exit 0; fi
+          curl -fsS --max-time 320 -H "Authorization: Bearer $CRON_SECRET" "$JOBS_URL"

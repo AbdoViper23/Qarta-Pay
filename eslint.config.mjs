@@ -8,6 +8,7 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/.next/**',
+      '.vercel/**',
       '**/coverage/**',
       'contracts/out/**',
       'contracts/cache/**',

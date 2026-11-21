@@ -9,6 +9,7 @@ import { migrate } from './db/migrate';
 import { createPool, type Db } from './db/pool';
 import { resolveQieName } from './identity/qie-name';
 import { Indexer } from './indexer/indexer';
+import { createJobRunner, type JobRunner } from './jobs';
 import type { Logger } from './log';
 import { formatUnitsPlain, parseUnitsStrict } from './money';
 import { PriceService } from './pricing/prices';
@@ -28,7 +29,16 @@ export interface Runtime {
   writer: CheckoutWriter;
   alerter: Alerter;
   housekeeping: () => Promise<void>;
+  jobs: JobRunner;
   server: Awaited<ReturnType<typeof buildServer>>;
+}
+
+/** Serverless hosting: no loops; requests and a cron drive the jobs (src/jobs.ts). */
+export interface ServerlessOptions {
+  /** Path prefix the host forwards unchanged, e.g. "/api" on Vercel. */
+  basePath: string;
+  /** Keeps a promise alive after the response is sent (Vercel: waitUntil). */
+  background: (task: Promise<unknown>) => void;
 }
 
 /**
@@ -38,9 +48,9 @@ export interface Runtime {
 export async function createRuntime(
   config: AppConfig,
   log: Logger,
-  options: { supplier?: Supplier; db?: Db } = {},
+  options: { supplier?: Supplier; db?: Db; serverless?: ServerlessOptions } = {},
 ): Promise<Runtime> {
-  const db = options.db ?? createPool(config.DATABASE_URL);
+  const db = options.db ?? createPool(config.DATABASE_URL, config.DB_POOL_MAX);
   await migrate(db);
   const clients = createClients(config);
   const supplier =
@@ -147,6 +157,9 @@ export async function createRuntime(
       await alerter.send('indexer-lag', `Indexer is ${lag} blocks behind`);
   };
 
+  const jobs = createJobRunner({ db, indexer, worker, housekeeping, log });
+  const serverless = options.serverless;
+
   const server = await buildServer({
     config,
     db,
@@ -162,9 +175,17 @@ export async function createRuntime(
       ),
     health,
     log,
+    ...(serverless && {
+      basePath: serverless.basePath,
+      onActivity: () => {
+        const task = jobs.kick();
+        if (task) serverless.background(task);
+      },
+      runJobs: jobs.run,
+    }),
   });
 
-  return { db, clients, supplier, indexer, worker, writer, alerter, housekeeping, server };
+  return { db, clients, supplier, indexer, worker, writer, alerter, housekeeping, jobs, server };
 }
 
 /** Runs `fn` every `ms`, never overlapping itself; returns a stop function. */

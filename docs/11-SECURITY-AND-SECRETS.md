@@ -23,6 +23,7 @@
 | Treasury key (used by `SweepTreasury.s.sol`) | testnet/anvil keys only | Foundry encrypted keystore `qarta-treasury` on one team member's machine; never in the backend or any `.env` |
 | Owner key | hardware/cold wallet | hardware/cold wallet |
 | DB URL, encryption key, session secret | `apps/api/.env` | hosting provider's secret store |
+| `CRON_SECRET` (runs the background jobs through `GET /v1/jobs/run`) | not needed | Vercel env (sensitive); the same value in the GitHub secret `CRON_SECRET` if the jobs workflow is used |
 
 Each workspace has its own `.env.example` (`apps/api/`, `apps/web/`, `contracts/`) listing every variable name with a dummy value; the root `.env.example` only points to them. Keep them in sync whenever a variable is added.
 

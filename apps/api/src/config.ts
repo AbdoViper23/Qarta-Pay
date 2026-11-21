@@ -83,6 +83,11 @@ const envSchema = z.object({
   SUPPLIER_MIN_BALANCE_USD: z.coerce.number().min(0).default(50),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_CHAT_ID: z.string().optional(),
+
+  // Serverless hosting (Vercel): no background loops; requests and a cron run the jobs.
+  DB_POOL_MAX: z.coerce.number().int().positive().default(10),
+  // Bearer token for GET /v1/jobs/run (cron callers). Unset: the route answers 404.
+  CRON_SECRET: z.preprocess((v) => (v === '' ? undefined : v), z.string().min(16).optional()),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -81,7 +81,7 @@ Rules:
 
 ## Data model
 
-As built: `apps/api/src/db/migrations/001_init.sql` (tables `orders`, `indexer_cursor`, `wallet_profile`, `auth_nonce`). Differences from the sketch below: no `DATA` kind yet (data bundles were cut, see `09-PLAN.md`), daily limits are computed from `orders` instead of a `DailyLimit` table, cashback columns are not created until P1, and `orders` also stores `supplier_attempted_at` (written before every supplier call), `delivered_at`, `refunded_by_payer` and `review_reason`.
+As built: `apps/api/src/db/migrations.ts`, entry `001_init.sql` (tables `orders`, `indexer_cursor`, `wallet_profile`, `auth_nonce`). Differences from the sketch below: no `DATA` kind yet (data bundles were cut, see `09-PLAN.md`), daily limits are computed from `orders` instead of a `DailyLimit` table, cashback columns are not created until P1, and `orders` also stores `supplier_attempted_at` (written before every supplier call), `delivered_at`, `refunded_by_payer` and `review_reason`.
 
 Original sketch:
 

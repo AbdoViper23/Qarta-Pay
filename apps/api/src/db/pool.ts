@@ -7,8 +7,9 @@ pg.types.setTypeParser(pg.types.builtins.INT8, (value) => BigInt(value));
 export type Db = pg.Pool;
 export type DbClient = pg.PoolClient | pg.Pool;
 
-export function createPool(connectionString: string): Db {
-  return new pg.Pool({ connectionString, max: 10 });
+/** `max` stays small on serverless hosts, where every instance opens its own pool. */
+export function createPool(connectionString: string, max = 10): Db {
+  return new pg.Pool({ connectionString, max });
 }
 
 /** Runs `fn` in one transaction; rolls back on any error. */

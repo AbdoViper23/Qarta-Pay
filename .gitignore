@@ -33,3 +33,5 @@ contracts/broadcast/
 
 # local data (embedded Postgres)
 .data/
+# Vercel CLI (project link, pulled settings, OIDC token in .env.local)
+.vercel

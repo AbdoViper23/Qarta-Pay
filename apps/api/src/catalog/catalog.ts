@@ -1,7 +1,5 @@
-import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
+import catalogJson from '../../config/catalog.json' with { type: 'json' };
 import type { GiftCardProduct, Operator, Supplier } from '../supplier/types';
 
 const catalogSchema = z.object({
@@ -12,10 +10,9 @@ const catalogSchema = z.object({
 });
 export type CatalogConfig = z.infer<typeof catalogSchema>;
 
-export function loadCatalogConfig(
-  path = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'config', 'catalog.json'),
-): CatalogConfig {
-  return catalogSchema.parse(JSON.parse(readFileSync(path, 'utf8')));
+/** `config/catalog.json`, imported (not read from disk) so a bundled function carries it. */
+export function loadCatalogConfig(raw: unknown = catalogJson): CatalogConfig {
+  return catalogSchema.parse(raw);
 }
 
 /**

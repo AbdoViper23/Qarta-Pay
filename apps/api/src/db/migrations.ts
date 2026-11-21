@@ -1,3 +1,12 @@
+/**
+ * Database migrations, applied in array order by `migrate()`. They live in code (not .sql files
+ * read at runtime) so a bundled serverless function carries them. Never edit an applied entry;
+ * append a new one. `name` is what `schema_migrations` records.
+ */
+export const migrations: readonly { name: string; sql: string }[] = [
+  {
+    name: '001_init.sql',
+    sql: `
 -- Qarta Pay schema. Amounts are integers in base units (numeric(78,0) fits any uint256).
 -- Status changes are UPDATE ... WHERE status = <expected>, so a transition happens at most once.
 
@@ -59,3 +68,18 @@ create table auth_nonce (
   created_at  timestamptz not null default now(),
   used_at     timestamptz
 );
+`,
+  },
+  {
+    name: '002_job_lease.sql',
+    sql: `
+-- One row per background job. A runner owns a job while expires_at is in the future, so on a
+-- serverless host where any request may run the indexer and worker, only one does at a time.
+create table job_lease (
+  name        text primary key,
+  holder      text not null,
+  expires_at  timestamptz not null
+);
+`,
+  },
+];

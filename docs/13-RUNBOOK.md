@@ -98,11 +98,33 @@ If a broadcast is rejected for the transaction type, add `--legacy`.
 
 ## 3. Hosting
 
+### Vercel, free plan (what runs today)
+
+One Vercel project, `qarta-pay`, built from the repo root with `vercel.json` (Vercel Services): `web` (Next.js, `apps/web`) answers `/`, `api` (Fastify, `apps/api/src/vercel.ts`) answers `/api/*`. Same origin, so no CORS. The GitHub repo is connected: every push to `main` deploys production, other branches get preview URLs. Database: Neon (Vercel Marketplace, free), which sets `DATABASE_URL` on the project.
+
+Nothing runs between requests on Vercel, so the API has no loops there (`src/jobs.ts`):
+- every GET to the API kicks one pass of indexer → worker → housekeeping (kept alive with `waitUntil`), at most every 4 s per instance; the order page polls while the buyer waits, which drives that order to `SETTLED`;
+- a lease row in `job_lease` lets one pass run at a time across all instances (no fulfiller nonce races);
+- `GET /api/v1/jobs/run` with `Authorization: Bearer $CRON_SECRET` runs one pass on demand. Vercel's cron calls it once a day (the Hobby limit); `.github/workflows/jobs.yml` calls it every 30 minutes once the GitHub secrets `JOBS_URL` (`https://<domain>/api/v1/jobs/run`) and `CRON_SECRET` are set. An order paid by someone who closed the tab waits for the next pass.
+
+Project env (Production and Preview): every variable of `apps/api/.env.example` that has no default, plus `DB_POOL_MAX=3`, `CRON_SECRET`, `NEXT_PUBLIC_API_URL=/api`, `NEXT_PUBLIC_CHAIN_ID`, `ENABLE_EXPERIMENTAL_COREPACK=1` (so Vercel uses the repo's pnpm 12) and `WEB_ORIGIN=https://<production domain>` (Sign-In checks it). After changing env, redeploy (`vercel --prod` or push). `vercel build` checks the whole build locally.
+
+```bash
+vercel env ls                                   # names only
+vercel --prod                                   # deploy the working tree to production
+vercel logs <deployment-url>                    # function logs
+curl https://<domain>/api/healthz
+```
+
+Limits of the free plan: functions stop after 300 s (the job lease is 310 s), cron once a day. Upgrade path if traffic grows: run `apps/api/src/main.ts` (loops) on any container host and keep the web on Vercel.
+
+### Long-running host (alternative)
+
 | Piece | Where | Settings |
 |-------|-------|----------|
 | PostgreSQL | any managed Postgres (Railway, Render, Neon, Supabase) | copy its URL into `DATABASE_URL` |
-| API (API + indexer + worker, one process) | Railway / Render / Fly with `apps/api/Dockerfile`, built from the repo root | every variable of `apps/api/.env.example`, as secrets; one instance only |
-| Web | Vercel, root directory `apps/web` | `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CHAIN_ID=1990`, `NEXT_PUBLIC_QIEDEX_SWAP_URL` |
+| API (API + indexer + worker, one process) | Railway / Render / Fly with `apps/api/Dockerfile`, built from the repo root | every variable of `apps/api/.env.example`, as secrets; one instance only; `CRON_SECRET` empty |
+| Web | Vercel, root directory `apps/web` | `NEXT_PUBLIC_API_URL=<API URL>`, `NEXT_PUBLIC_CHAIN_ID=1990`, `NEXT_PUBLIC_QIEDEX_SWAP_URL` |
 
 The API migrates the database on start. Set `WEB_ORIGIN` to the exact web URL (CORS and Sign-In use it). Start with `MAX_ORDER_USD=10` and raise it as the float grows.
 

@@ -46,6 +46,7 @@ pnpm --filter api db:dev                # embedded PostgreSQL for local dev (no 
 pnpm --filter api review list           # orders in NEEDS_REVIEW; see docs/13-RUNBOOK.md
 API=http://127.0.0.1:4000 PAY_TOKEN=QUSDC bash scripts/testnet-buy.sh   # one testnet purchase through a running API (testnet only)
 pnpm --filter web dev
+vercel build                            # full Vercel build (web + api services) locally; deploys happen on push to main
 ```
 
 Update this section when commands change.

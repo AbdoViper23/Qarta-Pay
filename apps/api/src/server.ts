@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
 import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify';
@@ -9,6 +10,7 @@ import { decryptCodes } from './codes';
 import type { AppConfig } from './config';
 import { getOrder, listOrdersByWallet } from './db/orders';
 import type { Db } from './db/pool';
+import type { JobsResult } from './jobs';
 import type { Logger } from './log';
 import { formatUnitsPlain } from './money';
 import type { PriceService } from './pricing/prices';
@@ -26,6 +28,12 @@ export interface ServerDeps {
   resolveName: (wallet: Address) => Promise<string | null>;
   health: () => Promise<Record<string, unknown>>;
   log?: Logger;
+  /** Public path prefix the host forwards unchanged (Vercel: "/api"). Stripped before routing. */
+  basePath?: string;
+  /** Called after each GET response; serverless hosts start background jobs from it. */
+  onActivity?: () => void;
+  /** Runs one pass of the background jobs, for GET /v1/jobs/run (cron). */
+  runJobs?: () => Promise<JobsResult>;
 }
 
 const walletParam = z
@@ -44,7 +52,17 @@ function bearer(request: FastifyRequest): string | undefined {
 /** Builds the HTTP API (docs/05-BACKEND.md). All inputs are validated with zod. */
 export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   const { config, db } = deps;
-  const app = Fastify({ logger: false, trustProxy: true });
+  const basePath = deps.basePath ?? '';
+  const app = Fastify({
+    logger: false,
+    trustProxy: true,
+    rewriteUrl: (request) => {
+      const url = request.url ?? '/';
+      if (!basePath) return url;
+      if (url === basePath) return '/';
+      return url.startsWith(`${basePath}/`) ? url.slice(basePath.length) : url;
+    },
+  });
 
   await app.register(cors, { origin: [config.WEB_ORIGIN], methods: ['GET', 'POST'] });
   await app.register(rateLimit, { max: 120, timeWindow: '1 minute' });
@@ -68,7 +86,25 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     return reply.status(500).send({ error: 'internal_error', message: 'something went wrong' });
   });
 
+  if (deps.onActivity) {
+    const onActivity = deps.onActivity;
+    app.addHook('onResponse', async (request) => {
+      if (request.method === 'GET' && request.routeOptions.url !== '/v1/jobs/run') onActivity();
+    });
+  }
+
   app.get('/healthz', async () => ({ status: 'ok', ...(await deps.health()) }));
+
+  // Cron entry point for serverless hosting. 404 unless CRON_SECRET is set and jobs are wired.
+  app.get('/v1/jobs/run', async (request, reply) => {
+    const secret = config.CRON_SECRET;
+    if (!secret || !deps.runJobs) return reply.status(404).send({ error: 'not_found' });
+    const given = Buffer.from(bearer(request) ?? '');
+    const expected = Buffer.from(secret);
+    if (given.length !== expected.length || !timingSafeEqual(given, expected))
+      return reply.status(401).send({ error: 'unauthorized' });
+    return deps.runJobs();
+  });
 
   app.get('/v1/config', async () => ({
     chainId: config.CHAIN_ID,

@@ -15,7 +15,8 @@ import { foundry } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ChainStatus, CheckoutWriter } from '../../src/chain/checkout-writer';
-import { loadConfig } from '../../src/config';
+import { loadConfig, type AppConfig } from '../../src/config';
+import { acquireLease, releaseLease, type JobsResult } from '../../src/jobs';
 import { getOrder, transition, type OrderStatus } from '../../src/db/orders';
 import type { Db } from '../../src/db/pool';
 import { createLogger } from '../../src/log';
@@ -47,6 +48,7 @@ let supplier: FakeSupplier;
 let qusdc: Address;
 let pair: Address;
 let checkout: Address;
+let config: AppConfig;
 const publicClient = () => createPublicClient({ chain: foundry, transport: http(anvil.url) });
 const testClient = () =>
   createTestClient({ chain: foundry, mode: 'anvil', transport: http(anvil.url) });
@@ -96,7 +98,7 @@ beforeAll(async () => {
 
   const hdKey = (who: typeof payer) =>
     `0x${Buffer.from(who.getHdKey().privateKey!).toString('hex')}` as Hex;
-  const config = loadConfig({
+  config = loadConfig({
     CHAIN_ID: '31337',
     RPC_URLS: anvil.url,
     CHECKOUT_ADDRESS: checkout,
@@ -550,6 +552,66 @@ describe('pricing and limits', () => {
     expect(config.contracts.checkout.toLowerCase()).toBe(checkout.toLowerCase());
     const stats = (await runtime.server.inject({ url: '/v1/stats' })).json();
     expect(stats.ordersSettled).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('serverless hosting (Vercel)', () => {
+  it('a job lease has one holder at a time and frees on release or expiry', async () => {
+    expect(await acquireLease(db, 'test-lease', 'a', 60)).toBe(true);
+    expect(await acquireLease(db, 'test-lease', 'b', 60)).toBe(false);
+    await releaseLease(db, 'test-lease', 'b'); // not the holder: no effect
+    expect(await acquireLease(db, 'test-lease', 'b', 60)).toBe(false);
+    await releaseLease(db, 'test-lease', 'a');
+    expect(await acquireLease(db, 'test-lease', 'b', 0)).toBe(true); // expires at once
+    expect(await acquireLease(db, 'test-lease', 'c', 60)).toBe(true);
+  });
+
+  it('serves under /api, runs jobs from the cron route only with the secret, and settles an order', async () => {
+    const secret = 's'.repeat(32);
+    const background: Promise<unknown>[] = [];
+    const serverless = await createRuntime(
+      { ...config, CRON_SECRET: secret },
+      createLogger(process.env.TEST_LOG ?? 'silent'),
+      {
+        supplier,
+        db,
+        serverless: { basePath: '/api', background: (task) => background.push(task) },
+      },
+    );
+    try {
+      const get = (url: string, token?: string) =>
+        serverless.server.inject({
+          method: 'GET',
+          url,
+          headers: token ? { authorization: `Bearer ${token}` } : {},
+        });
+
+      expect((await get('/api/v1/config')).json().chainId).toBe(31337);
+      expect((await get('/api/v1/jobs/run')).statusCode).toBe(401);
+      expect((await get('/api/v1/jobs/run', 'x'.repeat(32))).statusCode).toBe(401);
+      // The GET above kicked one background pass.
+      expect(background.length).toBe(1);
+      await Promise.all(background);
+
+      const q = await quote(airtime('8921'));
+      await pay(q);
+      for (let i = 0; i < 12; i += 1) {
+        // skip the worker's wait between steps, as driveTo does
+        await db.query('update orders set next_attempt_at = null where id = $1', [q.quote.orderId]);
+        const result = (await get('/api/v1/jobs/run', secret)).json() as JobsResult;
+        expect(result.ran).toBe(true);
+        if ((await getOrder(db, q.quote.orderId))?.status === 'SETTLED') break;
+      }
+      expect((await getOrder(db, q.quote.orderId))?.status).toBe('SETTLED');
+      expect(supplierCalls(q.quote.orderId, 'sendTopup')).toBe(1);
+    } finally {
+      await serverless.server.close();
+    }
+  });
+
+  it('the cron route is absent without CRON_SECRET or outside serverless mode', async () => {
+    const response = await runtime.server.inject({ method: 'GET', url: '/v1/jobs/run' });
+    expect(response.statusCode).toBe(404);
   });
 });
 

@@ -2,7 +2,7 @@
 
 Read this first if you are picking the project up, human or agent. It says where the work stands, what was decided, and what is blocked on whom. Update it at the end of every working session.
 
-Last updated: **19 Nov 2026**.
+Last updated: **22 Nov 2026**.
 
 ## Where we are
 
@@ -11,6 +11,7 @@ Last updated: **19 Nov 2026**.
 | Step 1 — scaffold and probe | Done, except the Reloadly sandbox run (needs test credentials) |
 | Step 2 — contract + sweep script | Code and tests done. **Deployed and verified on testnet** (19 Nov, `probe-results.md` §7). Waits for: team review of the contract and sweep script |
 | Step 3 — backend | Tested end to end on anvil and **on testnet** (fake supplier): QUSDC and QIE orders settled, failed delivery refunded on-chain. Waits for: Reloadly sandbox credentials to run it against the real supplier |
+| Hosting | **Vercel free plan**, one project `qarta-pay` (web + API as Vercel Services, Neon Postgres), on testnet with the fake supplier until Reloadly sandbox credentials exist. No background loops there: requests and a cron drive the jobs (`13-RUNBOOK.md` §3) |
 | Step 4 — frontend | Built; full flow checked against the local stack. Waits for: a non-developer test on a phone, and a test inside QIE Wallet |
 | Step 5 — mainnet go-live | Commands ready in `13-RUNBOOK.md`. Waits for: Reloadly live approval and float, wallets, hosting, domain |
 | Steps 6–7 — launch, P1, submission | Not started. P1 (cashback, gift to `name.qie`, Telegram bot) is not built |

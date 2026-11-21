@@ -56,7 +56,7 @@ Use the async endpoint in production (Reloadly's own recommendation):
 Response: `{ "transactionId": 28805 }` (immediate; delivery not yet done).
 
 - `useLocalAmount: true` means `amount` is in the operator's local currency.
-- `customIdentifier` is our own reference; set it to the `orderId`. The official spec says: "each transaction reference is to be unique. Once a reference has been used for a top-up, it cannot be reused." Gift cards, sandbox 21 Nov 2026 **[VERIFIED]**: a second `POST /orders` with the same `customIdentifier` → HTTP 400 `{"errorCode":"CUSTOM_IDENTIFIER_ALREADY_USED","message":"The custom identifier provided has already been used…"}`. The client treats any `CUSTOM_IDENTIFIER*` error as an **unknown outcome**, never a rejection (a rejection refunds the buyer; the order may be delivered). Airtime duplicate behaviour not recorded yet. Either way, always look up before retrying.
+- `customIdentifier` is our own reference; set it to the `orderId`. The official spec says: "each transaction reference is to be unique. Once a reference has been used for a top-up, it cannot be reused." Gift cards, sandbox 21 Nov 2026 **[VERIFIED]**: a second `POST /orders` with the same `customIdentifier` → HTTP 400 `{"errorCode":"CUSTOM_IDENTIFIER_ALREADY_USED","message":"The custom identifier provided has already been used…"}`. The client treats any `CUSTOM_IDENTIFIER*` error as an **unknown outcome**, never a rejection (a rejection refunds the buyer; the order may be delivered). Airtime: same answer for `POST /topups-async` **[VERIFIED]**. Either way, always look up before retrying.
 
 ### Status **[VERIFIED]**
 `GET /topups/{transactionId}/status` → `{ "status": "…", "transaction": { "transactionId", "status", "operatorName", "deliveredAmount", "customIdentifier", "balanceInfo": { "oldBalance", "newBalance" }, … } }`
@@ -124,7 +124,8 @@ Cost of an order to us = sender amount for the denomination + `senderFee` − di
 - Operators by country (NG): 12 operators, e.g. Airtel Nigeria `RANGE` 0.04–165.84 USD, `fx.rate` 1206 NGN. Every one parses with the client schema.
 - Auto-detect for `08012345678`/NG → 404 `COULD_NOT_AUTO_DETECT_OPERATOR`; the client returns "no operator" and the UI lets the buyer pick one.
 - Gift cards US: 84 products, all parse. Order → 200 with `transactionId`, `status: "SUCCESSFUL"`, `customIdentifier`, `balanceInfo`; `GET /reports/transactions/{id}` same shape; cards as above.
-- Not recorded yet: airtime top-up, its status and duplicate behaviour (auto-detect failed, so the script skipped them; the script now falls back to the country's first operator).
+- Airtime (second run, operator 342 Airtel Nigeria, 0.04 USD → 48.24 NGN): `POST /topups-async` → 200 `{transactionId}`; `GET /topups/{id}/status` → `{code, message, status: "SUCCESSFUL", transaction: {…full transaction…}}` (nested, as the blog showed); `GET /topups/reports/transactions/{id}` → flat transaction; same `customIdentifier` again → 400 `CUSTOM_IDENTIFIER_ALREADY_USED`.
+- Not recorded yet: whether `GET /topups/reports/transactions?customIdentifier=` filters (the worker's lookup before a retry). The smoke script now records it as `topups-transactions-by-custom-identifier`.
 
 ## Sandbox testing notes
 

@@ -1,0 +1,11 @@
+{
+  "httpStatus": 400,
+  "body": {
+    "timeStamp": "2026-11-21 23:39:18",
+    "message": "The custom identifier provided has already been used. Please provide a new, unique custom identifier",
+    "path": "/topups-async",
+    "errorCode": "CUSTOM_IDENTIFIER_ALREADY_USED",
+    "infoLink": null,
+    "details": []
+  }
+}

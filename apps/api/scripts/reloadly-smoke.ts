@@ -201,7 +201,13 @@ async function airtime(): Promise<void> {
     `/topups/reports/transactions/${created.data.transactionId}`,
   );
 
-  // Open question: does Reloadly reject a reused customIdentifier? Record what the sandbox does.
+  // The worker finds a top-up by customIdentifier before any retry: check the filter works.
+  await api.get(
+    'topups-transactions-by-custom-identifier',
+    `/topups/reports/transactions?size=20&page=1&customIdentifier=${encodeURIComponent(customIdentifier)}`,
+  );
+
+  // A reused customIdentifier: recorded so the client test covers Reloadly's real answer.
   await api.post('topups-async-duplicate-identifier', '/topups-async', topupBody);
 }
 

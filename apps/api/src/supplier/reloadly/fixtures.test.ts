@@ -70,6 +70,45 @@ describe('Reloadly client against recorded sandbox responses', () => {
     else expect(result).toBeNull();
   });
 
+  it.runIf(has('topups-async', 'topups-status'))(
+    'sends an airtime top-up and reads its status',
+    async () => {
+      const supplier = replay([
+        ['/oauth/token', token],
+        ['/topups-async', fixture('topups-async')],
+        ['/status', fixture('topups-status')],
+      ]);
+      const ref = await supplier.sendTopup({
+        customIdentifier: 'qarta-smoke',
+        operatorId: 342,
+        amount: '0.04',
+        countryCode: 'NG',
+        phone: '08031234567',
+      });
+      expect(ref.transactionId).toBe('184100');
+      expect((await supplier.getTopup(ref.transactionId)).status).toBe('SUCCESSFUL');
+    },
+  );
+
+  it.runIf(has('topups-async-duplicate-identifier'))(
+    'a reused customIdentifier on a top-up is an unknown outcome, never a rejection',
+    async () => {
+      const supplier = replay([
+        ['/oauth/token', token],
+        ['/topups-async', fixture('topups-async-duplicate-identifier')],
+      ]);
+      const attempt = supplier.sendTopup({
+        customIdentifier: 'qarta-smoke',
+        operatorId: 342,
+        amount: '0.04',
+        countryCode: 'NG',
+        phone: '08031234567',
+      });
+      await expect(attempt).rejects.toThrow(/CUSTOM_IDENTIFIER/);
+      await expect(attempt).rejects.not.toBeInstanceOf(SupplierRejectedError);
+    },
+  );
+
   it.runIf(has('giftcards-products-by-country'))(
     'parses every gift card product of the country list',
     async () => {

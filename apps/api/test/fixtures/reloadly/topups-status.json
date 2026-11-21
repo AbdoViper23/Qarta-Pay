@@ -1,0 +1,37 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "code": null,
+    "message": null,
+    "status": "SUCCESSFUL",
+    "transaction": {
+      "transactionId": 184100,
+      "status": "SUCCESSFUL",
+      "operatorTransactionId": null,
+      "customIdentifier": "qarta-smoke-1795304346102",
+      "recipientPhone": "REDACTED",
+      "recipientEmail": null,
+      "senderPhone": null,
+      "countryCode": "NG",
+      "operatorId": 342,
+      "operatorName": "Airtel Nigeria",
+      "discount": 0,
+      "discountCurrencyCode": "USD",
+      "requestedAmount": 0.04,
+      "requestedAmountCurrencyCode": "USD",
+      "deliveredAmount": 48.24,
+      "deliveredAmountCurrencyCode": "NGN",
+      "transactionDate": "2026-11-21 23:39:06",
+      "pinDetail": null,
+      "fee": 0,
+      "balanceInfo": {
+        "oldBalance": 999997.04,
+        "newBalance": 999997.0016,
+        "cost": 0.0384,
+        "currencyCode": "USD",
+        "currencyName": "US Dollar",
+        "updatedAt": "2026-11-21 23:35:28"
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 {
   "httpStatus": 404,
   "body": {
-    "timeStamp": "2026-11-21 23:35:25",
+    "timeStamp": "2026-11-21 23:39:05",
     "message": "Could not auto detect operator for given phone number",
     "path": "/operators/auto-detect/phone/08012345678/countries/NG",
     "errorCode": "COULD_NOT_AUTO_DETECT_OPERATOR",

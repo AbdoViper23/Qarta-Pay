@@ -19,8 +19,9 @@ import {
 
 /**
  * Reloadly client (docs/08-RELOADLY-REFERENCE.md). Endpoints come from Reloadly's official
- * OpenAPI repos. Response schemas are deliberately loose (`z.looseObject`) and only the fields
- * we use are required, because some shapes are not confirmed against a sandbox response yet.
+ * OpenAPI repos. Response schemas are loose (`z.looseObject`) and only the fields we use are
+ * required. They are checked against real sandbox responses in `test/fixtures/reloadly`
+ * (fixtures.test.ts).
  */
 
 const num = z.union([
@@ -224,6 +225,21 @@ export class ReloadlySupplier implements Supplier {
       typeof json === 'object' && json !== null && 'message' in json
         ? String(json.message)
         : `HTTP ${response.status}`;
+    const errorCode =
+      typeof json === 'object' && json !== null && 'errorCode' in json
+        ? String(json.errorCode)
+        : '';
+    // A reused customIdentifier means the order already exists at Reloadly (sandbox answers
+    // 400 CUSTOM_IDENTIFIER_ALREADY_USED, 21 Nov 2026). That is not a rejection: treating it as
+    // one would refund an order that may have been delivered. It stays an unknown outcome, so
+    // the worker looks the order up and, failing that, marks it NEEDS_REVIEW.
+    if (errorCode.startsWith('CUSTOM_IDENTIFIER')) {
+      const error = new Error(`reloadly ${method} ${path}: ${errorCode}`) as Error & {
+        status: number;
+      };
+      error.status = response.status;
+      throw error;
+    }
     if (
       response.status >= 400 &&
       response.status < 500 &&

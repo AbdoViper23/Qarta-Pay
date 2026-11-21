@@ -1,0 +1,39 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "transactionId": 82789,
+    "amount": 2.96,
+    "discount": 0.04,
+    "currencyCode": "USD",
+    "fee": 1,
+    "smsFee": 0,
+    "totalFee": 1,
+    "preOrdered": false,
+    "recipientEmail": "REDACTED",
+    "recipientPhone": null,
+    "customIdentifier": "qarta-smoke-1795304127423",
+    "status": "SUCCESSFUL",
+    "transactionCreatedTime": "2026-11-21 23:35:28",
+    "product": {
+      "productId": 21,
+      "productName": "App Store & iTunes US",
+      "countryCode": "US",
+      "quantity": 1,
+      "unitPrice": 2,
+      "totalPrice": 2,
+      "currencyCode": "USD",
+      "brand": {
+        "brandId": 3,
+        "brandName": "Apple"
+      }
+    },
+    "balanceInfo": {
+      "oldBalance": 1000000,
+      "newBalance": 999997.04,
+      "cost": 2.96,
+      "currencyCode": "USD",
+      "currencyName": "US Dollar",
+      "updatedAt": "2026-11-22 03:53:23"
+    }
+  }
+}

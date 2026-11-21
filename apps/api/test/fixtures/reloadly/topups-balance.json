@@ -1,0 +1,12 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "balance": 1000000,
+    "frozenBalance": null,
+    "currencyCode": "USD",
+    "currencyName": "US Dollar",
+    "updatedAt": "2026-11-21 22:53:23",
+    "lowBalanceThreshold": 0,
+    "maxLowBalanceThreshold": 0
+  }
+}

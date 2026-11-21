@@ -46,7 +46,7 @@ Probe run on 17 Nov 2026. Evidence: `probe-results.md`; sources and confidence: 
 - [ ] Does the QIEDex swap page accept token query parameters for a "Get QUSDC" deep link? The site's JS reads `tokenA`, `tokenB` and `tab`; untested. Needs a human to try it in a browser. Default stays the plain link.
 - [x] PUSH0 → executes in `eth_call` on mainnet and testnet (a real testnet deployment still needs a funded key). EIP-1559 → base fee present. Block time → 3.63 s
 - [ ] Explorer verification API works with `forge verify-contract --verifier blockscout` → explorer is Blockscout v7.0.2 and the API is live; the command itself is not run yet (needs a funded testnet key)
-- [ ] Reloadly: operator fields, list-by-country path, gift card code path and order statuses are confirmed from Reloadly's official OpenAPI repos. Still open, all need sandbox credentials: current status response shape, PIN field name, duplicate `customIdentifier` behaviour, sandbox behaviour for `REFUNDED`, gift card `RANGE` behaviour. Webhook signature scheme: not found anywhere public
+- [ ] Reloadly: sandbox run 21 Nov 2026 confirmed token, balance, operators, gift card products, order, status, card fields (`cardNumber`, `pinCode`) and the gift card duplicate `customIdentifier` error (`08-RELOADLY-REFERENCE.md`, "Sandbox run"). Still open: airtime top-up status shape and duplicate behaviour (next smoke run), sandbox behaviour for `REFUNDED`, gift card `RANGE` behaviour. Webhook signature scheme: not found anywhere public (not needed: we poll)
 - [ ] QIE Wallet on mobile: in-app browser with an injected provider? WalletConnect? Not answered by any public source → needs a human test on a phone
 
 ## D. Business / legal decisions for the team (not for the agent)

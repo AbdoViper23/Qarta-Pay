@@ -150,19 +150,24 @@ async function airtime(): Promise<void> {
     `/operators/auto-detect/phone/${encodeURIComponent(env.RELOADLY_SMOKE_PHONE)}/countries/${country}` +
       '?suggestedAmounts=true&suggestedAmountsMap=true',
   );
-  await api.get('topups-operators-by-country', `/operators/countries/${country}`);
+  const operators = await api.get('topups-operators-by-country', `/operators/countries/${country}`);
 
-  const operator = z
-    .object({
-      operatorId: z.number(),
-      denominationType: z.string(),
-      minAmount: z.number().nullable().optional(),
-      fixedAmounts: z.array(z.number()).optional(),
-    })
-    .safeParse(detect.body);
+  const operatorShape = z.object({
+    operatorId: z.number(),
+    denominationType: z.string(),
+    minAmount: z.number().nullable().optional(),
+    fixedAmounts: z.array(z.number()).optional(),
+  });
+  let operator = operatorShape.safeParse(detect.body);
   if (!operator.success) {
-    console.log('Auto-detect did not return an operator; skipping the top-up steps.');
-    return;
+    // The sandbox does not recognise every test number; fall back to the country's first operator.
+    const first = z.array(z.unknown()).safeParse(operators.body);
+    operator = operatorShape.safeParse(first.success ? first.data[0] : undefined);
+    if (!operator.success) {
+      console.log('No operator from auto-detect or the country list; skipping the top-up steps.');
+      return;
+    }
+    console.log(`Auto-detect failed; using operator ${operator.data.operatorId} from the list.`);
   }
   const amount = operator.data.fixedAmounts?.[0] ?? operator.data.minAmount;
   if (amount === undefined || amount === null) {

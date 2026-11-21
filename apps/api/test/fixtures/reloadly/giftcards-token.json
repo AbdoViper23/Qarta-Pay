@@ -1,0 +1,9 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "access_token": "REDACTED",
+    "scope": "developer",
+    "expires_in": 3600,
+    "token_type": "Bearer"
+  }
+}

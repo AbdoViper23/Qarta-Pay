@@ -56,7 +56,7 @@ Use the async endpoint in production (Reloadly's own recommendation):
 Response: `{ "transactionId": 28805 }` (immediate; delivery not yet done).
 
 - `useLocalAmount: true` means `amount` is in the operator's local currency.
-- `customIdentifier` is our own reference; set it to the `orderId`. The official spec says: "each transaction reference is to be unique. Once a reference has been used for a top-up, it cannot be reused." The actual rejection and its error body are **[UNVERIFIED]** — test in sandbox; either way, always look up before retrying.
+- `customIdentifier` is our own reference; set it to the `orderId`. The official spec says: "each transaction reference is to be unique. Once a reference has been used for a top-up, it cannot be reused." Gift cards, sandbox 21 Nov 2026 **[VERIFIED]**: a second `POST /orders` with the same `customIdentifier` → HTTP 400 `{"errorCode":"CUSTOM_IDENTIFIER_ALREADY_USED","message":"The custom identifier provided has already been used…"}`. The client treats any `CUSTOM_IDENTIFIER*` error as an **unknown outcome**, never a rejection (a rejection refunds the buyer; the order may be delivered). Airtime duplicate behaviour not recorded yet. Either way, always look up before retrying.
 
 ### Status **[VERIFIED]**
 `GET /topups/{transactionId}/status` → `{ "status": "…", "transaction": { "transactionId", "status", "operatorName", "deliveredAmount", "customIdentifier", "balanceInfo": { "oldBalance", "newBalance" }, … } }`
@@ -98,7 +98,7 @@ Register an HTTPS endpoint in the dashboard. Event `type: "airtime_transaction.s
 - Order response: `transactionId`, `amount`, `discount`, `currencyCode`, `fee`, `smsFee`, `status` (e.g. `SUCCESSFUL`), `customIdentifier`, `transactionCreatedTime`, `product { … }`. Orders are fulfilled in real time.
 - Get order: `GET /reports/transactions/{transactionId}` **[VERIFIED: official spec]**. (`GET /orders/{id}` is not in the official spec.)
 - Order statuses **[VERIFIED: official spec]**: `SUCCESSFUL`, `PENDING`, `PROCESSING`, `REFUNDED` (purchase failed, funds reversed at once), `FAILED` (purchase failed, funds **not yet** reversed). Treat `PENDING` / `PROCESSING` as "poll", `REFUNDED` as the refund path, and `FAILED` as `NEEDS_REVIEW` until it turns into `REFUNDED`.
-- Card code / PIN: `GET /orders/transactions/{transactionId}/cards` **[VERIFIED: official spec]**. The spec names the code field `cardNumber`; the PIN field name in the spec looks wrong (`amount`), so take both names from a sandbox response **[UNVERIFIED]**.
+- Card code / PIN: `GET /orders/transactions/{transactionId}/cards` **[VERIFIED: official spec]**. Sandbox response, 21 Nov 2026 **[VERIFIED]**: an array of `{ cardNumber, pinCode }`.
 - Redeem instructions: `GET /redeem-instructions/{brandId}` → `{ brandId, brandName, concise, verbose }`.
 - Reloadly also emails the code to `recipientEmail`; use a mailbox we control, not the user's, and deliver the code in-app.
 
@@ -114,6 +114,17 @@ Cost of an order to us = sender amount for the denomination + `senderFee` − di
 - Coverage claims: 700–800+ operators in 140+ countries; 14,000+ gift card products.
 - Sanctioned-country restrictions apply (US OFAC list).
 - Support: `tickets@reloadly.com`.
+
+## Sandbox run, 21 Nov 2026 **[VERIFIED]**
+
+`pnpm --filter api smoke:reloadly`; scrubbed responses in `apps/api/test/fixtures/reloadly/`, replayed through the client by `src/supplier/reloadly/fixtures.test.ts`.
+
+- Token: `POST https://auth.reloadly.com/oauth/token` with the sandbox audience → 200 `{access_token, scope, expires_in: 3600, token_type}`. Live credentials against the sandbox audience → 401 `CREDENTIAL_VS_ENVIRONMENT_MISMATCH` (the sandbox has its own Client ID/Secret: API Settings, toggle on Sandbox).
+- Balance (both products): `{balance, frozenBalance, currencyCode: "USD", currencyName, updatedAt, lowBalanceThreshold, maxLowBalanceThreshold}`; the sandbox starts at 1,000,000 USD.
+- Operators by country (NG): 12 operators, e.g. Airtel Nigeria `RANGE` 0.04–165.84 USD, `fx.rate` 1206 NGN. Every one parses with the client schema.
+- Auto-detect for `08012345678`/NG → 404 `COULD_NOT_AUTO_DETECT_OPERATOR`; the client returns "no operator" and the UI lets the buyer pick one.
+- Gift cards US: 84 products, all parse. Order → 200 with `transactionId`, `status: "SUCCESSFUL"`, `customIdentifier`, `balanceInfo`; `GET /reports/transactions/{id}` same shape; cards as above.
+- Not recorded yet: airtime top-up, its status and duplicate behaviour (auto-detect failed, so the script skipped them; the script now falls back to the country's first operator).
 
 ## Sandbox testing notes
 

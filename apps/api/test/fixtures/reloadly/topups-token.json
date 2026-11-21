@@ -1,0 +1,9 @@
+{
+  "httpStatus": 200,
+  "body": {
+    "access_token": "REDACTED",
+    "scope": "send-topups read-operators read-promotions read-topups-history read-prepaid-balance read-prepaid-commissions",
+    "expires_in": 3600,
+    "token_type": "Bearer"
+  }
+}

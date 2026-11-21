@@ -1,0 +1,9 @@
+{
+  "httpStatus": 200,
+  "body": [
+    {
+      "cardNumber": "REDACTED",
+      "pinCode": "REDACTED"
+    }
+  ]
+}

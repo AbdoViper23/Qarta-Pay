@@ -8,7 +8,7 @@ Last updated: **22 Nov 2026**.
 
 | Plan step (`09-PLAN.md`) | State |
 |--------------------------|-------|
-| Step 1 — scaffold and probe | Done, except the Reloadly sandbox run (needs test credentials) |
+| Step 1 — scaffold and probe | Done. Reloadly sandbox run 21 Nov 2026: gift cards end to end, airtime catalog; airtime top-up still to record |
 | Step 2 — contract + sweep script | Code and tests done. **Deployed and verified on testnet** (19 Nov, `probe-results.md` §7). Waits for: team review of the contract and sweep script |
 | Step 3 — backend | Tested end to end on anvil and **on testnet** (fake supplier): QUSDC and QIE orders settled, failed delivery refunded on-chain. Waits for: Reloadly sandbox credentials to run it against the real supplier |
 | Hosting | **Vercel free plan**, one project `qarta-pay` (web + API as Vercel Services, Neon Postgres), on testnet with the fake supplier until Reloadly sandbox credentials exist. No background loops there: requests and a cron drive the jobs (`13-RUNBOOK.md` §3) |

@@ -1,0 +1,11 @@
+{
+  "httpStatus": 400,
+  "body": {
+    "timeStamp": "2026-11-21 23:35:28",
+    "message": "The custom identifier provided has already been used. Please provide a new, unique custom identifier",
+    "path": "/orders",
+    "errorCode": "CUSTOM_IDENTIFIER_ALREADY_USED",
+    "infoLink": null,
+    "details": []
+  }
+}

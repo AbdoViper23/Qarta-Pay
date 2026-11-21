@@ -108,8 +108,14 @@ async function getToken(product: ReloadlyProduct): Promise<string> {
     .object({ access_token: z.string().min(1), expires_in: z.number(), token_type: z.string() })
     .safeParse(recorded.body);
   if (recorded.status !== 200 || !parsed.success) {
+    // Reloadly's error code and message carry no secret and say what is wrong,
+    // e.g. CREDENTIAL_VS_ENVIRONMENT_MISMATCH = live credentials used against the sandbox.
+    const error = z
+      .object({ errorCode: z.string().nullish(), message: z.string().nullish() })
+      .safeParse(recorded.body);
+    const reason = error.success ? `${error.data.errorCode ?? ''} ${error.data.message ?? ''}` : '';
     throw new Error(
-      `Could not get a ${product} sandbox token (HTTP ${recorded.status}). Check the test credentials.`,
+      `Could not get a ${product} sandbox token (HTTP ${recorded.status}) ${reason.trim()}. Use the Sandbox credentials (API Settings, toggle on Sandbox).`,
     );
   }
   console.log(`${''.padEnd(34)} expires_in = ${parsed.data.expires_in} s`);

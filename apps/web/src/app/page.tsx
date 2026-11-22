@@ -1,4 +1,4 @@
-import { EscrowStory } from '@/components/landing/EscrowStory';
+import { TokenJourney } from '@/components/landing/TokenJourney';
 import { Facts } from '@/components/landing/Facts';
 import { FinalCta } from '@/components/landing/FinalCta';
 import { Hero } from '@/components/landing/Hero';
@@ -10,7 +10,7 @@ export default function LandingPage() {
     <>
       <Hero />
       <Marquee />
-      <EscrowStory />
+      <TokenJourney />
       <Integrations />
       <Facts />
       <FinalCta />

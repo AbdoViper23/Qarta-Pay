@@ -58,7 +58,7 @@ export function PhoneDemo() {
     >
       <motion.div
         style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="relative rounded-[2.6rem] border border-white/10 bg-gradient-to-b from-[#1a2131] to-[#0a0e17] p-3 shadow-[0_40px_120px_-30px_rgb(245_165_36/0.35)]"
+        className="relative rounded-[2.6rem] border border-white/10 bg-gradient-to-b from-[#2a2621] to-[#12100e] p-3 shadow-[0_50px_100px_-40px_rgb(0_0_0/0.9)]"
       >
         <div className="relative h-[34rem] overflow-hidden rounded-[2rem] bg-bg">
           <div className="absolute top-2 left-1/2 h-6 w-24 -translate-x-1/2 rounded-full bg-black" />
@@ -146,7 +146,7 @@ function Screen({ step }: { step: Step }) {
           </span>
           <p className="mt-4 text-sm text-muted">QIE Wallet</p>
           <p className="font-mono text-xl">Pay 1.04 QUSDC</p>
-          <div className="mt-5 h-11 rounded-xl bg-[linear-gradient(110deg,var(--color-brand),45%,#ffe2a8,55%,var(--color-brand))] bg-[length:200%_100%] animate-shimmer" />
+          <div className="mt-5 h-11 rounded-xl bg-[linear-gradient(110deg,var(--color-ink),45%,#ffffff,55%,var(--color-ink))] bg-[length:200%_100%] animate-shimmer" />
         </div>
       </div>
     );
@@ -157,7 +157,9 @@ function Screen({ step }: { step: Step }) {
         <div className="relative overflow-hidden rounded-2xl border border-brand/30 bg-brand-soft p-5 text-center">
           <motion.span
             className="mx-auto flex size-16 items-center justify-center rounded-full border border-brand/40 text-brand"
-            animate={{ boxShadow: ['0 0 0 0 rgb(245 165 36/0.5)', '0 0 0 18px rgb(245 165 36/0)'] }}
+            animate={{
+              boxShadow: ['0 0 0 0 rgb(201 164 106/0.4)', '0 0 0 16px rgb(201 164 106/0)'],
+            }}
             transition={{ duration: 1.4, repeat: Infinity }}
           >
             <LockKeyhole className="size-7" />

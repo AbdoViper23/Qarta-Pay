@@ -3,9 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <section
-      className={`rounded-2xl border border-line bg-surface/80 p-5 shadow-[0_1px_0_rgb(255_255_255/0.03)_inset] backdrop-blur-sm ${className}`}
-    >
+    <section className={`rounded-2xl border border-line bg-surface p-5 ${className}`}>
       {children}
     </section>
   );
@@ -17,15 +15,14 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
   const styles = {
-    primary:
-      'bg-brand text-brand-ink hover:bg-brand-hover shadow-[0_8px_24px_-12px_var(--color-brand)]',
-    secondary: 'border border-line bg-surface-2 text-ink hover:border-brand/60',
+    primary: 'bg-ink text-bg hover:bg-white',
+    secondary: 'border border-line text-ink hover:border-ink/40',
     ghost: 'text-muted hover:text-ink',
   }[variant];
   return (
     <button
       {...props}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-[15px] font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
     />
   );
 }
@@ -63,7 +60,7 @@ export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: st
 }
 
 export const inputClass =
-  'min-h-11 w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-base text-ink placeholder:text-muted/70 outline-none transition-colors duration-200 focus:border-brand focus:ring-2 focus:ring-brand/25';
+  'min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-2 text-base text-ink placeholder:text-muted/70 outline-none transition-colors duration-200 focus:border-ink/50';
 
 export function Chip({
   selected,
@@ -75,10 +72,8 @@ export function Chip({
       type="button"
       {...props}
       aria-pressed={selected}
-      className={`min-h-11 rounded-xl border px-4 py-2 font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-        selected
-          ? 'border-brand bg-brand-soft text-brand'
-          : 'border-line bg-surface-2 text-ink hover:border-brand/60'
+      className={`min-h-11 rounded-full border px-4 py-2 font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+        selected ? 'border-ink bg-ink text-bg' : 'border-line text-ink hover:border-ink/40'
       }`}
     >
       {children}

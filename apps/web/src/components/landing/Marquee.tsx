@@ -1,39 +1,17 @@
-import { Sparkle } from 'lucide-react';
-
-/** Endless strip of where and what you can buy. Pure CSS; pauses on hover. */
-const ITEMS = [
-  'Nigeria',
-  'Ghana',
-  'Kenya',
-  'South Africa',
-  'Philippines',
-  'India',
-  'Egypt',
-  'Airtime in seconds',
-  'Gift cards',
-  'Paid in QIE',
-  'Paid in QUSDC',
-];
+/** Where top-ups work today: a quiet, static line instead of a ticker. */
+const COUNTRIES = ['Nigeria', 'Ghana', 'Kenya', 'South Africa', 'Philippines', 'India', 'Egypt'];
 
 export function Marquee() {
-  const row = [...ITEMS, ...ITEMS];
   return (
-    <div
-      className="relative overflow-hidden border-y border-line py-5 [mask-image:linear-gradient(to_right,transparent,#000_12%,#000_88%,transparent)]"
-      aria-label="Countries and products"
-    >
-      <ul className="flex w-max animate-marquee gap-10 hover:[animation-play-state:paused]">
-        {row.map((item, i) => (
-          <li
-            key={`${item}-${i}`}
-            aria-hidden={i >= ITEMS.length}
-            className="flex items-center gap-10 font-display text-2xl whitespace-nowrap text-ink/70 italic"
-          >
-            {item}
-            <Sparkle className="size-4 text-brand/70" aria-hidden />
-          </li>
-        ))}
-      </ul>
-    </div>
+    <section aria-label="Countries" className="border-y border-line">
+      <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-6 sm:flex-row sm:items-baseline sm:gap-10">
+        <p className="shrink-0 text-sm text-muted">Mobile top-ups in</p>
+        <ul className="flex flex-wrap gap-x-7 gap-y-2 font-display text-xl text-ink/85">
+          {COUNTRIES.map((country) => (
+            <li key={country}>{country}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 }

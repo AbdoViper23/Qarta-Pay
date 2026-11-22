@@ -22,12 +22,12 @@ interface Box {
   h: number;
 }
 
-const AMBER: RGB = [245, 165, 36];
-const TEAL: RGB = [94, 234, 212];
-const GREEN: RGB = [74, 222, 128];
-const RED: RGB = [248, 113, 113];
-const INK: RGB = [245, 247, 250];
-const DIM: RGB = [139, 149, 168];
+const AMBER: RGB = [214, 178, 118]; // brass
+const TEAL: RGB = [226, 220, 208]; // ivory, for the refunded coin
+const GREEN: RGB = [143, 191, 152];
+const RED: RGB = [217, 130, 107];
+const INK: RGB = [237, 232, 223];
+const DIM: RGB = [154, 147, 138];
 const N = 220;
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -326,8 +326,8 @@ export class TokenScene {
     ctx.save();
     // Back panel and a card peeking out.
     const back = ctx.createLinearGradient(x, y - h / 2, x, y + h / 2);
-    back.addColorStop(0, '#222a3a');
-    back.addColorStop(1, '#141a27');
+    back.addColorStop(0, '#2c2722');
+    back.addColorStop(1, '#1a1714');
     this.rr(x - w / 2, y - h / 2, w, h, 18);
     ctx.fillStyle = back;
     ctx.fill();
@@ -339,8 +339,8 @@ export class TokenScene {
     ctx.fill();
     // Front pocket with stitching.
     const front = ctx.createLinearGradient(x, y - h * 0.2, x, y + h / 2);
-    front.addColorStop(0, '#2a3346');
-    front.addColorStop(1, '#171d2b');
+    front.addColorStop(0, '#332d27');
+    front.addColorStop(1, '#1c1915');
     this.rr(x - w / 2, y - h * 0.18, w, h * 0.68, 16);
     ctx.fillStyle = front;
     ctx.fill();
@@ -352,11 +352,11 @@ export class TokenScene {
     ctx.setLineDash([]);
     // Clasp.
     this.rr(x + w / 2 - 38, y - 4, 38, 30, 9);
-    ctx.fillStyle = '#323c52';
+    ctx.fillStyle = '#3a332c';
     ctx.fill();
     ctx.beginPath();
     ctx.arc(x + w / 2 - 18, y + 11, 5, 0, Math.PI * 2);
-    ctx.fillStyle = active ? rgba(AMBER, 0.9) : '#566079';
+    ctx.fillStyle = active ? rgba(AMBER, 0.9) : '#6b6258';
     ctx.fill();
     // Outline.
     this.rr(x - w / 2, y - h / 2, w, h, 18);
@@ -379,29 +379,29 @@ export class TokenScene {
     ctx.translate(x, y - 6);
     ctx.scale(tilt, 1);
     // Edge (visible as the coin turns), rim and face.
-    ctx.fillStyle = '#8a4b07';
+    ctx.fillStyle = '#5e4628';
     ctx.beginPath();
     ctx.ellipse(2, 3, r, r, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
     const rim = ctx.createRadialGradient(-r * 0.3, -r * 0.4, r * 0.1, 0, 0, r);
-    rim.addColorStop(0, '#ffe2a3');
-    rim.addColorStop(0.6, '#f5a524');
-    rim.addColorStop(1, '#b8650a');
+    rim.addColorStop(0, '#f1dcb0');
+    rim.addColorStop(0.6, '#c9a46a');
+    rim.addColorStop(1, '#7d6036');
     ctx.fillStyle = rim;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
     ctx.fill();
     const face = ctx.createRadialGradient(r * 0.2, r * 0.3, r * 0.1, 0, 0, r * 0.8);
-    face.addColorStop(0, '#e8961a');
-    face.addColorStop(1, '#f7b343');
+    face.addColorStop(0, '#b8925a');
+    face.addColorStop(1, '#d4b47d');
     ctx.fillStyle = face;
     ctx.beginPath();
     ctx.arc(0, 0, r * 0.8, 0, Math.PI * 2);
     ctx.fill();
     // Milled ring.
     ctx.setLineDash([2, 3]);
-    ctx.strokeStyle = 'rgba(120,64,6,0.55)';
+    ctx.strokeStyle = 'rgba(80,60,30,0.55)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.arc(0, 0, r * 0.9, 0, Math.PI * 2);
@@ -410,7 +410,7 @@ export class TokenScene {
     ctx.font = `400 ${r * 1.05}px ${this.serif}`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(80,42,4,0.9)';
+    ctx.fillStyle = 'rgba(60,44,22,0.9)';
     ctx.fillText('Q', 0, r * 0.06);
     ctx.textBaseline = 'alphabetic';
     // Moving glint.
@@ -436,8 +436,8 @@ export class TokenScene {
       ctx.shadowBlur = 70 * lock;
     }
     const body = ctx.createLinearGradient(x - s / 2, y - s / 2, x + s / 2, y + s / 2);
-    body.addColorStop(0, '#2b3446');
-    body.addColorStop(1, '#0f141f');
+    body.addColorStop(0, '#34302a');
+    body.addColorStop(1, '#141210');
     this.rr(x - s / 2, y - s / 2, s, s, 24);
     ctx.fillStyle = body;
     ctx.fill();
@@ -462,8 +462,8 @@ export class TokenScene {
         y + by * s * 0.38,
         5,
       );
-      g.addColorStop(0, '#8a94aa');
-      g.addColorStop(1, '#2a3244');
+      g.addColorStop(0, '#a49a8c');
+      g.addColorStop(1, '#332e28');
       ctx.fillStyle = g;
       ctx.beginPath();
       ctx.arc(x + bx * s * 0.38, y + by * s * 0.38, 4.5, 0, Math.PI * 2);
@@ -471,7 +471,7 @@ export class TokenScene {
     }
     // Door: swings open on its left hinge.
     const r = s * 0.34;
-    ctx.fillStyle = '#05070d';
+    ctx.fillStyle = '#0b0a09';
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
@@ -479,8 +479,8 @@ export class TokenScene {
     ctx.scale(1 - open * 0.82, 1);
     ctx.translate(r, 0);
     const door = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
-    door.addColorStop(0, '#3a4458');
-    door.addColorStop(1, '#161c29');
+    door.addColorStop(0, '#433d35');
+    door.addColorStop(1, '#1b1815');
     ctx.fillStyle = door;
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -490,7 +490,7 @@ export class TokenScene {
     ctx.stroke();
     // Wheel handle.
     ctx.rotate((seg(p, 0.26, 0.32) - seg(p, 0.4, 0.46)) * Math.PI * 1.5);
-    ctx.strokeStyle = rgba(lock > 0.5 ? AMBER : [150, 160, 180], 0.9);
+    ctx.strokeStyle = rgba(lock > 0.5 ? AMBER : [176, 168, 156], 0.9);
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
     for (let k = 0; k < 3; k++) {
@@ -502,7 +502,7 @@ export class TokenScene {
     }
     ctx.beginPath();
     ctx.arc(0, 0, r * 0.18, 0, Math.PI * 2);
-    ctx.fillStyle = '#4a556c';
+    ctx.fillStyle = '#564e44';
     ctx.fill();
     ctx.restore();
     // Status light.
@@ -523,8 +523,8 @@ export class TokenScene {
 
   private skin(x0: number, y0: number, x1: number, y1: number) {
     const g = this.ctx.createLinearGradient(x0, y0, x1, y1);
-    g.addColorStop(0, '#3a4256');
-    g.addColorStop(1, '#1f2535');
+    g.addColorStop(0, '#3d3731');
+    g.addColorStop(1, '#221e1a');
     return g;
   }
 
@@ -579,7 +579,7 @@ export class TokenScene {
     ctx.translate(0, dy);
     ctx.globalAlpha = 0.4 + 0.6 * inAmt;
     // Side buttons.
-    ctx.fillStyle = '#2a3142';
+    ctx.fillStyle = '#332e28';
     this.rr(x - w / 2 - 3, y - h * 0.28, 4, 34, 2);
     ctx.fill();
     this.rr(x - w / 2 - 3, y - h * 0.18, 4, 50, 2);
@@ -588,16 +588,16 @@ export class TokenScene {
     ctx.fill();
     // Frame.
     const frame = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
-    frame.addColorStop(0, '#3a4255');
-    frame.addColorStop(0.5, '#1b2130');
-    frame.addColorStop(1, '#2c3344');
+    frame.addColorStop(0, '#433d36');
+    frame.addColorStop(0.5, '#1c1916');
+    frame.addColorStop(1, '#36302a');
     this.rr(x - w / 2, y - h / 2, w, h, 38);
     ctx.fillStyle = frame;
     ctx.fill();
     // Screen.
     const scr = ctx.createLinearGradient(0, s.y, 0, s.y + s.h);
-    scr.addColorStop(0, '#0c1322');
-    scr.addColorStop(1, '#05070d');
+    scr.addColorStop(0, '#161411');
+    scr.addColorStop(1, '#0b0a09');
     this.rr(s.x, s.y, s.w, s.h, 28);
     ctx.fillStyle = scr;
     ctx.fill();
@@ -624,7 +624,7 @@ export class TokenScene {
       ctx.save();
       ctx.globalAlpha = Math.min(1, t * 1.6) * (0.4 + 0.6 * inAmt);
       this.rr(s.x + 10, ty, s.w - 20, 36, 14);
-      ctx.fillStyle = 'rgba(28,36,54,0.95)';
+      ctx.fillStyle = 'rgba(42,38,33,0.96)';
       ctx.fill();
       ctx.beginPath();
       ctx.arc(s.x + 28, ty + 18, 6, 0, Math.PI * 2);
@@ -711,8 +711,8 @@ export class TokenScene {
     this.barRects.forEach((b, i) => {
       const hh = b.h * (0.6 + 0.4 * clamp(grow * 1.4 - i * 0.12));
       const g = ctx.createLinearGradient(0, b.y + b.h - hh, 0, b.y + b.h);
-      g.addColorStop(0, '#86efac');
-      g.addColorStop(1, '#16a34a');
+      g.addColorStop(0, '#b7d8bd');
+      g.addColorStop(1, '#5f8f69');
       ctx.shadowColor = rgba(GREEN, 0.5);
       ctx.shadowBlur = 16;
       this.rr(b.x, b.y + b.h - hh, b.w, hh, 5);
@@ -738,9 +738,9 @@ export class TokenScene {
     ctx.shadowColor = rgba(AMBER, 0.45);
     ctx.shadowBlur = 24;
     const g = ctx.createLinearGradient(c.x, c.y, c.x + c.w, c.y + c.h);
-    g.addColorStop(0, '#ffc75a');
-    g.addColorStop(0.55, '#f5a524');
-    g.addColorStop(1, '#b8650a');
+    g.addColorStop(0, '#e9d3a6');
+    g.addColorStop(0.55, '#c9a46a');
+    g.addColorStop(1, '#7d6036');
     this.rr(c.x, c.y, c.w, c.h, 12);
     ctx.fillStyle = g;
     ctx.fill();

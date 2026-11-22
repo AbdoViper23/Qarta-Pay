@@ -1,29 +1,29 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens (ui-ux-pro-max design system for Qarta Pay: "Trust & Authority", Swiss
- * minimalism, dark fintech). Navy surfaces, amber for primary actions and trust, a little
- * violet for accents only. Every component uses these names, never raw hex.
+ * Design tokens. Direction: "graphite and brass", a private-banking feel rather than a
+ * crypto one. Warm graphite surfaces, ivory type, one muted brass accent used sparingly,
+ * hairline structure, film grain for texture. No glows, no gradient text.
  */
 @theme {
-  --color-bg: #05070d;
-  --color-surface: #0b101b;
-  --color-surface-2: #111827;
-  --color-ink: #f5f7fa;
-  --color-muted: #8b95a8;
-  --color-line: #1c2536;
-  --color-brand: #f5a524;
-  --color-brand-hover: #ffbd4f;
-  --color-brand-ink: #120c02;
-  --color-brand-soft: #1d1608;
-  --color-accent: #5eead4;
-  --color-danger: #f87171;
-  --color-danger-soft: #2a1213;
-  --color-ok: #4ade80;
-  --color-ok-soft: #0d2216;
-  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --color-bg: #0f0e0c;
+  --color-surface: #171512;
+  --color-surface-2: #1e1b17;
+  --color-ink: #ede8df;
+  --color-muted: #9a938a;
+  --color-line: #2a2622;
+  --color-brand: #c9a46a;
+  --color-brand-hover: #d8b77f;
+  --color-brand-ink: #14110d;
+  --color-brand-soft: #241e15;
+  --color-accent: #c9a46a;
+  --color-danger: #d9826b;
+  --color-danger-soft: #2a1914;
+  --color-ok: #8fbf98;
+  --color-ok-soft: #18221a;
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
   --animate-marquee: marquee 40s linear infinite;
   --animate-aurora: aurora 18s ease-in-out infinite alternate;
   --animate-spin-slow: spin 6s linear infinite;
@@ -74,7 +74,7 @@ body {
 }
 
 ::selection {
-  background: rgb(245 165 36 / 0.35);
+  background: rgb(201 164 106 / 0.35);
 }
 
 /* Every clickable thing shows a pointer and a visible keyboard focus ring. */
@@ -103,60 +103,17 @@ select {
   }
 }
 
-/* Rotating border light for highlighted cards (an animatable custom property). */
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.glow-border {
-  position: relative;
-  isolation: isolate;
-}
-.glow-border::before {
+/* Film grain: a fixed, very faint noise layer that gives flat surfaces some material. */
+.grain::after {
   content: '';
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: inherit;
-  padding: 1px;
-  background: conic-gradient(
-    from var(--angle),
-    transparent 0deg,
-    var(--color-brand) 60deg,
-    var(--color-accent) 120deg,
-    transparent 180deg
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  animation: border-spin 6s linear infinite;
-}
-@keyframes border-spin {
-  to {
-    --angle: 360deg;
-  }
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Faint engineering grid behind the hero, faded at the edges. */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
-}
-
-/* Cursor-following light on cards; --mx/--my are set from JS. */
 .spotlight {
-  background:
-    radial-gradient(
-      28rem circle at var(--mx, 50%) var(--my, 50%),
-      rgb(245 165 36 / 0.09),
-      transparent 45%
-    ),
-    var(--color-surface);
+  background: var(--color-surface);
 }

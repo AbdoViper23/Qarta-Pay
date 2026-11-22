@@ -48,7 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-bg/60 py-2 pr-2 pl-4 shadow-[0_8px_32px_-12px_rgb(0_0_0/0.6)] backdrop-blur-xl">
               <Link href="/" aria-label="Qarta Pay home" className="flex items-center gap-2">
                 <Logo className="size-7" />
-                <span className="text-base font-semibold tracking-tight">
+                <span className="text-base font-semibold tracking-tight whitespace-nowrap">
                   Qarta <span className="text-brand">Pay</span>
                 </span>
               </Link>

@@ -111,7 +111,7 @@ export function Hero() {
           </motion.ul>
         </div>
 
-        <div className="relative">
+        <div className="relative mx-auto w-full max-w-md lg:max-w-none">
           <motion.div
             initial={{ opacity: 0, y: 60, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -128,7 +128,7 @@ export function Hero() {
             initial={{ opacity: 0, x: -40, rotate: -18 }}
             animate={{ opacity: 1, x: 0, rotate: -12 }}
             transition={{ duration: 1, delay: 0.9, ease }}
-            className="absolute top-24 -left-2 hidden w-44 rounded-2xl border border-white/10 bg-gradient-to-br from-brand to-[#b8650a] p-4 text-brand-ink shadow-2xl sm:block lg:-left-16"
+            className="absolute top-24 -left-2 hidden w-44 rounded-2xl border border-white/10 bg-gradient-to-br from-brand to-[#b8650a] p-4 text-brand-ink shadow-2xl sm:block sm:-left-14 lg:-left-20 xl:-left-16"
           >
             <p className="text-xs font-semibold opacity-70">GIFT CARD</p>
             <p className="mt-6 font-display text-2xl">$25.00</p>
@@ -140,7 +140,7 @@ export function Hero() {
             initial={{ opacity: 0, scale: 0.4 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: 'spring', stiffness: 120, damping: 12, delay: 1.1 }}
-            className="absolute top-8 right-0 flex size-16 items-center justify-center rounded-full border border-accent/40 bg-[radial-gradient(circle_at_30%_30%,#8ff5e4,#127a6b)] font-display text-2xl text-bg shadow-[0_0_40px_rgb(94_234_212/0.35)] lg:-right-6"
+            className="absolute top-8 right-0 flex size-16 items-center justify-center rounded-full border border-accent/40 bg-[radial-gradient(circle_at_30%_30%,#8ff5e4,#127a6b)] font-display text-2xl text-bg shadow-[0_0_40px_rgb(94_234_212/0.35)] sm:-right-2 xl:-right-6"
           >
             Q
           </motion.div>
@@ -149,7 +149,7 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.3, ease }}
-            className="absolute -right-2 bottom-24 hidden items-center gap-2 rounded-xl border border-white/10 bg-surface/80 px-3 py-2 text-xs backdrop-blur-xl sm:flex lg:-right-10"
+            className="absolute right-0 bottom-24 hidden items-center gap-2 rounded-xl border border-white/10 bg-surface/80 px-3 py-2 text-xs backdrop-blur-xl sm:flex xl:-right-10"
           >
             <ShieldCheck className="size-4 text-ok" /> Refund guaranteed by contract
           </motion.div>

@@ -71,7 +71,7 @@ export function WalletButton() {
       <Button onClick={() => setOpen(!open)} disabled={isPending} aria-expanded={open}>
         <Wallet className="size-4" aria-hidden />
         {isPending ? 'Connecting…' : 'Connect'}
-        <ChevronDown className="size-4" aria-hidden />
+        <ChevronDown className="hidden size-4 sm:block" aria-hidden />
       </Button>
       {open && (
         <div className="absolute right-0 z-30 mt-2 w-64 rounded-2xl border border-line bg-surface-2 p-2 shadow-2xl shadow-black/40">

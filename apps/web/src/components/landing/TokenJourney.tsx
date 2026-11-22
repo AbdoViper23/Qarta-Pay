@@ -103,22 +103,24 @@ export function TokenJourney() {
       className="relative h-[560vh]"
       aria-label="How escrow protects you"
     >
-      <div className="sticky top-0 mx-auto grid h-dvh max-w-6xl grid-rows-[auto_1fr] content-start gap-2 px-4 pt-24 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:grid-rows-1 md:content-center md:items-center md:gap-8 md:pt-0">
+      <div className="sticky top-0 mx-auto grid h-dvh max-w-6xl grid-rows-[auto_1fr] content-start gap-2 px-4 pt-24 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:grid-rows-1 md:content-center md:items-center md:gap-8 md:pt-20 md:pb-4">
         <div className="min-w-0">
           <p className="font-mono text-sm text-muted tabular-nums">
             <span className="text-brand">{active + 1}</span> of {CHAPTERS.length}
           </p>
-          <div className="relative mt-3 min-h-44 md:min-h-60">
+          <div className="relative mt-3 min-h-44 md:min-h-60 [@media(max-height:560px)]:min-h-36">
             {CHAPTERS.map((chapter, i) => (
               <article
                 key={chapter.title}
                 aria-hidden={i !== active}
                 className={`absolute inset-0 transition-all duration-500 ${i === active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
               >
-                <h2 className="font-display text-4xl leading-[1.02] tracking-tight text-balance md:text-6xl">
+                <h2 className="font-display text-4xl leading-[1.02] tracking-tight text-balance md:text-5xl lg:text-6xl [@media(max-height:560px)]:text-3xl">
                   {chapter.title}
                 </h2>
-                <p className="mt-4 max-w-md text-muted md:text-lg">{chapter.text}</p>
+                <p className="mt-4 max-w-md text-muted md:text-lg [@media(max-height:560px)]:mt-2 [@media(max-height:560px)]:text-sm">
+                  {chapter.text}
+                </p>
               </article>
             ))}
           </div>

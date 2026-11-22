@@ -104,7 +104,7 @@ export default function OrderPage() {
               return (
                 <li
                   key={step.label}
-                  className={`rounded-xl px-2 py-3 font-semibold ${done ? 'bg-brand text-brand-ink' : 'bg-brand-soft text-muted'}`}
+                  className={`rounded-xl border px-2 py-3 font-semibold transition-colors duration-300 ${done ? 'border-brand/40 bg-brand-soft text-brand' : 'border-line bg-surface-2 text-muted'}`}
                 >
                   {step.label}
                 </li>
@@ -153,7 +153,10 @@ export default function OrderPage() {
           <h2 className="font-bold">Your gift card</h2>
           {codes ? (
             codes.map((c) => (
-              <div key={c.code} className="space-y-2 rounded-xl bg-brand-soft p-4">
+              <div
+                key={c.code}
+                className="space-y-2 rounded-xl border border-brand/30 bg-brand-soft p-4"
+              >
                 <p className="font-mono text-lg break-all">{c.code}</p>
                 {c.pin && <p className="font-mono">PIN: {c.pin}</p>}
                 <Button

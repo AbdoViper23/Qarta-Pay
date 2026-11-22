@@ -1,5 +1,6 @@
 'use client';
 
+import { ChevronDown, LogOut, Wallet } from 'lucide-react';
 import { useState } from 'react';
 import { useConnect, useConnection, useConnectors, useDisconnect, useSwitchChain } from 'wagmi';
 import { appChain } from '@/lib/chains';
@@ -36,14 +37,23 @@ export function WalletButton() {
       <div className="flex items-center gap-2">
         <button
           type="button"
-          title={`${address} — click to copy`}
+          title={`${address} (click to copy)`}
           onClick={() => void navigator.clipboard?.writeText(address)}
-          className="max-w-44 truncate rounded-full border border-line bg-surface px-3 py-2 text-sm font-medium"
+          className="flex min-h-11 max-w-44 items-center gap-2 rounded-full border border-line bg-surface-2 px-3 text-sm font-medium transition-colors hover:border-brand/60"
         >
-          {qieName ?? shortAddress(address)}
+          <span className="size-2 shrink-0 rounded-full bg-ok" aria-hidden />
+          <span className={`truncate ${qieName ? '' : 'font-mono'}`}>
+            {qieName ?? shortAddress(address)}
+          </span>
         </button>
-        <Button variant="ghost" onClick={() => disconnect({})} className="text-sm">
-          Disconnect
+        <Button
+          variant="ghost"
+          onClick={() => disconnect({})}
+          aria-label="Disconnect wallet"
+          title="Disconnect"
+          className="px-2"
+        >
+          <LogOut className="size-4" aria-hidden />
         </Button>
       </div>
     );
@@ -58,16 +68,18 @@ export function WalletButton() {
 
   return (
     <div className="relative">
-      <Button onClick={() => setOpen(!open)} disabled={isPending}>
-        {isPending ? 'Connecting…' : 'Connect wallet'}
+      <Button onClick={() => setOpen(!open)} disabled={isPending} aria-expanded={open}>
+        <Wallet className="size-4" aria-hidden />
+        {isPending ? 'Connecting…' : 'Connect'}
+        <ChevronDown className="size-4" aria-hidden />
       </Button>
       {open && (
-        <div className="absolute right-0 z-10 mt-2 w-64 rounded-2xl border border-line bg-surface p-2 shadow-lg">
+        <div className="absolute right-0 z-30 mt-2 w-64 rounded-2xl border border-line bg-surface-2 p-2 shadow-2xl shadow-black/40">
           {options.map((connector) => (
             <button
               key={connector.uid}
               type="button"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left hover:bg-brand-soft"
+              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-surface"
               onClick={async () => {
                 setError(null);
                 try {

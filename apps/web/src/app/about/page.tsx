@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui';
 
@@ -29,8 +30,11 @@ export default function AboutPage() {
           What you trust us for: to deliver before releasing your payment. Every step is public on
           the QIE explorer.
         </p>
-        <Link href="/powered-by-qie" className="font-semibold text-brand">
-          See the QIE technology behind it →
+        <Link
+          href="/powered-by-qie"
+          className="inline-flex items-center gap-1.5 font-semibold text-brand transition-colors hover:text-brand-hover"
+        >
+          See the QIE technology behind it <ArrowRight className="size-4" aria-hidden />
         </Link>
       </Card>
     </div>

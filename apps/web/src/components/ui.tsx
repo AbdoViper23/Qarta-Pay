@@ -1,8 +1,11 @@
+import { CircleAlert, CircleCheck, Info } from 'lucide-react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border border-line bg-surface p-5 shadow-sm ${className}`}>
+    <section
+      className={`rounded-2xl border border-line bg-surface/80 p-5 shadow-[0_1px_0_rgb(255_255_255/0.03)_inset] backdrop-blur-sm ${className}`}
+    >
       {children}
     </section>
   );
@@ -14,14 +17,15 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
   const styles = {
-    primary: 'bg-brand text-brand-ink hover:opacity-90',
-    secondary: 'border border-line bg-surface text-ink hover:bg-brand-soft',
-    ghost: 'text-brand hover:underline',
+    primary:
+      'bg-brand text-brand-ink hover:bg-brand-hover shadow-[0_8px_24px_-12px_var(--color-brand)]',
+    secondary: 'border border-line bg-surface-2 text-ink hover:border-brand/60',
+    ghost: 'text-muted hover:text-ink',
   }[variant];
   return (
     <button
       {...props}
-      className={`min-h-11 rounded-xl px-4 py-2 font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${styles} ${className}`}
     />
   );
 }
@@ -34,30 +38,32 @@ export function Notice({
   children: ReactNode;
 }) {
   const styles = {
-    info: 'bg-brand-soft text-ink',
-    error: 'bg-danger-soft text-danger',
-    ok: 'bg-brand-soft text-ok',
+    info: 'border-line bg-surface-2 text-ink',
+    error: 'border-danger/30 bg-danger-soft text-danger',
+    ok: 'border-ok/30 bg-ok-soft text-ok',
   }[tone];
+  const Icon = { info: Info, error: CircleAlert, ok: CircleCheck }[tone];
   return (
-    <p
+    <div
       role={tone === 'error' ? 'alert' : 'status'}
-      className={`rounded-xl px-4 py-3 text-sm ${styles}`}
+      className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${styles}`}
     >
-      {children}
-    </p>
+      <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
+      <div className="min-w-0">{children}</div>
+    </div>
   );
 }
 
 export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1 block text-sm font-medium text-muted">
+    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-muted">
       {children}
     </label>
   );
 }
 
 export const inputClass =
-  'min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 text-base text-ink outline-none focus:border-brand';
+  'min-h-11 w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-base text-ink placeholder:text-muted/70 outline-none transition-colors duration-200 focus:border-brand focus:ring-2 focus:ring-brand/25';
 
 export function Chip({
   selected,
@@ -69,10 +75,10 @@ export function Chip({
       type="button"
       {...props}
       aria-pressed={selected}
-      className={`min-h-11 rounded-xl border px-4 py-2 font-medium ${
+      className={`min-h-11 rounded-xl border px-4 py-2 font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
         selected
-          ? 'border-brand bg-brand text-brand-ink'
-          : 'border-line bg-surface text-ink hover:border-brand'
+          ? 'border-brand bg-brand-soft text-brand'
+          : 'border-line bg-surface-2 text-ink hover:border-brand/60'
       }`}
     >
       {children}
@@ -87,9 +93,31 @@ export function ExternalLink({ href, children }: { href: string | null; children
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-brand underline underline-offset-2"
+      className="text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand"
     >
       {children}
     </a>
+  );
+}
+
+/** Small pill used for trust facts and statuses. */
+export function Badge({
+  children,
+  tone = 'neutral',
+}: {
+  children: ReactNode;
+  tone?: 'neutral' | 'brand' | 'ok';
+}) {
+  const styles = {
+    neutral: 'border-line bg-surface-2 text-muted',
+    brand: 'border-brand/30 bg-brand-soft text-brand',
+    ok: 'border-ok/30 bg-ok-soft text-ok',
+  }[tone];
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${styles}`}
+    >
+      {children}
+    </span>
   );
 }

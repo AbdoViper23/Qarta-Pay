@@ -14,18 +14,20 @@ const FACTS = [
 export function Facts() {
   return (
     <section id="facts" className="mx-auto max-w-6xl px-4 pb-28">
-      <div className="grid border-y border-line sm:grid-cols-3 sm:divide-x sm:divide-line">
+      <div className="grid border-y-2 border-rule bg-surface sm:grid-cols-3 sm:divide-x sm:divide-dashed sm:divide-muted">
         {FACTS.map((fact, i) => (
           <Reveal
             key={fact.label}
             delay={i * 0.06}
-            className="border-b border-line py-8 last:border-b-0 sm:border-b-0 sm:px-8 sm:first:pl-0"
+            className="dashed-b px-6 py-8 last:border-b-0 sm:border-b-0 sm:px-8"
           >
-            <p className="font-display text-6xl font-light tracking-tight">
+            <p className="font-display text-7xl leading-none font-extrabold">
               <CountUp to={fact.value} />
               <span className="text-brand">{fact.suffix}</span>
             </p>
-            <p className="mt-3 max-w-[16rem] text-sm text-muted">{fact.label}</p>
+            <p className="mt-3 max-w-[16rem] text-xs leading-5 text-muted uppercase">
+              {fact.label}
+            </p>
           </Reveal>
         ))}
       </div>

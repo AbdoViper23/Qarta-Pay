@@ -1,28 +1,29 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens. Direction: "graphite and brass", a private-banking feel rather than a
- * crypto one. Warm graphite surfaces, ivory type, one muted brass accent used sparingly,
- * hairline structure, film grain for texture. No glows, no gradient text.
+ * Design tokens. Direction: "thermal receipt". The site reads like the slip you get after
+ * paying: paper ground, black ink, condensed headlines, monospace details, dashed rules,
+ * and one stamp red used only for moments that matter (paid, held, refunded).
  */
 @theme {
-  --color-bg: #0f0e0c;
-  --color-surface: #171512;
-  --color-surface-2: #1e1b17;
-  --color-ink: #ede8df;
-  --color-muted: #9a938a;
-  --color-line: #2a2622;
-  --color-brand: #c9a46a;
-  --color-brand-hover: #d8b77f;
-  --color-brand-ink: #14110d;
-  --color-brand-soft: #241e15;
-  --color-accent: #c9a46a;
-  --color-danger: #d9826b;
-  --color-danger-soft: #2a1914;
-  --color-ok: #8fbf98;
-  --color-ok-soft: #18221a;
-  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-display: var(--font-newsreader), ui-serif, Georgia, serif;
+  --color-bg: #ecebe6;
+  --color-surface: #fbfaf7;
+  --color-surface-2: #f3f2ed;
+  --color-ink: #141414;
+  --color-muted: #5b5a56;
+  --color-line: #cdcbc4;
+  --color-rule: #141414;
+  --color-brand: #d9381e;
+  --color-brand-hover: #bf2e16;
+  --color-brand-ink: #fbfaf7;
+  --color-brand-soft: #f7ddd6;
+  --color-accent: #d9381e;
+  --color-danger: #b42318;
+  --color-danger-soft: #f7dedb;
+  --color-ok: #2f7a3d;
+  --color-ok-soft: #dcebdc;
+  --font-sans: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --font-display: var(--font-barlow), 'Arial Narrow', sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
   --animate-marquee: marquee 40s linear infinite;
   --animate-aurora: aurora 18s ease-in-out infinite alternate;
@@ -59,7 +60,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
@@ -74,7 +75,7 @@ body {
 }
 
 ::selection {
-  background: rgb(201 164 106 / 0.35);
+  background: rgb(217 56 30 / 0.2);
 }
 
 /* Every clickable thing shows a pointer and a visible keyboard focus ring. */
@@ -103,15 +104,47 @@ select {
   }
 }
 
-/* Film grain: a fixed, very faint noise layer that gives flat surfaces some material. */
+/* Paper grain: a fixed, very faint noise layer multiplied over the page. */
 .grain::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.08;
+  mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Torn, perforated top and bottom edge of a receipt slip. */
+.receipt-edge {
+  -webkit-mask:
+    radial-gradient(circle 6px at 50% 0, transparent 98%, #000) 0 0 / 16px 51% repeat-x,
+    radial-gradient(circle 6px at 50% 100%, transparent 98%, #000) 0 100% / 16px 51% repeat-x;
+  mask:
+    radial-gradient(circle 6px at 50% 0, transparent 98%, #000) 0 0 / 16px 51% repeat-x,
+    radial-gradient(circle 6px at 50% 100%, transparent 98%, #000) 0 100% / 16px 51% repeat-x;
+}
+
+/* Printed barcode strip. */
+.barcode {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-ink) 0 2px,
+    transparent 2px 4px,
+    var(--color-ink) 4px 5px,
+    transparent 5px 8px,
+    var(--color-ink) 8px 11px,
+    transparent 11px 12px
+  );
+}
+
+/* Dashed rule, like the separators printed on a receipt. */
+.dashed-t {
+  border-top: 1px dashed var(--color-muted);
+}
+.dashed-b {
+  border-bottom: 1px dashed var(--color-muted);
 }
 
 .spotlight {

@@ -39,7 +39,7 @@ export function WalletButton() {
           type="button"
           title={`${address} (click to copy)`}
           onClick={() => void navigator.clipboard?.writeText(address)}
-          className="flex min-h-11 max-w-44 items-center gap-2 rounded-full border border-line bg-surface-2 px-3 text-sm font-medium transition-colors hover:border-ink/40"
+          className="flex min-h-11 max-w-44 items-center gap-2 border-2 border-ink bg-surface px-3 text-sm font-semibold"
         >
           <span className="size-2 shrink-0 rounded-full bg-ok" aria-hidden />
           <span className={`truncate ${qieName ? '' : 'font-mono'}`}>
@@ -72,12 +72,12 @@ export function WalletButton() {
         {isPending ? 'Connecting…' : 'Connect wallet'}
       </Button>
       {open && (
-        <div className="absolute right-0 z-30 mt-2 w-64 rounded-2xl border border-line bg-surface-2 p-2 shadow-2xl shadow-black/40">
+        <div className="absolute right-0 z-30 mt-2 w-64 border-2 border-ink bg-surface p-2 shadow-[6px_6px_0_var(--color-ink)]">
           {options.map((connector) => (
             <button
               key={connector.uid}
               type="button"
-              className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-surface"
+              className="flex min-h-11 w-full items-center gap-3 px-3 py-3 text-left transition-colors hover:bg-surface-2"
               onClick={async () => {
                 setError(null);
                 try {

@@ -105,7 +105,7 @@ export function TokenJourney() {
     >
       <div className="sticky top-0 mx-auto grid h-dvh max-w-6xl grid-rows-[auto_1fr] content-start gap-2 px-4 pt-24 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:grid-rows-1 md:content-center md:items-center md:gap-8 md:pt-20 md:pb-4">
         <div className="min-w-0">
-          <p className="font-mono text-sm text-muted tabular-nums">
+          <p className="text-xs font-semibold tabular-nums uppercase">
             <span className="text-brand">{active + 1}</span> of {CHAPTERS.length}
           </p>
           <div className="relative mt-3 min-h-44 md:min-h-60 [@media(max-height:560px)]:min-h-36">
@@ -115,10 +115,10 @@ export function TokenJourney() {
                 aria-hidden={i !== active}
                 className={`absolute inset-0 transition-all duration-500 ${i === active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
               >
-                <h2 className="font-display text-4xl leading-[1.02] tracking-tight text-balance md:text-5xl lg:text-6xl [@media(max-height:560px)]:text-3xl">
+                <h2 className="font-display text-5xl leading-[0.9] font-extrabold uppercase text-balance md:text-6xl lg:text-7xl [@media(max-height:560px)]:text-4xl">
                   {chapter.title}
                 </h2>
-                <p className="mt-4 max-w-md text-muted md:text-lg [@media(max-height:560px)]:mt-2 [@media(max-height:560px)]:text-sm">
+                <p className="mt-4 max-w-md text-sm leading-7 text-muted md:text-[15px] [@media(max-height:560px)]:mt-2 [@media(max-height:560px)]:text-xs">
                   {chapter.text}
                 </p>
               </article>
@@ -126,15 +126,12 @@ export function TokenJourney() {
           </div>
           <div className="mt-4 flex gap-1.5" aria-hidden>
             {CHAPTERS.map((chapter, i) => (
-              <span
-                key={chapter.title}
-                className="h-[3px] max-w-14 flex-1 overflow-hidden rounded-full bg-line"
-              >
+              <span key={chapter.title} className="h-1 max-w-14 flex-1 overflow-hidden bg-line">
                 <span
                   ref={(node) => {
                     rail.current[i] = node;
                   }}
-                  className="block h-full w-0 bg-brand"
+                  className="block h-full w-0 bg-ink"
                 />
               </span>
             ))}

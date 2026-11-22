@@ -19,25 +19,25 @@ export function Integrations() {
     <section id="built-on-qie" className="mx-auto max-w-6xl px-4 py-28">
       <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
         <Reveal>
-          <h2 className="font-display text-4xl leading-tight font-light tracking-tight text-balance sm:text-5xl">
+          <h2 className="font-display text-5xl leading-[0.9] font-extrabold uppercase sm:text-6xl">
             Built on QIE, end to end.
           </h2>
-          <p className="mt-5 max-w-sm text-muted">
+          <p className="mt-5 max-w-sm text-sm leading-7 text-muted">
             Every payment, release and refund is a transaction anyone can check on the QIE explorer.
           </p>
           <Link
             href="/powered-by-qie"
-            className="mt-6 inline-block text-sm text-ink underline decoration-line underline-offset-[6px] transition-colors hover:decoration-ink"
+            className="mt-6 inline-block text-sm font-semibold underline decoration-brand decoration-2 underline-offset-[6px] hover:text-brand"
           >
             Contracts and addresses
           </Link>
         </Reveal>
-        <dl className="border-t border-line">
+        <dl className="border-t-2 border-rule">
           {ROWS.map(([name, text], i) => (
             <Reveal key={name} delay={i * 0.04}>
-              <div className="grid gap-1 border-b border-line py-6 sm:grid-cols-[13rem_1fr] sm:gap-8">
-                <dt className="font-display text-xl">{name}</dt>
-                <dd className="text-muted">{text}</dd>
+              <div className="dashed-b grid gap-1 py-5 sm:grid-cols-[14rem_1fr] sm:gap-8">
+                <dt className="font-display text-2xl font-bold uppercase">{name}</dt>
+                <dd className="text-sm leading-6 text-muted">{text}</dd>
               </div>
             </Reveal>
           ))}

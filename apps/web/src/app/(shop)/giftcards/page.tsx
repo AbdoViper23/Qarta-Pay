@@ -73,10 +73,10 @@ export default function GiftCardsPage() {
                 setValue('');
               }}
               aria-pressed={product?.productId === item.productId}
-              className={`flex min-h-20 flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center text-sm font-semibold ${
+              className={`flex min-h-20 flex-col items-center justify-center gap-2 border-2 p-3 text-center text-sm font-semibold ${
                 product?.productId === item.productId
-                  ? 'border-brand bg-brand-soft'
-                  : 'border-line bg-surface'
+                  ? 'border-ink bg-surface shadow-[4px_4px_0_var(--color-ink)]'
+                  : 'border-ink/20 bg-surface hover:border-ink'
               }`}
             >
               {item.logoUrl && <img src={item.logoUrl} alt="" className="h-8 object-contain" />}

@@ -104,7 +104,7 @@ export default function OrderPage() {
               return (
                 <li
                   key={step.label}
-                  className={`rounded-xl border px-2 py-3 font-semibold transition-colors duration-300 ${done ? 'border-brand/40 bg-brand-soft text-brand' : 'border-line bg-surface-2 text-muted'}`}
+                  className={`border-2 px-2 py-3 font-semibold transition-colors duration-300 ${done ? 'border-ink bg-ink text-surface' : 'border-ink/20 text-muted'}`}
                 >
                   {step.label}
                 </li>
@@ -155,7 +155,7 @@ export default function OrderPage() {
             codes.map((c) => (
               <div
                 key={c.code}
-                className="space-y-2 rounded-xl border border-brand/30 bg-brand-soft p-4"
+                className="space-y-2 border-2 border-dashed border-ink bg-surface p-4"
               >
                 <p className="font-mono text-lg break-all">{c.code}</p>
                 {c.pin && <p className="font-mono">PIN: {c.pin}</p>}

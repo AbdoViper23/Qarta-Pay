@@ -1,12 +1,9 @@
 import { CircleAlert, CircleCheck, Info } from 'lucide-react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
+/** A receipt slip: white paper on the page, hairline ink border. */
 export function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return (
-    <section className={`rounded-2xl border border-line bg-surface p-5 ${className}`}>
-      {children}
-    </section>
-  );
+  return <section className={`border border-ink bg-surface p-5 ${className}`}>{children}</section>;
 }
 
 export function Button({
@@ -15,14 +12,14 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
   const styles = {
-    primary: 'bg-ink text-bg hover:bg-white',
-    secondary: 'border border-line text-ink hover:border-ink/40',
-    ghost: 'text-muted hover:text-ink',
+    primary: 'border-2 border-ink bg-ink text-surface hover:bg-[#2a2a2a]',
+    secondary: 'border-2 border-ink text-ink hover:bg-surface',
+    ghost: 'text-muted underline-offset-4 hover:text-ink hover:underline',
   }[variant];
   return (
     <button
       {...props}
-      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-2 text-[15px] font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${styles} ${className}`}
     />
   );
 }
@@ -35,15 +32,15 @@ export function Notice({
   children: ReactNode;
 }) {
   const styles = {
-    info: 'border-line bg-surface-2 text-ink',
-    error: 'border-danger/30 bg-danger-soft text-danger',
-    ok: 'border-ok/30 bg-ok-soft text-ok',
+    info: 'border-ink/40 bg-surface text-ink',
+    error: 'border-danger bg-danger-soft text-danger',
+    ok: 'border-ok bg-ok-soft text-ok',
   }[tone];
   const Icon = { info: Info, error: CircleAlert, ok: CircleCheck }[tone];
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}
-      className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${styles}`}
+      className={`flex items-start gap-3 border px-4 py-3 text-sm ${styles}`}
     >
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0">{children}</div>
@@ -53,14 +50,14 @@ export function Notice({
 
 export function Label({ children, htmlFor }: { children: ReactNode; htmlFor?: string }) {
   return (
-    <label htmlFor={htmlFor} className="mb-1.5 block text-sm font-medium text-muted">
+    <label htmlFor={htmlFor} className="mb-1.5 block text-xs font-semibold text-ink uppercase">
       {children}
     </label>
   );
 }
 
 export const inputClass =
-  'min-h-12 w-full rounded-xl border border-line bg-surface px-4 py-2 text-base text-ink placeholder:text-muted/70 outline-none transition-colors duration-200 focus:border-ink/50';
+  'min-h-12 w-full border-2 border-ink bg-surface px-4 py-2 text-base text-ink placeholder:text-muted/70 outline-none transition-colors duration-150 focus:border-brand';
 
 export function Chip({
   selected,
@@ -72,8 +69,8 @@ export function Chip({
       type="button"
       {...props}
       aria-pressed={selected}
-      className={`min-h-11 rounded-full border px-4 py-2 font-medium transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
-        selected ? 'border-ink bg-ink text-bg' : 'border-line text-ink hover:border-ink/40'
+      className={`min-h-11 border-2 px-4 py-2 text-sm font-semibold transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+        selected ? 'border-ink bg-ink text-surface' : 'border-ink/30 text-ink hover:border-ink'
       }`}
     >
       {children}
@@ -88,14 +85,14 @@ export function ExternalLink({ href, children }: { href: string | null; children
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-brand underline decoration-brand/40 underline-offset-4 transition-colors hover:decoration-brand"
+      className="text-ink underline decoration-brand decoration-2 underline-offset-4 hover:text-brand"
     >
       {children}
     </a>
   );
 }
 
-/** Small pill used for trust facts and statuses. */
+/** A small printed tag. `brand` is the stamp red. */
 export function Badge({
   children,
   tone = 'neutral',
@@ -104,13 +101,13 @@ export function Badge({
   tone?: 'neutral' | 'brand' | 'ok';
 }) {
   const styles = {
-    neutral: 'border-line bg-surface-2 text-muted',
-    brand: 'border-brand/30 bg-brand-soft text-brand',
-    ok: 'border-ok/30 bg-ok-soft text-ok',
+    neutral: 'border-ink/40 text-muted',
+    brand: 'border-brand text-brand',
+    ok: 'border-ok text-ok',
   }[tone];
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${styles}`}
+      className={`inline-flex items-center gap-1.5 border px-2.5 py-1 text-xs font-semibold uppercase ${styles}`}
     >
       {children}
     </span>

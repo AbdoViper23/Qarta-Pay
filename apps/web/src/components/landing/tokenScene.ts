@@ -22,12 +22,12 @@ interface Box {
   h: number;
 }
 
-const AMBER: RGB = [214, 178, 118]; // brass
-const TEAL: RGB = [226, 220, 208]; // ivory, for the refunded coin
-const GREEN: RGB = [143, 191, 152];
-const RED: RGB = [217, 130, 107];
-const INK: RGB = [237, 232, 223];
-const DIM: RGB = [154, 147, 138];
+const AMBER: RGB = [217, 56, 30]; // stamp red: the token
+const TEAL: RGB = [20, 20, 20]; // ink, for the refunded coin
+const GREEN: RGB = [47, 122, 61];
+const RED: RGB = [217, 56, 30];
+const INK: RGB = [245, 243, 238];
+const DIM: RGB = [91, 90, 86];
 const N = 220;
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -93,9 +93,9 @@ export class TokenScene {
       const value = css.getPropertyValue(v).trim();
       return value ? `${value}, ${fallback}` : fallback;
     };
-    this.sans = font('--font-geist', this.sans);
-    this.serif = font('--font-instrument', this.serif);
-    this.mono = font('--font-geist-mono', this.mono);
+    this.sans = font('--font-plex-mono', this.sans);
+    this.serif = font('--font-barlow', this.serif);
+    this.mono = font('--font-plex-mono', this.mono);
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('2d canvas not available');
     this.ctx = ctx;
@@ -249,7 +249,6 @@ export class TokenScene {
     const lock = this.lockAmount(p);
 
     ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
     const inPhone = p >= 0.52 && p < 0.9;
     for (let i = 0; i < N; i++) {
       const { pos, col } = this.particle(i, p, time);
@@ -307,7 +306,7 @@ export class TokenScene {
     const ph = this.phone;
     ctx.save();
     ctx.setLineDash([3, 8]);
-    ctx.strokeStyle = 'rgba(139,149,168,0.16)';
+    ctx.strokeStyle = 'rgba(20,20,20,0.28)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
     ctx.moveTo(wx, wy);
@@ -735,7 +734,7 @@ export class TokenScene {
     const s = this.screen;
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.shadowColor = rgba(AMBER, 0.45);
+    ctx.shadowColor = 'rgba(0,0,0,0.35)';
     ctx.shadowBlur = 24;
     const g = ctx.createLinearGradient(c.x, c.y, c.x + c.w, c.y + c.h);
     g.addColorStop(0, '#e9d3a6');
@@ -793,7 +792,6 @@ export class TokenScene {
       const t = seg(p, start, start + 0.04);
       if (t <= 0 || t >= 1) continue;
       ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
       for (let k = 0; k < 18; k++) {
         const a = (k / 18) * Math.PI * 2 + hash(k, 3.1);
         const d = easeOut(t) * (s.w * 0.55) * (0.7 + 0.3 * hash(k, 9.7));

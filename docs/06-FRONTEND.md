@@ -4,7 +4,9 @@ Next.js (App Router) + wagmi v2 + viem + Tailwind. Mobile-first: most target use
 
 ## As built (Step 4, 18 Nov 2026)
 
-Next.js 16 (App Router), wagmi 3, viem, Tailwind 4. Pages in `apps/web/src/app/`: `/`, `/airtime`, `/giftcards`, `/orders/[id]`, `/history`, `/stats`, `/about`, `/powered-by-qie`. Checkout logic: `apps/web/src/components/Checkout.tsx`; wallet chip: `components/WalletButton.tsx`; error sentences: `lib/errors.ts`; Sign-In: `lib/siwe.ts`.
+Next.js 16 (App Router), wagmi 3, viem, Tailwind 4, Motion (`motion/react`) for animation. Landing page `/` in `apps/web/src/app/page.tsx` (sections in `components/landing/`: hero with a looping phone demo, country marquee, scroll-pinned escrow story, QIE bento, facts, final CTA). Store pages live in the route group `apps/web/src/app/(shop)/` (one-column layout): `/airtime`, `/giftcards`, `/orders/[id]`, `/history`, `/stats`, `/about`, `/powered-by-qie`.
+
+Design system (22 Nov 2026, ui-ux-pro-max): dark fintech, tokens in `app/globals.css` (near-black navy surfaces, amber `brand` for primary actions and trust, teal `accent` for small highlights), Instrument Serif for display headings, Geist for text, Geist Mono for amounts and labels, lucide icons (no emoji). Every animation honours `prefers-reduced-motion` (`MotionConfig reducedMotion="user"` in `Providers`, CSS fallback in `globals.css`). Landing facts are product facts, never traction numbers. Checkout logic: `apps/web/src/components/Checkout.tsx`; wallet chip: `components/WalletButton.tsx`; error sentences: `lib/errors.ts`; Sign-In: `lib/siwe.ts`.
 
 Differences from the spec: no WalletConnect (QIE Wallet support for it is unknown); data bundles are not offered; QUSDC is the default pay token. The app runs on one chain set by `NEXT_PUBLIC_CHAIN_ID` (1990, 1983 or 31337 for local anvil). Not yet done: a test on a real phone and in the QIE Wallet mobile browser (human task).
 

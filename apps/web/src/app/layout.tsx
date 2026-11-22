@@ -1,27 +1,28 @@
 import type { Metadata, Viewport } from 'next';
-import { IBM_Plex_Mono, IBM_Plex_Sans } from 'next/font/google';
+import { Geist, Geist_Mono, Instrument_Serif } from 'next/font/google';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { Logo } from '@/components/Logo';
 import { Providers } from '@/components/Providers';
 import { WalletButton } from '@/components/WalletButton';
-import { Logo } from '@/components/Logo';
 import './globals.css';
 
-const plexSans = IBM_Plex_Sans({
+const geist = Geist({ subsets: ['latin'], variable: '--font-geist', display: 'swap' });
+const geistMono = Geist_Mono({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-plex-sans',
+  variable: '--font-geist-mono',
   display: 'swap',
 });
-const plexMono = IBM_Plex_Mono({
+const instrument = Instrument_Serif({
   subsets: ['latin'],
-  weight: ['400', '500'],
-  variable: '--font-plex-mono',
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-instrument',
   display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: 'Qarta Pay',
+  title: 'Qarta Pay — spend crypto on real life',
   description:
     'Spend QIE and QUSDC on mobile airtime and gift cards. Paid on QIE Mainnet, held in escrow until delivery.',
 };
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#0b1120',
+  themeColor: '#05070d',
 };
 
 const nav = [
@@ -40,23 +41,23 @@ const nav = [
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${plexSans.variable} ${plexMono.variable}`}>
-      <body className="min-h-dvh">
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} ${instrument.variable}`}>
+      <body className="min-h-dvh overflow-x-hidden">
         <Providers>
-          <header className="sticky top-0 z-20 border-b border-line/60 bg-bg/80 backdrop-blur-md">
-            <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-3">
+          <header className="fixed inset-x-0 top-0 z-40 px-3 pt-3">
+            <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-bg/60 py-2 pr-2 pl-4 shadow-[0_8px_32px_-12px_rgb(0_0_0/0.6)] backdrop-blur-xl">
               <Link href="/" aria-label="Qarta Pay home" className="flex items-center gap-2">
-                <Logo className="size-8" />
-                <span className="text-lg font-bold tracking-tight">
+                <Logo className="size-7" />
+                <span className="text-base font-semibold tracking-tight">
                   Qarta <span className="text-brand">Pay</span>
                 </span>
               </Link>
-              <nav aria-label="Main" className="hidden items-center gap-1 sm:flex">
+              <nav aria-label="Main" className="hidden items-center gap-1 md:flex">
                 {nav.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded-lg px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                    className="rounded-lg px-3 py-2 text-sm text-muted transition-colors hover:text-ink"
                   >
                     {item.label}
                   </Link>
@@ -65,36 +66,60 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <WalletButton />
             </div>
           </header>
-          <main className="mx-auto max-w-3xl px-4 pt-6 pb-16">{children}</main>
-          <footer className="border-t border-line/60">
-            <div className="mx-auto max-w-3xl space-y-3 px-4 py-8 text-sm text-muted">
-              <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
-                {nav.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="transition-colors hover:text-ink"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <Link href="/about" className="transition-colors hover:text-ink">
-                  How it works
+          <main>{children}</main>
+          <footer className="border-t border-line">
+            <div className="mx-auto grid max-w-5xl gap-8 px-4 py-12 text-sm text-muted sm:grid-cols-[1.5fr_1fr_1fr]">
+              <div className="space-y-3">
+                <Link href="/" className="flex items-center gap-2 text-ink">
+                  <Logo className="size-6" />
+                  <span className="font-semibold">Qarta Pay</span>
                 </Link>
-                <Link href="/powered-by-qie" className="transition-colors hover:text-ink">
-                  Powered by QIE
-                </Link>
-                <Link href="/stats" className="transition-colors hover:text-ink">
-                  Stats
-                </Link>
-              </nav>
-              <p className="text-xs">
-                Payments settle on QIE Mainnet. Deliveries through Reloadly, a third-party provider.
-              </p>
+                <p className="max-w-xs">
+                  Spend QIE and QUSDC on airtime and gift cards. Every payment is held in an
+                  on-chain escrow until delivery.
+                </p>
+              </div>
+              <FooterColumn
+                title="Shop"
+                links={[...nav, { href: '/about', label: 'How it works' }]}
+              />
+              <FooterColumn
+                title="Transparency"
+                links={[
+                  { href: '/powered-by-qie', label: 'Powered by QIE' },
+                  { href: '/stats', label: 'Live stats' },
+                ]}
+              />
             </div>
+            <p className="mx-auto max-w-5xl px-4 pb-8 text-xs text-muted/80">
+              Payments settle on QIE Mainnet. Deliveries through Reloadly, a third-party provider.
+            </p>
           </footer>
         </Providers>
       </body>
     </html>
+  );
+}
+
+function FooterColumn({
+  title,
+  links,
+}: {
+  title: string;
+  links: { href: string; label: string }[];
+}) {
+  return (
+    <div>
+      <p className="mb-3 font-mono text-xs tracking-widest text-ink/70 uppercase">{title}</p>
+      <ul className="space-y-2">
+        {links.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className="transition-colors hover:text-ink">
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }

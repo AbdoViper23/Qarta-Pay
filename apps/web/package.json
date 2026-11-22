@@ -14,6 +14,7 @@
     "@qarta/shared": "workspace:*",
     "@tanstack/react-query": "^5.108.0",
     "lucide-react": "1.72.0",
+    "motion": "14.11.1",
     "next": "^16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

@@ -6,40 +6,75 @@
  * violet for accents only. Every component uses these names, never raw hex.
  */
 @theme {
-  --color-bg: #0b1120;
-  --color-surface: #131c2e;
-  --color-surface-2: #1a2438;
-  --color-ink: #f8fafc;
-  --color-muted: #94a3b8;
-  --color-line: #263248;
-  --color-brand: #f59e0b;
-  --color-brand-hover: #fbbf24;
-  --color-brand-ink: #0f172a;
-  --color-brand-soft: #2a2312;
-  --color-accent: #a78bfa;
+  --color-bg: #05070d;
+  --color-surface: #0b101b;
+  --color-surface-2: #111827;
+  --color-ink: #f5f7fa;
+  --color-muted: #8b95a8;
+  --color-line: #1c2536;
+  --color-brand: #f5a524;
+  --color-brand-hover: #ffbd4f;
+  --color-brand-ink: #120c02;
+  --color-brand-soft: #1d1608;
+  --color-accent: #5eead4;
   --color-danger: #f87171;
-  --color-danger-soft: #3a1618;
+  --color-danger-soft: #2a1213;
   --color-ok: #4ade80;
-  --color-ok-soft: #10291c;
-  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-plex-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --color-ok-soft: #0d2216;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, 'SFMono-Regular', monospace;
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-aurora: aurora 18s ease-in-out infinite alternate;
+  --animate-spin-slow: spin 6s linear infinite;
+  --animate-shimmer: shimmer 2.2s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes aurora {
+    0% {
+      transform: translate3d(-8%, -4%, 0) rotate(0deg) scale(1);
+    }
+    50% {
+      transform: translate3d(6%, 4%, 0) rotate(20deg) scale(1.15);
+    }
+    100% {
+      transform: translate3d(-4%, 8%, 0) rotate(-10deg) scale(1.05);
+    }
+  }
+  @keyframes shimmer {
+    from {
+      background-position: -200% 0;
+    }
+    to {
+      background-position: 200% 0;
+    }
+  }
 }
 
 :root {
   color-scheme: dark;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background:
-    radial-gradient(60rem 30rem at 50% -10rem, rgb(245 158 11 / 0.07), transparent 70%),
-    var(--color-bg);
+  background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
 ::selection {
-  background: rgb(245 158 11 / 0.35);
+  background: rgb(245 165 36 / 0.35);
 }
 
 /* Every clickable thing shows a pointer and a visible keyboard focus ring. */
@@ -66,4 +101,62 @@ select {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Rotating border light for highlighted cards (an animatable custom property). */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.glow-border {
+  position: relative;
+  isolation: isolate;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0deg,
+    var(--color-brand) 60deg,
+    var(--color-accent) 120deg,
+    transparent 180deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: border-spin 6s linear infinite;
+}
+@keyframes border-spin {
+  to {
+    --angle: 360deg;
+  }
+}
+
+/* Faint engineering grid behind the hero, faded at the edges. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000 30%, transparent 75%);
+}
+
+/* Cursor-following light on cards; --mx/--my are set from JS. */
+.spotlight {
+  background:
+    radial-gradient(
+      28rem circle at var(--mx, 50%) var(--my, 50%),
+      rgb(245 165 36 / 0.09),
+      transparent 45%
+    ),
+    var(--color-surface);
 }

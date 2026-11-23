@@ -80,3 +80,8 @@ export const qieMainnet = defineChain({
 ## Brand
 
 Name: **Qarta Pay**. Tagline: "Your crypto, as good as cash." Tone: simple, trustworthy, a little warm. Avoid imitating any existing brand's logo or look.
+
+### Country and brand search (23 Nov 2026)
+
+- `components/CountryPicker.tsx`: searchable dropdown (type a name or ISO code, arrows, Enter, Escape) with flags from Reloadly's public flag bucket. Used on airtime and gift cards.
+- Gift cards: a "Global" entry pinned at the top of the country list (`GET /v1/giftcards?country=GLOBAL`), a brand search box that filters the country's cards and the worldwide cards, and after two characters also searches every country (`GET /v1/giftcards/search?q=`, debounced, rate-limited). A chosen card is ordered in its own country.

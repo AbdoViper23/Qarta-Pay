@@ -42,6 +42,8 @@ export interface GiftCardProduct {
   denominations: GiftCardDenomination[];
   logoUrl: string | null;
   redeemInstructions: string | null;
+  /** Usable in any country: the supplier's `global` flag, or "Global" in the product name. */
+  global: boolean;
 }
 
 export interface DeliveryRef {
@@ -70,6 +72,8 @@ export interface Supplier {
   findTopup(customIdentifier: string, since: Date): Promise<DeliveryRef | null>;
 
   listGiftCards(countryCode: string): Promise<GiftCardProduct[]>;
+  /** Products in any country whose name contains `query` (case-insensitive). */
+  searchGiftCards(query: string): Promise<GiftCardProduct[]>;
   getGiftCard(productId: number): Promise<GiftCardProduct>;
   orderGiftCard(input: {
     customIdentifier: string;

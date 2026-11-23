@@ -85,6 +85,7 @@ export interface GiftCardProduct {
   denominations: { recipient: string; sender: string }[];
   logoUrl: string | null;
   redeemInstructions: string | null;
+  global: boolean;
 }
 
 export type PayToken = 'QUSDC' | 'QIE';
@@ -190,6 +191,8 @@ export const api = {
     ),
   giftCards: (country: string) =>
     call<{ products: GiftCardProduct[] }>(`/v1/giftcards?country=${country}`),
+  searchGiftCards: (q: string) =>
+    call<{ products: GiftCardProduct[] }>(`/v1/giftcards/search?q=${encodeURIComponent(q)}`),
   quote: (body: QuoteRequest) =>
     call<QuoteResponse>('/v1/quotes', { method: 'POST', body: JSON.stringify(body) }),
   order: (id: string) => call<OrderView>(`/v1/orders/${id}`),

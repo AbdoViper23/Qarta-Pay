@@ -75,3 +75,57 @@ describe('gift card brands', () => {
     expect(all.length).toBe(sellable.length);
   });
 });
+
+describe('global cards and search', () => {
+  const product = (productId: number, name: string, countryCode: string, global = true) => ({
+    productId,
+    name,
+    brandName: name.split(' ')[0] ?? name,
+    countryCode,
+    recipientCurrency: 'USD',
+    senderCurrency: 'USD',
+    senderFee: '0',
+    denominations: [{ recipient: '10', sender: '10' }],
+    logoUrl: null,
+    redeemInstructions: null,
+    global,
+  });
+
+  function searching(found: ReturnType<typeof product>[]) {
+    const fake = new FakeSupplier();
+    const queries: string[] = [];
+    const supplier = Object.assign(Object.create(fake) as Supplier, {
+      listCountries: async () => ['AF', 'AL', 'US', 'BR', 'IR'],
+      searchGiftCards: async (query: string) => {
+        queries.push(query);
+        return found;
+      },
+    });
+    return { catalog: new Catalog(supplier, loadCatalogConfig(base)), queries };
+  }
+
+  it('keeps one card per worldwide product line, preferring the US copy', async () => {
+    const { catalog } = searching([
+      product(1, 'Razer Gold Global AF', 'AF'),
+      product(2, 'Razer Gold Global US', 'US'),
+      product(3, 'Razer Gold Global AL', 'AL'),
+      product(4, 'PUBG New State (Global) BR', 'BR'),
+      product(5, 'Steam US', 'US', false), // not global
+      product(6, 'Binance Global IR', 'IR'), // blocked country
+    ]);
+    const cards = await catalog.globalGiftCards();
+    expect(cards.map((c) => c.productId)).toEqual([4, 2]);
+  });
+
+  it('search needs two characters, filters blocked countries, and is cached', async () => {
+    const { catalog, queries } = searching([
+      product(7, 'Steam BR', 'BR', false),
+      product(8, 'Steam IR', 'IR', false),
+    ]);
+    expect(await catalog.searchGiftCards(' s ')).toEqual([]);
+    expect(queries).toEqual([]);
+    expect((await catalog.searchGiftCards('Steam')).map((c) => c.productId)).toEqual([7]);
+    await catalog.searchGiftCards('steam ');
+    expect(queries).toEqual(['steam']);
+  });
+});

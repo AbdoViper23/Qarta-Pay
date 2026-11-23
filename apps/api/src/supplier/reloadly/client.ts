@@ -58,6 +58,7 @@ const productSchema = z.looseObject({
   brand: z.looseObject({ brandName: z.string() }).nullish(),
   country: z.looseObject({ isoName: z.string() }).nullish(),
   redeemInstruction: z.looseObject({ concise: z.string().nullish() }).nullish(),
+  global: z.boolean().nullish(),
 });
 
 const transactionIdSchema = z.looseObject({ transactionId: z.union([z.number(), z.string()]) });
@@ -152,6 +153,8 @@ function toProduct(raw: z.infer<typeof productSchema>): GiftCardProduct {
         : [], // RANGE products are not sold until their behaviour is confirmed in sandbox
     logoUrl: raw.logoUrls?.[0] ?? null,
     redeemInstructions: raw.redeemInstruction?.concise ?? null,
+    // The flag is rare (sandbox, 23 Nov 2026: 1 product); most worldwide cards say so in the name.
+    global: raw.global === true || /\bglobal\b/i.test(raw.productName),
   };
 }
 
@@ -352,6 +355,16 @@ export class ReloadlySupplier implements Supplier {
   async listGiftCards(countryCode: string): Promise<GiftCardProduct[]> {
     const raw = await this.request('giftcards', 'GET', `/countries/${countryCode}/products`);
     return z.array(productSchema).parse(raw).map(toProduct);
+  }
+
+  /** `GET /products?productName=` matches a substring of the name across every country. */
+  async searchGiftCards(query: string): Promise<GiftCardProduct[]> {
+    const raw = await this.request(
+      'giftcards',
+      'GET',
+      `/products?size=200&page=0&productName=${encodeURIComponent(query)}`,
+    );
+    return pageSchema(productSchema).parse(raw).content.map(toProduct);
   }
 
   async getGiftCard(productId: number): Promise<GiftCardProduct> {

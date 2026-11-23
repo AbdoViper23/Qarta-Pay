@@ -33,6 +33,7 @@ const card: GiftCardProduct = {
   denominations: [{ recipient: '10', sender: '10' }],
   logoUrl: null,
   redeemInstructions: null,
+  global: false,
 };
 
 describe('pricing', () => {

@@ -35,6 +35,11 @@ Write a thin typed client in `apps/api/src/supplier/reloadly/`, behind a `Suppli
 
 `GET {base}/countries` on both hosts returns `[{ isoName, name, currencyCode, ... }]` (airtime also `continent`, `callingCodes`, `flag`; gift cards `flagUrl`). Sandbox counts: 159 airtime countries, 169 gift card countries. The airtime list answered without a token; the gift card list needs one. `config/catalog.json` uses `"all"` to sell in every listed country, minus `blockedCountries` (sanctioned: BY, CU, IR, KP, RU, SY).
 
+## Gift card search and worldwide cards **[VERIFIED: sandbox, 23 Nov 2026]**
+
+- `GET /products?size=200&page=0&productName=steam` matches a substring of the name in every country (sandbox: "Steam BR", "Steam US", ...). About 2,960 products in 15 pages of 200.
+- The product `global` flag is rare (one sandbox product, "PUBG New State (Global) US"). Worldwide cards say "Global" in the name and are listed once per country ("Razer Gold Global AF", "... AL"). We treat flag-or-name as worldwide and keep one copy per product line, the US one when it exists (`catalog.globalGiftCards`).
+
 ## Airtime and data
 
 ### Detect operator **[VERIFIED: Reloadly blog]**

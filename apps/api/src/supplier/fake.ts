@@ -70,6 +70,20 @@ export class FakeSupplier implements Supplier {
       ],
       logoUrl: null,
       redeemInstructions: 'Redeem at amazon.com/redeem.',
+      global: false,
+    },
+    {
+      productId: 77,
+      name: 'Razer Gold Global US',
+      brandName: 'Razer Gold',
+      countryCode: 'US',
+      recipientCurrency: 'USD',
+      senderCurrency: 'USD',
+      senderFee: '0',
+      denominations: [{ recipient: '10', sender: '10' }],
+      logoUrl: null,
+      redeemInstructions: null,
+      global: true,
     },
     {
       productId: 9999,
@@ -82,6 +96,7 @@ export class FakeSupplier implements Supplier {
       denominations: [{ recipient: '5', sender: '5' }],
       logoUrl: null,
       redeemInstructions: null,
+      global: false,
     },
   ];
 
@@ -137,6 +152,11 @@ export class FakeSupplier implements Supplier {
 
   async listGiftCards(countryCode: string): Promise<GiftCardProduct[]> {
     return this.products.filter((product) => product.countryCode === countryCode);
+  }
+
+  async searchGiftCards(query: string): Promise<GiftCardProduct[]> {
+    const q = query.toLowerCase();
+    return this.products.filter((product) => product.name.toLowerCase().includes(q));
   }
 
   async getGiftCard(productId: number): Promise<GiftCardProduct> {

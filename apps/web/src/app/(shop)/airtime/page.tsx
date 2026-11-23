@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Checkout } from '@/components/Checkout';
+import { CountryPicker } from '@/components/CountryPicker';
 import { Card, Chip, Label, Notice, inputClass } from '@/components/ui';
 import { api, type Operator } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
-import { byCountryName, countryName, preferredCountry } from '@/lib/format';
+import { byCountryName, preferredCountry } from '@/lib/format';
 import { useAppConfig } from '@/lib/hooks';
 
 export default function AirtimePage() {
@@ -80,18 +81,7 @@ export default function AirtimePage() {
       <Card className="space-y-4">
         <div>
           <Label htmlFor="country">Country</Label>
-          <select
-            id="country"
-            className={inputClass}
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            {countries.map((code) => (
-              <option key={code} value={code}>
-                {countryName(code)}
-              </option>
-            ))}
-          </select>
+          <CountryPicker id="country" countries={countries} value={country} onChange={setCountry} />
         </div>
         <div>
           <Label htmlFor="phone">Phone number</Label>

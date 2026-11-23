@@ -634,6 +634,22 @@ describe('serverless hosting (Vercel)', () => {
     }
   });
 
+  it('lists worldwide gift cards and searches every country', async () => {
+    const global = await runtime.server.inject({
+      method: 'GET',
+      url: '/v1/giftcards?country=GLOBAL',
+    });
+    expect(global.statusCode).toBe(200);
+    expect(global.json().products.map((p: { productId: number }) => p.productId)).toEqual([77]);
+    const found = await runtime.server.inject({
+      method: 'GET',
+      url: '/v1/giftcards/search?q=amazon',
+    });
+    expect(found.json().products.map((p: { name: string }) => p.name)).toEqual(['Amazon US']);
+    const short = await runtime.server.inject({ method: 'GET', url: '/v1/giftcards/search?q=a' });
+    expect(short.statusCode).toBe(400);
+  });
+
   it('the cron route is absent without CRON_SECRET or outside serverless mode', async () => {
     const response = await runtime.server.inject({ method: 'GET', url: '/v1/jobs/run' });
     expect(response.statusCode).toBe(404);

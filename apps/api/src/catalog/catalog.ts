@@ -86,6 +86,40 @@ export class Catalog {
     return products.filter((product) => this.isSellable(product));
   }
 
+  /**
+   * Worldwide cards, one per product line: Reloadly lists e.g. "Razer Gold Global AF",
+   * "... AL", ... once per country, so the copy for the US (else the first) is kept.
+   */
+  async globalGiftCards(): Promise<GiftCardProduct[]> {
+    const found = await this.cached('giftcards:global', () =>
+      this.supplier.searchGiftCards('global'),
+    );
+    const allowed = new Set(await this.giftCardCountries());
+    const lines = new Map<string, GiftCardProduct>();
+    for (const product of found) {
+      if (!product.global || !allowed.has(product.countryCode) || !this.isSellable(product))
+        continue;
+      const line = product.name.replace(/\s+[A-Z]{2,3}$/, '').toLowerCase();
+      const kept = lines.get(line);
+      if (!kept || (product.countryCode === 'US' && kept.countryCode !== 'US'))
+        lines.set(line, product);
+    }
+    return [...lines.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  /** Sellable products in any served country whose name contains `query`; at most 60. */
+  async searchGiftCards(query: string): Promise<GiftCardProduct[]> {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return [];
+    const found = await this.cached(`giftcards:search:${q}`, () =>
+      this.supplier.searchGiftCards(q),
+    );
+    const allowed = new Set(await this.giftCardCountries());
+    return found
+      .filter((product) => allowed.has(product.countryCode) && this.isSellable(product))
+      .slice(0, 60);
+  }
+
   async giftCard(productId: number, countryCode: string): Promise<GiftCardProduct | null> {
     return (
       (await this.giftCards(countryCode)).find((product) => product.productId === productId) ?? null

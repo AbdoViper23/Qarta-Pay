@@ -191,9 +191,24 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
   });
 
   app.get('/v1/giftcards', async (request) => {
-    const { country } = z.object({ country: z.string().regex(/^[A-Z]{2}$/) }).parse(request.query);
-    return { products: await deps.catalog.giftCards(country) };
+    const { country } = z
+      .object({ country: z.union([z.literal('GLOBAL'), z.string().regex(/^[A-Z]{2}$/)]) })
+      .parse(request.query);
+    const products =
+      country === 'GLOBAL'
+        ? await deps.catalog.globalGiftCards()
+        : await deps.catalog.giftCards(country);
+    return { products };
   });
+
+  app.get(
+    '/v1/giftcards/search',
+    { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } },
+    async (request) => {
+      const { q } = z.object({ q: z.string().trim().min(2).max(40) }).parse(request.query);
+      return { products: await deps.catalog.searchGiftCards(q) };
+    },
+  );
 
   app.post(
     '/v1/quotes',

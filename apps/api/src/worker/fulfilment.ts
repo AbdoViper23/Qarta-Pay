@@ -1,5 +1,6 @@
 import type { Alerter } from '../alerts';
 import { ChainStatus, type CheckoutWriter } from '../chain/checkout-writer';
+import type { ContractLimits } from '../chain/contract-limits';
 import { encryptCodes } from '../codes';
 import type { AppConfig } from '../config';
 import { lockWork, patchOrder, transition, type Order } from '../db/orders';
@@ -31,7 +32,7 @@ export class FulfilmentWorker {
     private readonly supplier: Supplier,
     private readonly writer: CheckoutWriter,
     private readonly config: AppConfig,
-    private readonly refundTimeoutSeconds: number,
+    private readonly contractLimits: () => Promise<ContractLimits>,
     private readonly log: Logger,
     private readonly alerter: Alerter,
   ) {}
@@ -71,17 +72,20 @@ export class FulfilmentWorker {
     }
   }
 
-  /** Last moment a supplier call may start for this order. */
-  cutoff(order: Order): Date {
+  /**
+   * Last moment a supplier call may start for this order. Needs the contract refundTimeout,
+   * so it throws while the chain is unreachable; the order then stays PAID and is retried.
+   */
+  async cutoff(order: Order): Promise<Date> {
+    const { refundTimeoutSeconds } = await this.contractLimits();
     const paidAt = order.paidAt ?? order.createdAt;
     return new Date(
-      paidAt.getTime() +
-        (this.refundTimeoutSeconds - this.config.FULFIL_CUTOFF_BEFORE_TIMEOUT_S) * 1000,
+      paidAt.getTime() + (refundTimeoutSeconds - this.config.FULFIL_CUTOFF_BEFORE_TIMEOUT_S) * 1000,
     );
   }
 
   private async startDelivery(order: Order): Promise<void> {
-    if (Date.now() >= this.cutoff(order).getTime()) {
+    if (Date.now() >= (await this.cutoff(order)).getTime()) {
       await transition(this.db, order.id, ['PAID'], 'REFUND_PENDING', {
         reviewReason: 'fulfilment cutoff passed before delivery started',
         nextAttemptAt: null,

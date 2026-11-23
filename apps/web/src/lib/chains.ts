@@ -9,9 +9,14 @@ const anvil = defineChain({
   rpcUrls: { default: { http: [env.rpcUrl ?? 'http://127.0.0.1:8545'] } },
 });
 
+/** NEXT_PUBLIC_RPC_URL may hold one URL or a comma-separated list; it replaces the defaults. */
 function withRpc(chain: Chain): Chain {
-  if (!env.rpcUrl) return chain;
-  return { ...chain, rpcUrls: { default: { http: [env.rpcUrl] } } };
+  const urls = (env.rpcUrl ?? '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+  if (urls.length === 0) return chain;
+  return { ...chain, rpcUrls: { default: { http: urls } } };
 }
 
 /** The one chain this deployment of the storefront talks to. */

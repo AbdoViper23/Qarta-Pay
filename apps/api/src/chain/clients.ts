@@ -31,9 +31,14 @@ export function createClients(config: AppConfig): Clients {
     nativeCurrency: { name: 'QIE', symbol: 'QIE', decimals: 18 },
     rpcUrls: { default: { http: config.RPC_URLS } },
   });
+  // Each URL gets one short try; on failure or timeout the next URL is used. With several
+  // URLs, viem also pings them in the background and moves the fastest healthy one first.
   const transport = fallback(
-    config.RPC_URLS.map((url) => http(url, { timeout: 20_000, retryCount: 2 })),
-    { rank: false },
+    config.RPC_URLS.map((url) => http(url, { timeout: 10_000, retryCount: 0 })),
+    {
+      retryCount: 1,
+      rank: config.RPC_URLS.length > 1 ? { interval: 60_000, timeout: 5_000 } : false,
+    },
   );
   const publicClient = createPublicClient({ chain, transport });
   const fulfiller = createWalletClient({

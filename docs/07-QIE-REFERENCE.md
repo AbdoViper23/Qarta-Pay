@@ -7,7 +7,7 @@ Collected 15–17 Nov 2026. Re-check every address on the explorer before sendin
 | | Mainnet | Testnet |
 |---|---|---|
 | Chain ID | `1990` (`0x7c6`) | `1983` (`0x7bf`) |
-| RPC | `https://rpc1mainnet.qie.digital` … `https://rpc5mainnet.qie.digital` (all five answered on 17 Nov 2026) | `https://rpc1testnet.qie.digital` |
+| RPC | `https://rpc1mainnet.qie.digital` … `https://rpc5mainnet.qie.digital` (all five answered on 17 Nov 2026) | `https://rpc1testnet.qie.digital` … `https://rpc6testnet.qie.digital` (list from QIE support, 23 Nov 2026; that day only rpc4 and rpc5 answered, in 8-14 s) |
 | Explorer | `https://mainnet.qie.digital` | `https://testnet.qie.digital` |
 | Native coin | QIE, 18 decimals | QIE, 18 decimals |
 | Faucet | — | `https://www.qie.digital/faucet` |

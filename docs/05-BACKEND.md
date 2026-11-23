@@ -101,7 +101,7 @@ A manipulated pool can block QIE quotes for a while, or make a QIE quote up to `
 
 If the Step 1 probe finds no WQIE/QUSDC pair (`getPair` returns zero) or a pool below `DEX_MIN_RESERVE_QUSDC`, fail-closed would refuse every QIE quote from day one and turn off native-QIE payment. In that case: stop, write it in `10-OPEN-QUESTIONS.md`, and let the team decide between a lower `DEX_MIN_RESERVE_QUSDC` and `DEX_PRICE_CHECK_ENABLED=false`. Turning the check off is a human decision, not an agent default. The treasury sweep (if the router works) and the "Get QUSDC" link still cover QIEDEX.
 
-`ORACLE_MAX_AGE_S` must be ≤ the contract's `maxOracleAge`; otherwise the backend signs quotes that revert at `pay`. Check this at startup by reading `maxOracleAge` from the contract.
+`ORACLE_MAX_AGE_S` must be ≤ the contract's `maxOracleAge`; otherwise the backend signs quotes that revert at `pay`. Check it by reading `maxOracleAge` (and `refundTimeout`) from the contract on first use, not at startup (`src/chain/contract-limits.ts`): a slow RPC must not stop the API from serving config and catalog. Until the read succeeds, quotes return 503 `chain_unavailable` and the worker does not start deliveries; settle and refund do not wait for it. A config that contradicts the contract keeps quotes refused.
 
 Tests: deviation just below / at / above the threshold, both token orders, zero reserves, reverted read, wrong `token0/token1` at startup, switch off, QUSDC quote unaffected when the check fails.
 

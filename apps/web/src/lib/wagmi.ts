@@ -1,4 +1,4 @@
-import { createConfig, http, injected } from 'wagmi';
+import { createConfig, fallback, http, injected } from 'wagmi';
 import { appChain } from './chains';
 
 declare global {
@@ -26,7 +26,12 @@ export const wagmiConfig = createConfig({
     }),
     injected(),
   ],
-  transports: { [appChain.id]: http() },
+  // Reads go to every public RPC of the chain in turn: QIE RPCs go down one at a time.
+  transports: {
+    [appChain.id]: fallback(
+      appChain.rpcUrls.default.http.map((url) => http(url, { timeout: 10_000 })),
+    ),
+  },
   ssr: true,
 });
 

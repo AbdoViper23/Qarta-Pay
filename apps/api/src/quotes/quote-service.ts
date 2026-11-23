@@ -4,6 +4,7 @@ import { parsePhoneNumberFromString, type CountryCode } from 'libphonenumber-js'
 import { getAddress, isAddress, toHex, type Account, type Address, type Hex } from 'viem';
 import { z } from 'zod';
 import type { Catalog } from '../catalog/catalog';
+import { ContractLimitsError } from '../chain/contract-limits';
 import type { AppConfig } from '../config';
 import { insertOrder, supplierCostReserved, usdCommittedToday } from '../db/orders';
 import type { Db } from '../db/pool';
@@ -92,10 +93,22 @@ export class QuoteService {
     private readonly supplier: Supplier,
     private readonly prices: PriceService,
     private readonly signer: Account,
+    /** Resolves once the contract settings are known to agree with config; see contract-limits.ts. */
+    private readonly contractLimits: () => Promise<unknown>,
   ) {}
 
   async create(request: QuoteRequest): Promise<QuoteResponse> {
     if (this.config.SALES_PAUSED) throw new QuoteError('sales_paused', 'sales are paused', 503);
+    try {
+      await this.contractLimits();
+    } catch (error) {
+      if (error instanceof ContractLimitsError) throw error;
+      throw new QuoteError(
+        'chain_unavailable',
+        'the QIE network is not responding, try again',
+        503,
+      );
+    }
 
     // 1. Product and supplier cost.
     let price: ProductPrice;

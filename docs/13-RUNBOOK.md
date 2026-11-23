@@ -27,7 +27,7 @@ Testnet has no QUSDC, oracle or QIEDex, so the deploy script brings mocks (`DEPL
 # fund the deployer from https://www.qie.digital/faucet first
 export QUOTE_SIGNER_ADDRESS=<signer> FULFILLER_ADDRESS=<fulfiller> TREASURY_ADDRESS=<treasury> OWNER_ADDRESS=<owner>
 DEPLOY_MOCKS=true forge script script/Deploy.s.sol:Deploy \
-  --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer --sender <deployer> --broadcast
+  --rpc-url https://rpc5testnet.qie.digital --account qarta-deployer --sender <deployer> --broadcast
 ```
 
 The output prints `QartaCheckout`, `MockERC20 (QUSDC)`, `MockAggregatorV3 (feed)`, `MockPair (WQIE/QUSDC)`, `mock WQIE address` and the deploy block. Then:
@@ -37,12 +37,12 @@ The output prints `QartaCheckout`, `MockERC20 (QUSDC)`, `MockAggregatorV3 (feed)
 forge verify-contract <QartaCheckout> src/QartaCheckout.sol:QartaCheckout --verifier blockscout \
   --verifier-url https://testnet.qie.digital/api/ --chain-id 1983 --guess-constructor-args
 # second step of the ownership handover, from the owner wallet
-cast send <QartaCheckout> "acceptOwnership()" --rpc-url https://rpc1testnet.qie.digital --account qarta-owner
+cast send <QartaCheckout> "acceptOwnership()" --rpc-url https://rpc5testnet.qie.digital --account qarta-owner
 # give a test wallet some mock QUSDC (anyone can mint the mock)
-cast send <MockERC20> "mint(address,uint256)" <your wallet> 1000000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer
+cast send <MockERC20> "mint(address,uint256)" <your wallet> 1000000000 --rpc-url https://rpc5testnet.qie.digital --account qarta-deployer
 ```
 
-API env for testnet: `CHAIN_ID=1983`, `RPC_URLS=https://rpc1testnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK=<deploy block>`, `RELOADLY_ENV=sandbox`. The mock addresses come from `packages/shared/config/qie-testnet.json`; set `QUSDC_ADDRESS`, `QIE_USD_FEED`, `QIEDEX_WQIE_QUSDC_PAIR`, `WQIE_ADDRESS` only after a new deploy, until that file is updated. Web: `NEXT_PUBLIC_CHAIN_ID=1983`.
+API env for testnet: `CHAIN_ID=1983`, `RPC_URLS` = all six testnet RPCs, comma-separated (as in `apps/api/.env.example`), `CHECKOUT_ADDRESS`, `START_BLOCK=<deploy block>`, `RELOADLY_ENV=sandbox`. The mock addresses come from `packages/shared/config/qie-testnet.json`; set `QUSDC_ADDRESS`, `QIE_USD_FEED`, `QIEDEX_WQIE_QUSDC_PAIR`, `WQIE_ADDRESS` only after a new deploy, until that file is updated. Web: `NEXT_PUBLIC_CHAIN_ID=1983`.
 
 **Current testnet deployment (19 Nov 2026):** `QartaCheckout` `0x07522573bE0C3C7E9A6D48Eda0a38D8408724f62`, `START_BLOCK=9863130`; mocks in `qie-testnet.json` and `docs/probe-results.md` §7. The mock price is $5 per QIE so the faucet's 2 QIE a day can pay for test orders.
 
@@ -62,10 +62,10 @@ pnpm --filter web dev
 The mock feed goes stale after `MAX_ORACLE_AGE_S` (24 h): QIE quotes stop and the contract rejects QIE payments. Refresh it (anyone may call the mock):
 
 ```bash
-cast send 0x25998aaDd5992c3480204DE1BBf2e631809c7c77 "setAnswer(int256)" 500000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer
+cast send 0x25998aaDd5992c3480204DE1BBf2e631809c7c77 "setAnswer(int256)" 500000000 --rpc-url https://rpc5testnet.qie.digital --account qarta-deployer
 ```
 
-Test QUSDC for any wallet: `cast send 0x52259E57Ba961292a23AB4F78D3C815d84030B42 "mint(address,uint256)" <wallet> 100000000 --rpc-url https://rpc1testnet.qie.digital --account qarta-deployer` (100 QUSDC).
+Test QUSDC for any wallet: `cast send 0x52259E57Ba961292a23AB4F78D3C815d84030B42 "mint(address,uint256)" <wallet> 100000000 --rpc-url https://rpc5testnet.qie.digital --account qarta-deployer` (100 QUSDC).
 
 QIE Wallet hides testnet until it is enabled in its settings.
 
@@ -128,7 +128,7 @@ Limits of the free plan: functions stop after 300 s (the job lease is 310 s), cr
 
 The API migrates the database on start. Set `WEB_ORIGIN` to the exact web URL (CORS and Sign-In use it). Start with `MAX_ORDER_USD=10` and raise it as the float grows.
 
-Mainnet API values: `CHAIN_ID=1990`, `RPC_URLS=https://rpc1mainnet.qie.digital,https://rpc2mainnet.qie.digital,https://rpc5mainnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK`, `RELOADLY_ENV=live` with the live credentials. The QIE addresses come from `packages/shared/config/qie-mainnet.json`; leave their overrides empty.
+Mainnet API values: `CHAIN_ID=1990`, `RPC_URLS=https://rpc1mainnet.qie.digital,https://rpc2mainnet.qie.digital,https://rpc5mainnet.qie.digital,https://rpc4mainnet.qie.digital,https://rpc3mainnet.qie.digital`, `CHECKOUT_ADDRESS`, `START_BLOCK`, `RELOADLY_ENV=live` with the live credentials. The QIE addresses come from `packages/shared/config/qie-mainnet.json`; leave their overrides empty.
 
 ## 4. Daily operations
 

@@ -3,6 +3,7 @@ import { Alerter } from './alerts';
 import { Catalog, loadCatalogConfig } from './catalog/catalog';
 import { CheckoutWriter } from './chain/checkout-writer';
 import { createClients, type Clients } from './chain/clients';
+import { lazyContractLimits } from './chain/contract-limits';
 import type { AppConfig } from './config';
 import { expireQuotes } from './db/orders';
 import { migrate } from './db/migrate';
@@ -73,20 +74,14 @@ export async function createRuntime(
   const writer = new CheckoutWriter(clients, config.addresses.checkout);
 
   // The backend must never sign quotes the contract would reject (docs/05-BACKEND.md).
-  const [refundTimeout, maxOracleAge] = await Promise.all([
-    writer.refundTimeoutSeconds(),
-    writer.maxOracleAgeSeconds(),
-  ]);
-  if (config.ORACLE_MAX_AGE_S > maxOracleAge) {
-    throw new Error(
-      `ORACLE_MAX_AGE_S (${config.ORACLE_MAX_AGE_S}) exceeds the contract maxOracleAge (${maxOracleAge})`,
-    );
-  }
-  if (config.FULFIL_CUTOFF_BEFORE_TIMEOUT_S >= refundTimeout) {
-    throw new Error(
-      'FULFIL_CUTOFF_BEFORE_TIMEOUT_S must be smaller than the contract refundTimeout',
-    );
-  }
+  // Checked on first use, so a slow RPC cannot keep the API from starting.
+  const contractLimits = lazyContractLimits(async () => {
+    const [refundTimeoutSeconds, maxOracleAgeSeconds] = await Promise.all([
+      writer.refundTimeoutSeconds(),
+      writer.maxOracleAgeSeconds(),
+    ]);
+    return { refundTimeoutSeconds, maxOracleAgeSeconds };
+  }, config);
 
   const refusals = new Map<string, number>();
   const prices = new PriceService(
@@ -101,7 +96,15 @@ export async function createRuntime(
     config.PRICE_CACHE_MS,
   );
   const catalog = new Catalog(supplier, loadCatalogConfig());
-  const quotes = new QuoteService(db, config, catalog, supplier, prices, clients.quoteSigner);
+  const quotes = new QuoteService(
+    db,
+    config,
+    catalog,
+    supplier,
+    prices,
+    clients.quoteSigner,
+    contractLimits,
+  );
   const indexer = new Indexer(
     db,
     clients.publicClient,
@@ -111,7 +114,7 @@ export async function createRuntime(
     log,
     alerter,
   );
-  const worker = new FulfilmentWorker(db, supplier, writer, config, refundTimeout, log, alerter);
+  const worker = new FulfilmentWorker(db, supplier, writer, config, contractLimits, log, alerter);
 
   let healthCache: { at: number; value: Record<string, unknown> } | null = null;
   const health = async () => {

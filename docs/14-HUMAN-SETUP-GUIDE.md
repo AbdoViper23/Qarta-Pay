@@ -94,7 +94,7 @@ Run it twice, once per role.
 **Add QIE Testnet to MetaMask**: network selector → **Add network** → **Add a network manually**:
 
 - Network name: `QIE Testnet`
-- RPC URL: `https://rpc1testnet.qie.digital`
+- RPC URL: `https://rpc5testnet.qie.digital` (rpc1 to rpc6 exist; use any that answers)
 - Chain ID: `1983`
 - Currency symbol: `QIE`
 - Block explorer: `https://testnet.qie.digital`

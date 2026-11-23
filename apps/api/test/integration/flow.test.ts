@@ -609,6 +609,31 @@ describe('serverless hosting (Vercel)', () => {
     }
   });
 
+  it('starts and serves config while the RPC is down, and refuses quotes with 503', async () => {
+    const offline = await createRuntime(
+      { ...config, RPC_URLS: ['http://127.0.0.1:1'] },
+      createLogger(process.env.TEST_LOG ?? 'silent'),
+      { supplier, db },
+    );
+    try {
+      const before = await db.query('select count(*)::int as n from orders');
+      expect((await offline.server.inject({ method: 'GET', url: '/v1/config' })).statusCode).toBe(
+        200,
+      );
+      const response = await offline.server.inject({
+        method: 'POST',
+        url: '/v1/quotes',
+        payload: { payer: payer.address, ...airtime('7310') },
+      });
+      expect(response.statusCode).toBe(503);
+      expect(response.json().error).toBe('chain_unavailable');
+      const after = await db.query('select count(*)::int as n from orders');
+      expect(after.rows[0].n).toBe(before.rows[0].n); // nothing stored, nothing signed
+    } finally {
+      await offline.server.close();
+    }
+  });
+
   it('the cron route is absent without CRON_SECRET or outside serverless mode', async () => {
     const response = await runtime.server.inject({ method: 'GET', url: '/v1/jobs/run' });
     expect(response.statusCode).toBe(404);

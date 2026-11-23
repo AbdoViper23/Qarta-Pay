@@ -1,18 +1,8 @@
 {
-  "note": "Curated launch catalog (docs/08-RELOADLY-REFERENCE.md). Pin productIds once the sandbox shows the real ones; until then products are allowed by brand name.",
-  "airtimeCountries": ["NG", "GH", "KE", "ZA", "PH", "IN", "EG"],
-  "giftCardCountries": ["US"],
-  "giftCardBrands": [
-    "Amazon",
-    "Google Play",
-    "Steam",
-    "PlayStation",
-    "Xbox",
-    "Netflix",
-    "Spotify",
-    "Apple",
-    "Uber",
-    "Airbnb"
-  ],
+  "note": "What we sell (docs/08-RELOADLY-REFERENCE.md). Countries: \"all\" = every country the supplier lists for that product, or an explicit ISO2 list. blockedCountries are never offered (sanctioned). giftCardBrands empty = every brand; otherwise only brands whose name contains one of them, plus giftCardProductIds.",
+  "airtimeCountries": "all",
+  "giftCardCountries": "all",
+  "blockedCountries": ["BY", "CU", "IR", "KP", "RU", "SY"],
+  "giftCardBrands": [],
   "giftCardProductIds": []
 }

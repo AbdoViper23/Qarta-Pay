@@ -115,7 +115,7 @@ export class QuoteService {
     let recipientPhone: string | null = null;
     let recipientWallet: Address = request.payer;
     if (request.kind === 'AIRTIME') {
-      if (!this.catalog.isAirtimeCountry(request.countryCode)) {
+      if (!(await this.catalog.isAirtimeCountry(request.countryCode))) {
         throw new QuoteError('country_not_enabled', 'airtime is not sold for this country');
       }
       recipientPhone = normalisePhone(request.recipientPhone, request.countryCode);

@@ -130,6 +130,11 @@ export class FakeSupplier implements Supplier {
     return this.find(customIdentifier);
   }
 
+  async listCountries(product: 'airtime' | 'giftcards'): Promise<string[]> {
+    const items = product === 'airtime' ? this.operators : this.products;
+    return [...new Set(items.map((item) => item.countryCode))];
+  }
+
   async listGiftCards(countryCode: string): Promise<GiftCardProduct[]> {
     return this.products.filter((product) => product.countryCode === countryCode);
   }

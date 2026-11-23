@@ -9,7 +9,7 @@ Node 22 + TypeScript + Fastify + PostgreSQL (`pg`, SQL migrations) + viem + zod.
 | Config (zod, every env var) | `apps/api/src/config.ts` |
 | Orders repository, status transitions with preconditions | `apps/api/src/db/orders.ts`, `apps/api/src/db/migrations.ts` |
 | Supplier interface, Reloadly client, fake supplier | `apps/api/src/supplier/` |
-| Curated catalog (`config/catalog.json`) | `apps/api/src/catalog/catalog.ts` |
+| Catalog (`config/catalog.json`: every supplier country minus blocked ones, every USD fixed-price gift card brand) | `apps/api/src/catalog/catalog.ts` |
 | Pricing rules, quote service, EIP-712 signing | `apps/api/src/quotes/` |
 | Oracle read, QIEDex cross-check, price cache | `apps/api/src/pricing/` |
 | `.qie` names | `apps/api/src/identity/qie-name.ts` |

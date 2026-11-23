@@ -5,12 +5,12 @@ import { Checkout } from '@/components/Checkout';
 import { Card, Chip, Label, Notice, inputClass } from '@/components/ui';
 import { api, type Operator } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
-import { countryName } from '@/lib/format';
+import { byCountryName, countryName, preferredCountry } from '@/lib/format';
 import { useAppConfig } from '@/lib/hooks';
 
 export default function AirtimePage() {
   const { data: config } = useAppConfig();
-  const countries = config?.airtimeCountries ?? [];
+  const countries = useMemo(() => byCountryName(config?.airtimeCountries ?? []), [config]);
   const [country, setCountry] = useState('');
   const [phone, setPhone] = useState('');
   const [operator, setOperator] = useState<Operator | null>(null);
@@ -20,7 +20,8 @@ export default function AirtimePage() {
   const [amount, setAmount] = useState('');
 
   useEffect(() => {
-    if (!country && countries[0]) setCountry(countries[0]);
+    const preferred = preferredCountry(countries);
+    if (!country && preferred) setCountry(preferred);
   }, [country, countries]);
 
   // Detect the operator once the number looks complete (debounced).

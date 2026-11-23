@@ -11,6 +11,26 @@ export function trimDecimals(value: string, digits: number): string {
   return kept ? `${whole}.${kept}` : (whole ?? '0');
 }
 
+/** Country codes sorted by their English name, for a long dropdown. */
+export function byCountryName(codes: string[]): string[] {
+  return [...codes].sort((a, b) => countryName(a).localeCompare(countryName(b)));
+}
+
+/** The browser's own region when we serve it, else the first in the list. */
+export function preferredCountry(codes: string[]): string | undefined {
+  if (typeof navigator !== 'undefined') {
+    for (const tag of navigator.languages ?? [navigator.language]) {
+      try {
+        const region = new Intl.Locale(tag).maximize().region;
+        if (region && codes.includes(region)) return region;
+      } catch {
+        // ignore malformed language tags
+      }
+    }
+  }
+  return codes[0];
+}
+
 export function countryName(code: string): string {
   try {
     return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) ?? code;

@@ -31,6 +31,10 @@ Write a thin typed client in `apps/api/src/supplier/reloadly/`, behind a `Suppli
   - Gift cards: `Accept: application/com.reloadly.giftcards-v1+json`
 - Balance: `GET {base}/accounts/balance`.
 
+## Countries **[VERIFIED: sandbox, 23 Nov 2026]**
+
+`GET {base}/countries` on both hosts returns `[{ isoName, name, currencyCode, ... }]` (airtime also `continent`, `callingCodes`, `flag`; gift cards `flagUrl`). Sandbox counts: 159 airtime countries, 169 gift card countries. The airtime list answered without a token; the gift card list needs one. `config/catalog.json` uses `"all"` to sell in every listed country, minus `blockedCountries` (sanctioned: BY, CU, IR, KP, RU, SY).
+
 ## Airtime and data
 
 ### Detect operator **[VERIFIED: Reloadly blog]**

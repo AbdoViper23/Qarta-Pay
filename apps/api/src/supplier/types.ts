@@ -54,6 +54,8 @@ export interface Supplier {
   /** Prepaid balance in USD, 6 decimals. */
   balanceUsd6(): Promise<bigint>;
 
+  /** ISO 3166-1 alpha-2 codes of the countries the supplier serves for this product. */
+  listCountries(product: 'airtime' | 'giftcards'): Promise<string[]>;
   detectOperator(phone: string, countryCode: string): Promise<Operator | null>;
   getOperator(operatorId: number): Promise<Operator>;
   sendTopup(input: {

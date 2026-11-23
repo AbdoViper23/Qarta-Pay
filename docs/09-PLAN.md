@@ -17,7 +17,7 @@ Start these today; several have waiting time.
 - [ ] Get testnet QIE from the faucet for `deployer` and one test user wallet.
 - [ ] Buy a small amount of mainnet QIE and QUSDC for testing (≈ $20–30).
 - [ ] Buy the domain; create Vercel + backend hosting + Postgres projects; create the private GitHub repo (make it public before submission).
-- [ ] Decide launch countries.
+- [x] Decide launch countries: every country Reloadly lists, minus sanctioned ones (23 Nov 2026).
 
 ## Step 1 (17–18 Nov) — scaffold and probe [agent]
 

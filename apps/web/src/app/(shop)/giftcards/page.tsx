@@ -1,22 +1,23 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Checkout } from '@/components/Checkout';
 import { Card, Chip, Label, Notice, inputClass } from '@/components/ui';
 import { api, type GiftCardProduct } from '@/lib/api';
-import { countryName } from '@/lib/format';
+import { byCountryName, countryName, preferredCountry } from '@/lib/format';
 import { useAppConfig } from '@/lib/hooks';
 
 export default function GiftCardsPage() {
   const { data: config } = useAppConfig();
-  const countries = config?.giftCardCountries ?? [];
+  const countries = useMemo(() => byCountryName(config?.giftCardCountries ?? []), [config]);
   const [country, setCountry] = useState('');
   const [product, setProduct] = useState<GiftCardProduct | null>(null);
   const [value, setValue] = useState('');
 
   useEffect(() => {
-    if (!country && countries[0]) setCountry(countries[0]);
+    const preferred = preferredCountry(countries);
+    if (!country && preferred) setCountry(preferred);
   }, [country, countries]);
   useEffect(() => {
     setProduct(null);

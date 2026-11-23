@@ -88,6 +88,8 @@ const cardSchema = z.looseObject({
   redemptionUrl: z.string().nullish(),
 });
 
+const countrySchema = z.looseObject({ isoName: z.string().length(2) });
+
 const balanceSchema = z.looseObject({ balance: num, currencyCode: z.string() });
 
 const tokenSchema = z.object({
@@ -262,6 +264,19 @@ export class ReloadlySupplier implements Supplier {
   }
 
   // --------------------------------------------------------------- airtime
+
+  /** `GET /countries` on the product's host; both return `[{ isoName, name, ... }]`. */
+  async listCountries(product: 'airtime' | 'giftcards'): Promise<string[]> {
+    const raw = await this.request(
+      product === 'airtime' ? 'topups' : 'giftcards',
+      'GET',
+      '/countries',
+    );
+    return z
+      .array(countrySchema)
+      .parse(raw)
+      .map((country) => country.isoName.toUpperCase());
+  }
 
   async detectOperator(phone: string, countryCode: string): Promise<Operator | null> {
     try {

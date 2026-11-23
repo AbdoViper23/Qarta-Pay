@@ -2,9 +2,16 @@ import { z } from 'zod';
 import catalogJson from '../../config/catalog.json' with { type: 'json' };
 import type { GiftCardProduct, Operator, Supplier } from '../supplier/types';
 
+const iso2 = z.string().regex(/^[A-Z]{2}$/);
+/** "all" = every country the supplier lists for the product. */
+const countries = z.union([z.literal('all'), z.array(iso2)]);
+
 const catalogSchema = z.object({
-  airtimeCountries: z.array(z.string().length(2)),
-  giftCardCountries: z.array(z.string().length(2)),
+  airtimeCountries: countries,
+  giftCardCountries: countries,
+  /** Never offered, even when the supplier lists them. */
+  blockedCountries: z.array(iso2).default([]),
+  /** Empty = every brand. */
   giftCardBrands: z.array(z.string().min(1)),
   giftCardProductIds: z.array(z.number().int()),
 });
@@ -16,9 +23,9 @@ export function loadCatalogConfig(raw: unknown = catalogJson): CatalogConfig {
 }
 
 /**
- * What we sell: the supplier's catalog, narrowed to the curated countries and brands, and
- * only products we know how to price (sender currency USD, fixed denominations).
- * Supplier responses are cached for 10 minutes.
+ * What we sell: the supplier's catalog, narrowed to the configured countries and brands
+ * (minus blocked countries), and only products we know how to price (sender currency USD,
+ * fixed denominations). Supplier responses are cached for 10 minutes; failures are not cached.
  */
 export class Catalog {
   private readonly cache = new Map<string, { at: number; value: unknown }>();
@@ -37,12 +44,31 @@ export class Catalog {
     return value;
   }
 
-  isAirtimeCountry(countryCode: string): boolean {
-    return this.config.airtimeCountries.includes(countryCode);
+  private async countries(product: 'airtime' | 'giftcards'): Promise<string[]> {
+    const configured =
+      product === 'airtime' ? this.config.airtimeCountries : this.config.giftCardCountries;
+    const codes =
+      configured === 'all'
+        ? await this.cached(`countries:${product}`, () => this.supplier.listCountries(product))
+        : configured;
+    const blocked = new Set(this.config.blockedCountries);
+    return [...new Set(codes)].filter((code) => !blocked.has(code)).sort();
+  }
+
+  airtimeCountries(): Promise<string[]> {
+    return this.countries('airtime');
+  }
+
+  giftCardCountries(): Promise<string[]> {
+    return this.countries('giftcards');
+  }
+
+  async isAirtimeCountry(countryCode: string): Promise<boolean> {
+    return (await this.airtimeCountries()).includes(countryCode);
   }
 
   async detectOperator(phone: string, countryCode: string): Promise<Operator | null> {
-    if (!this.isAirtimeCountry(countryCode)) return null;
+    if (!(await this.isAirtimeCountry(countryCode))) return null;
     return this.cached(`detect:${countryCode}:${phone}`, () =>
       this.supplier.detectOperator(phone, countryCode),
     );
@@ -53,7 +79,7 @@ export class Catalog {
   }
 
   async giftCards(countryCode: string): Promise<GiftCardProduct[]> {
-    if (!this.config.giftCardCountries.includes(countryCode)) return [];
+    if (!(await this.giftCardCountries()).includes(countryCode)) return [];
     const products = await this.cached(`giftcards:${countryCode}`, () =>
       this.supplier.listGiftCards(countryCode),
     );
@@ -69,6 +95,7 @@ export class Catalog {
   private isSellable(product: GiftCardProduct): boolean {
     if (product.senderCurrency !== 'USD' || product.denominations.length === 0) return false;
     if (this.config.giftCardProductIds.includes(product.productId)) return true;
+    if (this.config.giftCardBrands.length === 0) return true;
     const brand = product.brandName.toLowerCase();
     return this.config.giftCardBrands.some((allowed) => brand.includes(allowed.toLowerCase()));
   }

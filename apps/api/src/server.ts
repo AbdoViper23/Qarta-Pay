@@ -106,28 +106,41 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     return deps.runJobs();
   });
 
-  app.get('/v1/config', async () => ({
-    chainId: config.CHAIN_ID,
-    explorerUrl: config.explorerUrl,
-    salesPaused: config.SALES_PAUSED,
-    contracts: {
-      checkout: config.addresses.checkout,
-      qusdc: config.addresses.qusdc,
-      qieUsdFeed: config.addresses.qieUsdFeed,
-      qiedexPair: config.addresses.pair,
-      wqie: config.addresses.wqie,
-      qieReverseResolver: config.addresses.reverseResolver,
-      qieNameRegistryB: config.addresses.nameRegistryB,
-    },
-    airtimeCountries: deps.catalog.config.airtimeCountries,
-    giftCardCountries: deps.catalog.config.giftCardCountries,
-    limits: {
-      maxOrderUsd: config.MAX_ORDER_USD,
-      maxWalletDailyUsd: config.MAX_WALLET_DAILY_USD,
-      quoteTtlQusdcS: config.QUOTE_TTL_QUSDC_S,
-      quoteTtlQieS: config.QUOTE_TTL_QIE_S,
-    },
-  }));
+  app.get('/v1/config', async () => {
+    // Country lists come from the supplier; if it is down the page still loads, without them.
+    const [airtimeCountries, giftCardCountries] = await Promise.all([
+      deps.catalog.airtimeCountries().catch((err: unknown) => {
+        deps.log?.warn({ err }, 'airtime countries unavailable');
+        return [];
+      }),
+      deps.catalog.giftCardCountries().catch((err: unknown) => {
+        deps.log?.warn({ err }, 'gift card countries unavailable');
+        return [];
+      }),
+    ]);
+    return {
+      chainId: config.CHAIN_ID,
+      explorerUrl: config.explorerUrl,
+      salesPaused: config.SALES_PAUSED,
+      contracts: {
+        checkout: config.addresses.checkout,
+        qusdc: config.addresses.qusdc,
+        qieUsdFeed: config.addresses.qieUsdFeed,
+        qiedexPair: config.addresses.pair,
+        wqie: config.addresses.wqie,
+        qieReverseResolver: config.addresses.reverseResolver,
+        qieNameRegistryB: config.addresses.nameRegistryB,
+      },
+      airtimeCountries,
+      giftCardCountries,
+      limits: {
+        maxOrderUsd: config.MAX_ORDER_USD,
+        maxWalletDailyUsd: config.MAX_WALLET_DAILY_USD,
+        quoteTtlQusdcS: config.QUOTE_TTL_QUSDC_S,
+        quoteTtlQieS: config.QUOTE_TTL_QIE_S,
+      },
+    };
+  });
 
   app.get('/v1/prices', async () => {
     const snapshot = await deps.prices.get();

@@ -11,7 +11,7 @@ export function FinalCta() {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/airtime"
-            className="inline-flex min-h-12 items-center border-2 border-ink bg-ink px-6 text-sm font-semibold text-surface transition-colors hover:bg-[#2a2a2a]"
+            className="inline-flex min-h-12 items-center border-2 border-ink bg-ink px-6 text-sm font-semibold text-surface transition-colors hover:bg-ink-hover"
           >
             Start with a top-up
           </Link>

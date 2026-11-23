@@ -10,6 +10,7 @@
   --color-surface: #fbfaf7;
   --color-surface-2: #f3f2ed;
   --color-ink: #141414;
+  --color-ink-hover: #2a2a2a;
   --color-muted: #5b5a56;
   --color-line: #cdcbc4;
   --color-rule: #141414;
@@ -61,6 +62,32 @@
 
 :root {
   color-scheme: light;
+}
+
+/*
+ * Night shift: the same receipt printed in light ink on dark paper. The inline script in
+ * layout.tsx sets data-theme before first paint (saved choice, else the system setting),
+ * so every token-based utility switches at once.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-bg: #121211;
+  --color-surface: #1c1c1a;
+  --color-surface-2: #252522;
+  --color-ink: #ecebe6;
+  --color-ink-hover: #d2d1cb;
+  --color-muted: #a3a19a;
+  --color-line: #3b3a36;
+  --color-rule: #ecebe6;
+  --color-brand: #ec4a2f;
+  --color-brand-hover: #ff6247;
+  --color-brand-ink: #fbfaf7;
+  --color-brand-soft: #3d1f19;
+  --color-accent: #ec4a2f;
+  --color-danger: #f26b5e;
+  --color-danger-soft: #3b1d1a;
+  --color-ok: #63b874;
+  --color-ok-soft: #1b2f20;
 }
 
 html {
@@ -119,6 +146,11 @@ textarea:focus-visible {
   opacity: 0.08;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+[data-theme='dark'] .grain::after {
+  opacity: 0.05;
+  mix-blend-mode: screen;
 }
 
 /* Torn, perforated top and bottom edge of a receipt slip. */

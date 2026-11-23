@@ -12,7 +12,7 @@ export function Button({
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'ghost' }) {
   const styles = {
-    primary: 'border-2 border-ink bg-ink text-surface hover:bg-[#2a2a2a]',
+    primary: 'border-2 border-ink bg-ink text-surface hover:bg-ink-hover',
     secondary: 'border-2 border-ink text-ink hover:bg-surface',
     ghost: 'text-muted underline-offset-4 hover:text-ink hover:underline',
   }[variant];

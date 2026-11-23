@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Logo } from '@/components/Logo';
 import { Providers } from '@/components/Providers';
+import { ThemeToggle, themeScript } from '@/components/ThemeToggle';
 import { WalletButton } from '@/components/WalletButton';
 import './globals.css';
 
@@ -29,7 +30,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#ecebe6',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ecebe6' },
+    { media: '(prefers-color-scheme: dark)', color: '#121211' },
+  ],
 };
 
 const nav = [
@@ -40,7 +44,11 @@ const nav = [
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${barlow.variable} ${plexMono.variable}`}>
+    // suppressHydrationWarning: the theme script sets data-theme before React hydrates.
+    <html lang="en" className={`${barlow.variable} ${plexMono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="grain min-h-dvh overflow-x-hidden">
         <Providers>
           <header className="fixed inset-x-0 top-0 z-40 border-b-2 border-rule bg-bg/95 backdrop-blur-sm">
@@ -62,7 +70,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </Link>
                 ))}
               </nav>
-              <WalletButton />
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <WalletButton />
+              </div>
             </div>
           </header>
           <main>{children}</main>

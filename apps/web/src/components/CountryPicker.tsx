@@ -59,14 +59,15 @@ export function CountryPicker({
 
   useEffect(() => {
     if (!open) return;
-    setQuery('');
-    setActive(0);
     input.current?.focus();
-    const close = (event: MouseEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    const onOutside = (event: MouseEvent) => {
+      if (root.current?.contains(event.target as Node)) return;
+      setOpen(false);
+      setQuery('');
+      setActive(0);
     };
-    document.addEventListener('mousedown', close);
-    return () => document.removeEventListener('mousedown', close);
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
   }, [open]);
 
   useEffect(() => setActive(0), [query]);
@@ -74,9 +75,15 @@ export function CountryPicker({
     list.current?.children[active]?.scrollIntoView({ block: 'nearest' });
   }, [active]);
 
+  // The filter is cleared on close, so the list opens fresh even when typing starts at once.
+  const close = () => {
+    setOpen(false);
+    setQuery('');
+    setActive(0);
+  };
   const pick = (code: string) => {
     onChange(code);
-    setOpen(false);
+    close();
   };
 
   return (
@@ -87,7 +94,7 @@ export function CountryPicker({
         aria-haspopup="listbox"
         aria-expanded={open}
         disabled={countries.length === 0 && pinned.length === 0}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (open ? close() : setOpen(true))}
         className="flex min-h-12 w-full items-center gap-3 border-2 border-ink bg-surface px-4 py-2 text-left text-base text-ink outline-none focus-visible:border-brand disabled:text-muted"
       >
         {value ? <Flag code={value} /> : null}
@@ -123,7 +130,7 @@ export function CountryPicker({
                   e.preventDefault();
                   if (options[active]) pick(options[active]);
                 } else if (e.key === 'Escape') {
-                  setOpen(false);
+                  close();
                 }
               }}
               className="min-h-11 w-full bg-transparent text-base outline-none placeholder:text-muted/70"

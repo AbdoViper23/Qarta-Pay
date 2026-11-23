@@ -90,7 +90,12 @@ select {
 :focus-visible {
   outline: 2px solid var(--color-brand);
   outline-offset: 2px;
-  border-radius: 0.5rem;
+}
+
+/* Text fields show focus with their own border colour (inputClass), not a second ring. */
+input:focus-visible,
+textarea:focus-visible {
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

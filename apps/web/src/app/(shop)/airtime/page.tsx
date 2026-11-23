@@ -6,7 +6,7 @@ import { CountryPicker } from '@/components/CountryPicker';
 import { Card, Chip, Label, Notice, inputClass } from '@/components/ui';
 import { api, type Operator } from '@/lib/api';
 import { friendlyError } from '@/lib/errors';
-import { byCountryName, preferredCountry } from '@/lib/format';
+import { byCountryName, phoneHint, preferredCountry } from '@/lib/format';
 import { useAppConfig } from '@/lib/hooks';
 
 export default function AirtimePage() {
@@ -19,6 +19,7 @@ export default function AirtimePage() {
   const [detecting, setDetecting] = useState(false);
   const [detectError, setDetectError] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
+  const hint = useMemo(() => (country ? phoneHint(country) : null), [country]);
 
   useEffect(() => {
     const preferred = preferredCountry(countries);
@@ -85,15 +86,22 @@ export default function AirtimePage() {
         </div>
         <div>
           <Label htmlFor="phone">Phone number</Label>
-          <input
-            id="phone"
-            inputMode="tel"
-            autoComplete="tel"
-            className={inputClass}
-            placeholder="e.g. 0803 123 4567"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-          />
+          <div className="flex min-h-12 border-2 border-ink bg-surface focus-within:border-brand">
+            {hint && (
+              <span className="flex items-center border-r-2 border-ink/20 px-4 text-base text-muted">
+                {hint.callingCode}
+              </span>
+            )}
+            <input
+              id="phone"
+              inputMode="tel"
+              autoComplete="tel-national"
+              className="min-w-0 flex-1 bg-transparent px-4 py-2 text-base text-ink outline-none placeholder:text-muted/70"
+              placeholder={hint ? `e.g. ${hint.example}` : 'Phone number'}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
+          </div>
           {detecting && <p className="mt-1 text-sm text-muted">Finding the operator…</p>}
           {detectError && <p className="mt-1 text-sm text-danger">{detectError}</p>}
         </div>

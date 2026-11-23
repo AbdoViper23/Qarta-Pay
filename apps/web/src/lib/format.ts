@@ -1,3 +1,5 @@
+import { getCountryCallingCode, getExampleNumber, type CountryCode } from 'libphonenumber-js';
+import mobileExamples from 'libphonenumber-js/examples.mobile.json';
 /** Short form of an address for display, for example `0x3F43…5DA5`. */
 export function shortAddress(address: string): string {
   if (!/^0x[0-9a-fA-F]{40}$/.test(address)) throw new Error('not an address');
@@ -36,5 +38,16 @@ export function countryName(code: string): string {
     return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) ?? code;
   } catch {
     return code;
+  }
+}
+
+/** Dialling code and a sample mobile number in national format, e.g. +20 and 0100 123 4567. */
+export function phoneHint(country: string): { callingCode: string; example: string } | null {
+  try {
+    const code = country as CountryCode;
+    const example = getExampleNumber(code, mobileExamples)?.formatNational();
+    return example ? { callingCode: `+${getCountryCallingCode(code)}`, example } : null;
+  } catch {
+    return null; // a code libphonenumber does not know
   }
 }

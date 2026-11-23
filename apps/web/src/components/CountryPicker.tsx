@@ -11,7 +11,9 @@ function Flag({ code }: { code: string }) {
   if (code === GLOBAL) return <Globe aria-hidden className="size-5 shrink-0 text-brand" />;
   return (
     // Flags come from Reloadly's public flag bucket (the same URL its /countries returns).
+    // keyed so a changed country never shows the previous flag while the new one loads
     <img
+      key={code}
       src={`https://s3.amazonaws.com/rld-flags/${code.toLowerCase()}.svg`}
       alt=""
       loading="lazy"

@@ -99,7 +99,13 @@ export class Catalog {
     for (const product of found) {
       if (!product.global || !allowed.has(product.countryCode) || !this.isSellable(product))
         continue;
-      const line = product.name.replace(/\s+[A-Z]{2,3}$/, '').toLowerCase();
+      // "Razer Gold (Global) US" and "Razer Gold Global AF" are the same line.
+      const line = product.name
+        .replace(/\s+[A-Z]{2,3}$/, '')
+        .replace(/[()]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
       const kept = lines.get(line);
       if (!kept || (product.countryCode === 'US' && kept.countryCode !== 'US'))
         lines.set(line, product);

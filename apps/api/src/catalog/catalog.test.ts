@@ -107,7 +107,7 @@ describe('global cards and search', () => {
   it('keeps one card per worldwide product line, preferring the US copy', async () => {
     const { catalog } = searching([
       product(1, 'Razer Gold Global AF', 'AF'),
-      product(2, 'Razer Gold Global US', 'US'),
+      product(2, 'Razer Gold (Global) US', 'US'),
       product(3, 'Razer Gold Global AL', 'AL'),
       product(4, 'PUBG New State (Global) BR', 'BR'),
       product(5, 'Steam US', 'US', false), // not global

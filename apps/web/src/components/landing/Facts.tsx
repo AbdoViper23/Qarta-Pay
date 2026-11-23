@@ -2,16 +2,21 @@
 
 import { animate, useInView, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
+import { useAppConfig } from '@/lib/hooks';
 import { Reveal } from './Reveal';
 
 /** Product facts (not traction): each number counts up when it comes into view. */
-const FACTS = [
-  { value: 100, suffix: '%', label: 'of every payment held on-chain until delivery' },
-  { value: 2, suffix: 'h', label: 'until you can reclaim a stuck payment yourself' },
-  { value: 7, suffix: '', label: 'countries for mobile top-ups at launch' },
-];
-
 export function Facts() {
+  const { data: config } = useAppConfig();
+  const airtime = config?.airtimeCountries.length;
+  const FACTS = [
+    { value: 100, suffix: '%', label: 'of every payment held on-chain until delivery' },
+    { value: 2, suffix: 'h', label: 'until you can reclaim a stuck payment yourself' },
+    // Live count from the API; "150+" until it answers.
+    airtime
+      ? { value: airtime, suffix: '', label: 'countries for mobile top-ups' }
+      : { value: 150, suffix: '+', label: 'countries for mobile top-ups' },
+  ];
   return (
     <section id="facts" className="mx-auto max-w-6xl px-4 pb-28">
       <div className="grid border-y-2 border-rule bg-surface sm:grid-cols-3 sm:divide-x sm:divide-dashed sm:divide-muted">

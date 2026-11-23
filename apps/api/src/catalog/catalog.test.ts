@@ -121,10 +121,14 @@ describe('global cards and search', () => {
     const { catalog, queries } = searching([
       product(7, 'Steam BR', 'BR', false),
       product(8, 'Steam IR', 'IR', false),
+      product(9, 'Steam Global AF', 'AF'),
+      product(10, 'Steam Global US', 'US'),
+      product(11, 'Steam US', 'US', false),
     ]);
     expect(await catalog.searchGiftCards(' s ')).toEqual([]);
     expect(queries).toEqual([]);
-    expect((await catalog.searchGiftCards('Steam')).map((c) => c.productId)).toEqual([7]);
+    // Country cards stay apart; the worldwide line collapses to its US copy.
+    expect((await catalog.searchGiftCards('Steam')).map((c) => c.productId)).toEqual([7, 10, 11]);
     await catalog.searchGiftCards('steam ');
     expect(queries).toEqual(['steam']);
   });

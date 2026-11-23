@@ -95,22 +95,11 @@ export class Catalog {
       this.supplier.searchGiftCards('global'),
     );
     const allowed = new Set(await this.giftCardCountries());
-    const lines = new Map<string, GiftCardProduct>();
-    for (const product of found) {
-      if (!product.global || !allowed.has(product.countryCode) || !this.isSellable(product))
-        continue;
-      // "Razer Gold (Global) US" and "Razer Gold Global AF" are the same line.
-      const line = product.name
-        .replace(/\s+[A-Z]{2,3}$/, '')
-        .replace(/[()]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .toLowerCase();
-      const kept = lines.get(line);
-      if (!kept || (product.countryCode === 'US' && kept.countryCode !== 'US'))
-        lines.set(line, product);
-    }
-    return [...lines.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return onePerLine(
+      found.filter(
+        (product) => product.global && allowed.has(product.countryCode) && this.isSellable(product),
+      ),
+    ).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /** Sellable products in any served country whose name contains `query`; at most 60. */
@@ -121,9 +110,10 @@ export class Catalog {
       this.supplier.searchGiftCards(q),
     );
     const allowed = new Set(await this.giftCardCountries());
-    return found
-      .filter((product) => allowed.has(product.countryCode) && this.isSellable(product))
-      .slice(0, 60);
+    // Worldwide cards collapse to one per line; country cards (Steam BR, Steam US) stay apart.
+    return onePerLine(
+      found.filter((product) => allowed.has(product.countryCode) && this.isSellable(product)),
+    ).slice(0, 60);
   }
 
   async giftCard(productId: number, countryCode: string): Promise<GiftCardProduct | null> {
@@ -139,4 +129,29 @@ export class Catalog {
     const brand = product.brandName.toLowerCase();
     return this.config.giftCardBrands.some((allowed) => brand.includes(allowed.toLowerCase()));
   }
+}
+
+/** "Razer Gold (Global) US" and "Razer Gold Global AF" are the same product line. */
+function productLine(product: GiftCardProduct): string {
+  return product.name
+    .replace(/\s+[A-Z]{2,3}$/, '')
+    .replace(/[()]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+}
+
+/**
+ * Keeps one copy of each worldwide card (the US one when it exists, else the first); cards
+ * that are not worldwide pass through unchanged, in order.
+ */
+function onePerLine(products: GiftCardProduct[]): GiftCardProduct[] {
+  const kept = new Map<string, GiftCardProduct>();
+  for (const product of products) {
+    const key = product.global ? `global:${productLine(product)}` : `id:${product.productId}`;
+    const current = kept.get(key);
+    if (!current || (product.countryCode === 'US' && current.countryCode !== 'US'))
+      kept.set(key, product);
+  }
+  return [...kept.values()];
 }

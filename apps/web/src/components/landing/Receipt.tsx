@@ -73,7 +73,7 @@ export function Receipt() {
           initial={{ opacity: 0, scale: 2.4, rotate: -24 }}
           animate={{ opacity: 0.9, scale: 1, rotate: -14 }}
           transition={{ delay: 1.9, type: 'spring', stiffness: 420, damping: 18 }}
-          className="absolute top-[44%] right-5 border-[3px] border-brand px-3 py-0.5 font-display text-3xl font-extrabold tracking-widest text-brand mix-blend-multiply"
+          className="absolute top-[44%] right-5 border-[3px] border-brand px-3 py-0.5 font-display text-3xl font-extrabold tracking-widest text-brand mix-blend-multiply dark-stamp"
         >
           PAID
         </motion.span>

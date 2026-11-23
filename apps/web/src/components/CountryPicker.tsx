@@ -108,7 +108,7 @@ export function CountryPicker({
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-full z-30 mt-1 border-2 border-ink bg-surface shadow-[6px_6px_0_var(--color-ink)]">
+        <div className="absolute inset-x-0 top-full z-30 mt-1 border-2 border-ink bg-surface shadow-[6px_6px_0_var(--color-shadow)]">
           <div className="dashed-b flex items-center gap-2 px-3">
             <Search aria-hidden className="size-4 shrink-0 text-muted" />
             <input

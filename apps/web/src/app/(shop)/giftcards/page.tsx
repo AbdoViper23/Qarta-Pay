@@ -240,7 +240,7 @@ function ProductGroup({
               aria-pressed={isSelected}
               className={`flex min-h-24 flex-col items-center justify-center gap-2 border-2 p-3 text-center text-sm font-semibold ${
                 isSelected
-                  ? 'border-ink bg-surface shadow-[4px_4px_0_var(--color-ink)]'
+                  ? 'border-ink bg-surface shadow-[4px_4px_0_var(--color-shadow)]'
                   : 'border-ink/20 bg-surface hover:border-ink'
               }`}
             >

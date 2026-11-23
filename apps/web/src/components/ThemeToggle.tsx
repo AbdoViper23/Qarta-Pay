@@ -7,37 +7,20 @@ type Theme = 'light' | 'dark';
 const KEY = 'qarta-theme';
 
 /**
- * Runs in <head> before first paint: the saved choice, else the system setting. Kept as a
+ * Runs in <head> before first paint: the saved choice, else light (the default look). Kept as a
  * string so layout.tsx can inline it; a theme set after paint would flash light first.
  */
-export const themeScript = `(function(){try{var t=localStorage.getItem('${KEY}');}catch(e){}if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=t;})();`;
+export const themeScript = `(function(){try{var t=localStorage.getItem('${KEY}');}catch(e){}if(t!=='dark'){t='light';}document.documentElement.dataset.theme=t;})();`;
 
 function current(): Theme {
   return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 }
 
-/** Light / dark switch. Follows the system until the visitor picks one, then remembers it. */
+/** Light / dark switch. Light by default; remembers the visitor's pick. */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<Theme | null>(null);
 
-  useEffect(() => {
-    setTheme(current());
-    const media = matchMedia('(prefers-color-scheme: dark)');
-    const onSystem = () => {
-      let saved: string | null = null;
-      try {
-        saved = localStorage.getItem(KEY);
-      } catch {
-        // storage blocked: keep following the system
-      }
-      if (saved) return;
-      const next: Theme = media.matches ? 'dark' : 'light';
-      document.documentElement.dataset.theme = next;
-      setTheme(next);
-    };
-    media.addEventListener('change', onSystem);
-    return () => media.removeEventListener('change', onSystem);
-  }, []);
+  useEffect(() => setTheme(current()), []);
 
   const toggle = () => {
     const next: Theme = current() === 'dark' ? 'light' : 'dark';

@@ -72,7 +72,7 @@ export function WalletButton() {
         {isPending ? 'Connecting…' : 'Connect wallet'}
       </Button>
       {open && (
-        <div className="absolute right-0 z-30 mt-2 w-64 border-2 border-ink bg-surface p-2 shadow-[6px_6px_0_var(--color-ink)]">
+        <div className="absolute right-0 z-30 mt-2 w-64 border-2 border-ink bg-surface p-2 shadow-[6px_6px_0_var(--color-shadow)]">
           {options.map((connector) => (
             <button
               key={connector.uid}

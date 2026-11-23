@@ -11,6 +11,7 @@
   --color-surface-2: #f3f2ed;
   --color-ink: #141414;
   --color-ink-hover: #2a2a2a;
+  --color-shadow: #141414;
   --color-muted: #5b5a56;
   --color-line: #cdcbc4;
   --color-rule: #141414;
@@ -65,29 +66,31 @@
 }
 
 /*
- * Night shift: the same receipt printed in light ink on dark paper. The inline script in
- * layout.tsx sets data-theme before first paint (saved choice, else the system setting),
- * so every token-based utility switches at once.
+ * Night shift: the same receipt as carbon paper. Warm charcoal ground, cream ink (not pure
+ * white, which glares at 2px borders), quiet rules, and offset shadows that fall darker
+ * instead of glowing. Light is the default; the inline script in layout.tsx switches to
+ * this only when the visitor picked it.
  */
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --color-bg: #121211;
-  --color-surface: #1c1c1a;
-  --color-surface-2: #252522;
-  --color-ink: #ecebe6;
-  --color-ink-hover: #d2d1cb;
-  --color-muted: #a3a19a;
-  --color-line: #3b3a36;
-  --color-rule: #ecebe6;
-  --color-brand: #ec4a2f;
-  --color-brand-hover: #ff6247;
-  --color-brand-ink: #fbfaf7;
-  --color-brand-soft: #3d1f19;
-  --color-accent: #ec4a2f;
-  --color-danger: #f26b5e;
-  --color-danger-soft: #3b1d1a;
-  --color-ok: #63b874;
-  --color-ok-soft: #1b2f20;
+  --color-bg: #1b1a17;
+  --color-surface: #24231f;
+  --color-surface-2: #2d2b27;
+  --color-ink: #e4dfd3;
+  --color-ink-hover: #cfc9bc;
+  --color-shadow: #0c0b0a;
+  --color-muted: #9d978a;
+  --color-line: #3e3b35;
+  --color-rule: #4a463f;
+  --color-brand: #ef5b3f;
+  --color-brand-hover: #ff7357;
+  --color-brand-ink: #1b1a17;
+  --color-brand-soft: #3c2520;
+  --color-accent: #ef5b3f;
+  --color-danger: #f2766a;
+  --color-danger-soft: #3d221f;
+  --color-ok: #7cc48a;
+  --color-ok-soft: #1f3324;
 }
 
 html {
@@ -102,7 +105,7 @@ body {
 }
 
 ::selection {
-  background: rgb(217 56 30 / 0.2);
+  background: color-mix(in srgb, var(--color-brand) 25%, transparent);
 }
 
 /* Every clickable thing shows a pointer and a visible keyboard focus ring. */
@@ -186,4 +189,9 @@ textarea:focus-visible {
 
 .spotlight {
   background: var(--color-surface);
+}
+
+/* Ink stamps multiply into paper; on dark paper that would hide them, so they print flat. */
+[data-theme='dark'] .dark-stamp {
+  mix-blend-mode: normal;
 }

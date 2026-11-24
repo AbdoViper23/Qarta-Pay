@@ -44,9 +44,14 @@ function CountUp({ to }: { to: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
   const reduce = useReducedMotion();
-  const [value, setValue] = useState(reduce ? to : 0);
+  // Starts at 0 on the server and in the browser alike; reduced motion skips the count.
+  const [value, setValue] = useState(0);
   useEffect(() => {
-    if (!inView || reduce) return;
+    if (reduce) {
+      setValue(to);
+      return;
+    }
+    if (!inView) return;
     const controls = animate(0, to, {
       duration: 1.6,
       ease: [0.22, 1, 0.36, 1],

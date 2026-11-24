@@ -1,46 +1,90 @@
 /**
- * Canvas scene for the "token journey" section: one payment drawn as 220 points of light.
+ * Canvas scene for the "token journey" section, drawn in the site's receipt language: flat
+ * paper shapes, ink outlines, one stamp red. The payment is a red coin. Whenever it moves it
+ * breaks into printer dots, and it re-forms as whatever it has become.
  *
- * Timeline (scroll progress p, 0..1):
- *   0.00–0.10  a solid coin rests in the wallet
- *   0.10–0.28  it dissolves and arcs into the escrow vault; the door wheel spins shut
- *   0.28–0.42  locked in the vault
- *   0.42–0.56  the door opens; the points stream to the phone
- *   0.56–0.70  they re-form as signal bars, then a solid "airtime received" screen
- *   0.70–0.84  the bars re-form as a gift card
- *   0.84–1.00  delivery failed: the points fly back through the vault and land as a coin again
+ * Layout: wallet top left, escrow below it, phone on the right. Colours come from the CSS
+ * theme variables, so the scene follows light and dark mode.
+ *
+ * Timeline (scroll progress p, 0..1), chapters start at CHAPTER_STARTS:
+ *   0.00–0.11  the coin lifts out of the wallet
+ *   0.11–0.36  it breaks into dots, drops into the escrow, the door locks, stamp HELD
+ *   0.36–0.52  the top-up is sent to the phone while the payment stays held; once it is
+ *              delivered the escrow unlocks
+ *   0.52–0.82  the dots leave the escrow and re-form on the phone as airtime, then a gift card
+ *   0.82–1.00  the other ending: delivery failed, the dots go back through the escrow to the
+ *              wallet, stamp REFUNDED
  *
  * Illustration only. No real data.
  */
 
 type RGB = readonly [number, number, number];
 type Pt = readonly [number, number];
+type Span = readonly [number, number];
+/** Top-left box. */
 interface Box {
   x: number;
   y: number;
   w: number;
   h: number;
 }
+/** Box placed by its centre. */
+interface Station {
+  cx: number;
+  cy: number;
+  w: number;
+  h: number;
+}
+interface Palette {
+  ink: RGB;
+  paper: RGB;
+  paper2: RGB;
+  ground: RGB;
+  muted: RGB;
+  line: RGB;
+  brand: RGB;
+  brandInk: RGB;
+  ok: RGB;
+  danger: RGB;
+  shadow: RGB;
+}
 
-const AMBER: RGB = [217, 56, 30]; // stamp red: the token
-const TEAL: RGB = [20, 20, 20]; // ink, for the refunded coin
-const GREEN: RGB = [47, 122, 61];
-const RED: RGB = [217, 56, 30];
-const INK: RGB = [245, 243, 238];
-const DIM: RGB = [91, 90, 86];
-const N = 220;
+/** Where each of the five chapters starts; the last entry is the end. */
+export const CHAPTER_STARTS = [0, 0.11, 0.36, 0.52, 0.82, 1] as const;
+
+/** The moves that carry the dots from one shape to the next. */
+const BEATS = {
+  rise: [0, 0.08],
+  pay: [0.11, 0.27],
+  held: [0.31, 0.345],
+  send: [0.39, 0.48],
+  arrive: [0.52, 0.65],
+  toCard: [0.7, 0.77],
+  fail: [0.82, 0.86],
+  refund: [0.86, 0.93],
+  tuck: [0.945, 0.975],
+} as const satisfies Record<string, Span>;
+
+const N = 168; // dots in the token
+const AMOUNT = '1.04 QUSDC';
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
-const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+/** Ends at 1 after a small overshoot: how a stamp lands. */
+const backOut = (t: number) => 1 + 2.70158 * Math.pow(t - 1, 3) + 1.70158 * Math.pow(t - 1, 2);
+/** 0 before the span, 1 after it, linear inside. */
+const seg = (p: number, [a, b]: Span) => clamp((p - a) / (b - a));
+/** Fades in over a..b and out over c..d. */
+const pulse = (p: number, a: number, b: number, c: number, d: number) =>
+  seg(p, [a, b]) * (1 - seg(p, [c, d]));
 const mix = (a: RGB, b: RGB, t: number): RGB => [
   Math.round(lerp(a[0], b[0], t)),
   Math.round(lerp(a[1], b[1], t)),
   Math.round(lerp(a[2], b[2], t)),
 ];
-const seg = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
-const rgba = (c: RGB, a: number) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+const rgba = (c: RGB, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 const bez = (p0: Pt, p1: Pt, p2: Pt, t: number): Pt => {
   const u = 1 - t;
   return [
@@ -52,10 +96,32 @@ const hash = (i: number, k: number) => {
   const v = Math.sin(i * k) * 43758.5453;
   return v - Math.floor(v);
 };
+// Each dot leaves a little later than the one before and takes a slightly different curve.
 const delay = Array.from({ length: N }, (_, i) => hash(i, 12.9898));
+const drift = Array.from({ length: N }, (_, i): Pt => [
+  (hash(i, 3.317) - 0.5) * 56,
+  (hash(i, 7.713) - 0.5) * 56,
+]);
 const shuffle = Array.from({ length: N }, (_, i) => i).sort(
   (a, b) => hash(a, 78.233) - hash(b, 78.233),
 );
+/** Exactly N points out of a grid, spread evenly. */
+const pick = (pts: Pt[]): Pt[] =>
+  Array.from({ length: N }, (_, i) => pts[Math.floor((i * pts.length) / N)] ?? [0, 0]);
+
+const FALLBACK: Palette = {
+  ink: [20, 20, 20],
+  paper: [251, 250, 247],
+  paper2: [243, 242, 237],
+  ground: [236, 235, 230],
+  muted: [91, 90, 86],
+  line: [205, 203, 196],
+  brand: [217, 56, 30],
+  brandInk: [251, 250, 247],
+  ok: [47, 122, 61],
+  danger: [180, 35, 24],
+  shadow: [20, 20, 20],
+};
 
 export class TokenScene {
   private ctx: CanvasRenderingContext2D;
@@ -63,43 +129,75 @@ export class TokenScene {
   private scale = 1;
   private ox = 0;
   private oy = 0;
-  private wide = true;
-  private wallet: Pt = [0, 0];
-  private vault = { x: 0, y: 0, s: 150 };
-  private phone: Box = { x: 0, y: 0, w: 0, h: 0 };
+  private k = 1; // shrinks the left column on short canvases
+  private pal: Palette = FALLBACK;
+  private mono = 'ui-monospace, monospace';
+  private display = "'Arial Narrow', sans-serif";
+
+  private wallet: Station = { cx: 0, cy: 0, w: 0, h: 0 };
+  private vault: Station = { cx: 0, cy: 0, w: 0, h: 0 };
+  private phone: Station = { cx: 0, cy: 0, w: 0, h: 0 };
   private screen: Box = { x: 0, y: 0, w: 0, h: 0 };
-  private coinR = 50;
-  private f: Record<'wallet' | 'vault' | 'screenCoin' | 'bars' | 'card', Pt[]> = {
-    wallet: [],
+  private card: Box = { x: 0, y: 0, w: 0, h: 0 };
+  private bars: Box[] = [];
+  private coinR = 60;
+  private coinUp: Pt = [0, 0]; // the coin held above the wallet
+  private coinIn: Pt = [0, 0]; // the coin tucked into the wallet
+  private bend1: Pt = [0, 0]; // curve of the wallet–escrow leg
+  private bend2: Pt = [0, 0]; // curve of the escrow–phone leg
+  /** Where every dot sits in each shape. */
+  private f: Record<'coin' | 'vault' | 'bars' | 'card', Pt[]> = {
+    coin: [],
     vault: [],
-    screenCoin: [],
     bars: [],
     card: [],
   };
-  private barRects: Box[] = [];
-  private card: Box = { x: 0, y: 0, w: 0, h: 0 };
-
-  private sans = 'ui-sans-serif, system-ui, sans-serif';
-  private serif = 'Georgia, serif';
-  private mono = 'ui-monospace, monospace';
 
   constructor(
     private canvas: HTMLCanvasElement,
     private reduce: boolean,
   ) {
-    // next/font registers generated family names; read them from the CSS variables.
-    const css = getComputedStyle(document.documentElement);
-    const font = (v: string, fallback: string) => {
-      const value = css.getPropertyValue(v).trim();
-      return value ? `${value}, ${fallback}` : fallback;
-    };
-    this.sans = font('--font-plex-mono', this.sans);
-    this.serif = font('--font-barlow', this.serif);
-    this.mono = font('--font-plex-mono', this.mono);
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('2d canvas not available');
     this.ctx = ctx;
+    this.readTheme();
     this.resize();
+  }
+
+  /** Reads fonts and colours from the CSS variables. Call again when the theme changes. */
+  readTheme() {
+    const css = getComputedStyle(document.documentElement);
+    // next/font registers generated family names; they are only known through the variables.
+    const font = (name: string, fallback: string) => {
+      const value = css.getPropertyValue(name).trim();
+      return value ? `${value}, ${fallback}` : fallback;
+    };
+    this.mono = font('--font-plex-mono', 'ui-monospace, monospace');
+    this.display = font('--font-barlow', "'Arial Narrow', sans-serif");
+    const color = (name: string, fallback: RGB): RGB => {
+      const raw = css.getPropertyValue(name).trim();
+      if (!raw) return fallback;
+      // The canvas turns any CSS colour into #rrggbb.
+      this.ctx.fillStyle = '#000000';
+      this.ctx.fillStyle = raw;
+      const m = /^#([0-9a-f]{6})$/i.exec(String(this.ctx.fillStyle));
+      if (!m) return fallback;
+      const n = parseInt(m[1]!, 16);
+      return [n >> 16, (n >> 8) & 255, n & 255];
+    };
+    this.pal = {
+      ink: color('--color-ink', FALLBACK.ink),
+      paper: color('--color-surface', FALLBACK.paper),
+      paper2: color('--color-surface-2', FALLBACK.paper2),
+      ground: color('--color-bg', FALLBACK.ground),
+      muted: color('--color-muted', FALLBACK.muted),
+      line: color('--color-line', FALLBACK.line),
+      brand: color('--color-brand', FALLBACK.brand),
+      brandInk: color('--color-brand-ink', FALLBACK.brandInk),
+      ok: color('--color-ok', FALLBACK.ok),
+      danger: color('--color-danger', FALLBACK.danger),
+      shadow: color('--color-shadow', FALLBACK.shadow),
+    };
   }
 
   resize() {
@@ -107,710 +205,840 @@ export class TokenScene {
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
     this.canvas.width = Math.max(1, Math.round(r.width * this.dpr));
     this.canvas.height = Math.max(1, Math.round(r.height * this.dpr));
-    this.wide = r.width / Math.max(1, r.height) > 0.95;
-    const [W, H] = this.wide ? [1000, 640] : [600, 780];
+    // The scene is 1000 units wide and as tall as the canvas allows, within limits.
+    const W = 1000;
+    const H = clamp((W * r.height) / Math.max(1, r.width), 800, 1350);
     this.scale = Math.min(r.width / W, r.height / H);
     this.ox = (r.width - W * this.scale) / 2;
     this.oy = (r.height - H * this.scale) / 2;
-    if (this.wide) {
-      this.wallet = [140, 270];
-      this.vault = { x: 450, y: 340, s: 160 };
-      this.phone = { x: 805, y: 300, w: 230, h: 460 };
-    } else {
-      this.wallet = [150, 120];
-      this.vault = { x: 190, y: 340, s: 130 };
-      this.phone = { x: 430, y: 560, w: 200, h: 390 };
-    }
-    const ph = this.phone;
-    this.screen = { x: ph.x - ph.w / 2 + 12, y: ph.y - ph.h / 2 + 12, w: ph.w - 24, h: ph.h - 24 };
-    this.coinR = this.wide ? 46 : 40;
-    this.buildFormations();
-  }
+    const k = (this.k = Math.min(1, H / 1000));
 
-  private disk(cx: number, cy: number, r: number): Pt[] {
-    const rim = 64;
-    const face = N - rim;
-    const golden = Math.PI * (3 - Math.sqrt(5));
-    return Array.from({ length: N }, (_, i): Pt => {
-      if (i < rim) {
-        const a = (i / rim) * Math.PI * 2;
-        return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-      }
-      const j = i - rim;
-      const rr = r * 0.74 * Math.sqrt((j + 0.5) / face);
-      const a = j * golden;
-      return [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
-    });
-  }
+    this.wallet = { cx: 215, cy: H * 0.25, w: 300 * k, h: 190 * k };
+    this.vault = { cx: 215, cy: H * 0.7, w: 264 * k, h: 264 * k };
+    const ph = Math.min(730, H * 0.74);
+    this.phone = { cx: 765, cy: H * 0.47, w: ph * 0.49, h: ph };
+    const inset = 13;
+    this.screen = {
+      x: this.phone.cx - this.phone.w / 2 + inset,
+      y: this.phone.cy - this.phone.h / 2 + inset,
+      w: this.phone.w - inset * 2,
+      h: this.phone.h - inset * 2,
+    };
 
-  private fill(rects: Box[], step: number): Pt[] {
-    const pts: Pt[] = [];
-    for (const q of rects)
-      for (let y = q.y + step / 2; y < q.y + q.h; y += step)
-        for (let x = q.x + step / 2; x < q.x + q.w; x += step) pts.push([x, y]);
-    return Array.from(
-      { length: N },
-      (_, i) => pts[Math.floor((i * pts.length) / N)] ?? [q0(rects).x, q0(rects).y],
-    );
-  }
+    const w = this.wallet;
+    this.coinR = 60 * k;
+    const coinX = w.cx + w.w * 0.17;
+    this.coinUp = [coinX, w.cy - w.h / 2 - this.coinR - 14 * k];
+    this.coinIn = [coinX, w.cy - w.h * 0.3];
 
-  private buildFormations() {
     const s = this.screen;
-    const bw = s.w * 0.12;
-    const gap = s.w * 0.06;
-    const base = s.y + s.h * 0.5;
+    const bw = s.w * 0.13;
+    const gap = s.w * 0.07;
+    const base = s.y + s.h * 0.69;
     const x0 = s.x + (s.w - (4 * bw + 3 * gap)) / 2;
-    this.barRects = [0.28, 0.5, 0.72, 0.95].map((k, i) => ({
+    this.bars = [0.3, 0.52, 0.76, 1].map((t, i) => ({
       x: x0 + i * (bw + gap),
-      y: base - s.h * 0.26 * k,
+      y: base - s.h * 0.2 * t,
       w: bw,
-      h: s.h * 0.26 * k,
+      h: s.h * 0.2 * t,
     }));
-    const cw = s.w * 0.82;
-    const ch = cw / 1.586;
-    this.card = { x: s.x + (s.w - cw) / 2, y: s.y + s.h * 0.24, w: cw, h: ch };
-    const c = this.card;
+    const cw = s.w * 0.8;
+    this.card = { x: s.x + (s.w - cw) / 2, y: s.y + s.h * 0.46, w: cw, h: cw / 1.586 };
+
+    const v = this.vault;
+    const barsMid: Pt = [s.x + s.w / 2, base - s.h * 0.1];
+    this.bend1 = [w.cx + w.w * 1.12, lerp(this.coinUp[1], v.cy, 0.36)];
+    this.bend2 = [barsMid[0] - s.w * 0.2, v.cy + 34 * k];
+
     const ordered = (pts: Pt[]) => shuffle.map((i) => pts[i]!);
     this.f = {
-      wallet: this.disk(this.wallet[0], this.wallet[1], this.coinR),
-      vault: this.disk(this.vault.x, this.vault.y, this.coinR * 0.6),
-      screenCoin: this.disk(s.x + s.w / 2, s.y + s.h * 0.38, this.coinR * 0.72),
-      bars: ordered(this.fill(this.barRects, s.w * 0.03)),
-      card: ordered(this.fill([c], c.w / 19)),
+      coin: this.disc(this.coinUp, this.coinR * 0.93),
+      vault: this.disc([v.cx, v.cy], v.w * 0.2),
+      bars: ordered(this.grid(this.bars)),
+      card: ordered(this.grid([this.card])),
     };
   }
 
-  /** Where particle i is at progress p, and its colour. */
-  private particle(i: number, p: number, time: number): { pos: Pt; col: RGB } {
-    const d = delay[i]! * 0.35;
-    const st = (t: number) => ease(clamp((t - d) / 0.65));
-    const w = this.f.wallet[i]!;
-    const v = this.f.vault[i]!;
-    const sc = this.f.screenCoin[i]!;
-    const b = this.f.bars[i]!;
-    const c = this.f.card[i]!;
-    const lift = (a: Pt, z: Pt, h: number): Pt => [lerp(a[0], z[0], 0.5), Math.min(a[1], z[1]) - h];
-    if (p < 0.3) return { pos: bez(w, lift(w, v, 150), v, st(seg(p, 0.1, 0.28))), col: AMBER };
-    if (p < 0.42) {
-      const k = this.reduce ? 0 : Math.sin(time / 380 + i) * 1.6;
-      return { pos: [v[0] + k, v[1] + k * 0.6], col: AMBER };
+  /** CSS pixels to scene units, for strokes and labels that must not shrink with the scene. */
+  private u(px: number) {
+    return px / this.scale;
+  }
+
+  private disc(c: Pt, r: number): Pt[] {
+    const step = r * Math.sqrt(Math.PI / N) * 1.03;
+    const n = Math.ceil(r / step);
+    const pts: Pt[] = [];
+    for (let j = -n; j < n; j++)
+      for (let i = -n; i < n; i++) {
+        const x = (i + 0.5) * step;
+        const y = (j + 0.5) * step;
+        if (x * x + y * y <= r * r) pts.push([c[0] + x, c[1] + y]);
+      }
+    return pick(pts);
+  }
+
+  private grid(rects: Box[]): Pt[] {
+    const area = rects.reduce((sum, q) => sum + q.w * q.h, 0);
+    const step = Math.sqrt(area / N) * 1.03;
+    const pts: Pt[] = [];
+    for (const q of rects) {
+      const nx = Math.max(1, Math.round(q.w / step));
+      const ny = Math.max(1, Math.round(q.h / step));
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++)
+          pts.push([q.x + ((i + 0.5) * q.w) / nx, q.y + ((j + 0.5) * q.h) / ny]);
     }
-    if (p < 0.58) return { pos: bez(v, lift(v, sc, 170), sc, st(seg(p, 0.42, 0.56))), col: AMBER };
-    if (p < 0.7) {
-      const t = st(seg(p, 0.57, 0.64));
-      return { pos: [lerp(sc[0], b[0], t), lerp(sc[1], b[1], t)], col: mix(AMBER, GREEN, t) };
+    return pick(pts);
+  }
+
+  /** Where dot i is at progress p. tint 0 is stamp red (a token), 1 is ink (printed). */
+  private dot(i: number, p: number): { pos: Pt; tint: number } {
+    const B = BEATS;
+    const go = (span: Span) => ease(clamp((seg(p, span) - delay[i]! * 0.4) / 0.6));
+    const bend = (c: Pt): Pt => [c[0] + drift[i]![0], c[1] + drift[i]![1]];
+    const coin = this.f.coin[i]!;
+    const vault = this.f.vault[i]!;
+    const bars = this.f.bars[i]!;
+    const card = this.f.card[i]!;
+    if (p < B.pay[1]) return { pos: bez(coin, bend(this.bend1), vault, go(B.pay)), tint: 0 };
+    if (p < B.arrive[0]) return { pos: vault, tint: 0 };
+    if (p < B.toCard[0]) {
+      const t = go(B.arrive);
+      return { pos: bez(vault, bend(this.bend2), bars, t), tint: seg(t, [0.7, 1]) };
     }
-    if (p < 0.84) {
-      const t = st(seg(p, 0.7, 0.77));
-      return { pos: [lerp(b[0], c[0], t), lerp(b[1], c[1], t)], col: mix(GREEN, AMBER, t) };
+    if (p < B.fail[0]) {
+      const t = go(B.toCard);
+      return { pos: [lerp(bars[0], card[0], t), lerp(bars[1], card[1], t)], tint: 1 };
     }
-    const t = st(seg(p, 0.85, 0.97));
-    let pos: Pt;
-    if (t < 0.25) {
-      const k = t / 0.25;
-      pos = [lerp(c[0], sc[0], k), lerp(c[1], sc[1], k)];
-    } else {
-      const k = (t - 0.25) / 0.75;
-      pos =
-        k < 0.5
-          ? bez(sc, [lerp(sc[0], v[0], 0.5), v[1] + 160], v, k / 0.5)
-          : bez(v, lift(v, w, 150), w, (k - 0.5) / 0.5);
+    if (p < B.refund[0]) {
+      const t = go(B.fail);
+      return { pos: bez(card, bend(this.bend2), vault, t), tint: 1 - seg(t, [0, 0.4]) };
     }
-    return { pos, col: mix(AMBER, TEAL, t) };
+    return { pos: bez(vault, bend(this.bend1), coin, go(B.refund)), tint: 0 };
   }
 
   draw(p: number, time: number) {
-    const { ctx } = this;
-    const cw = this.canvas.width / this.dpr;
-    const chh = this.canvas.height / this.dpr;
+    const { ctx, pal, k } = this;
+    const B = BEATS;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    ctx.clearRect(0, 0, cw, chh);
+    ctx.clearRect(0, 0, this.canvas.width / this.dpr, this.canvas.height / this.dpr);
     ctx.translate(this.ox, this.oy);
     ctx.scale(this.scale, this.scale);
-    // Crisp, evenly kerned small labels at any scale.
     ctx.fontKerning = 'normal';
-    ctx.letterSpacing = '0px';
     ctx.textRendering = 'geometricPrecision';
+    ctx.lineJoin = 'round';
 
-    const phoneIn = easeOut(seg(p, 0.34, 0.5));
-    const dy = (1 - phoneIn) * 70;
+    // ---- what is happening at p
+    const up = easeOut(seg(p, B.rise)) - ease(seg(p, B.tuck));
+    const bob = this.reduce ? 0 : Math.sin(time / 650) * 3 * k * up;
+    const coinAt: Pt = [this.coinUp[0], lerp(this.coinIn[1], this.coinUp[1], up) + bob];
+    const coinSolid = Math.max(
+      1 - seg(p, [B.pay[0], B.pay[0] + 0.02]),
+      seg(p, [B.refund[1], B.refund[1] + 0.015]),
+    );
+    const open =
+      pulse(p, 0.09, 0.12, 0.265, 0.295) +
+      pulse(p, 0.5, 0.53, 0.645, 0.675) +
+      pulse(p, 0.812, 0.832, 0.935, 0.955);
+    const dial = (ease(seg(p, [0.285, 0.32])) - ease(seg(p, [0.48, 0.51]))) * Math.PI * 1.5;
+    const held = seg(p, B.held);
+    const heldOff = seg(p, [0.485, 0.505]);
+    const isHeld = p >= 0.3 && p < 0.495;
+    const isReleased = p >= 0.495 && p < 0.68;
+    const isRefunding = p >= B.fail[0] && p < B.refund[1];
+    const isRefunded = p >= B.refund[1];
+    const refunded = seg(p, [0.95, 0.982]);
+    const barsSolid = pulse(p, 0.645, 0.665, 0.7, 0.712);
+    const cardSolid = pulse(p, 0.765, 0.785, 0.82, 0.832);
+    // Which of the three places the eye should be on.
+    const fWallet = Math.max(1 - seg(p, [0.14, 0.26]), seg(p, [0.86, 0.93]));
+    const fVault = Math.max(pulse(p, 0.12, 0.2, 0.6, 0.68), pulse(p, 0.82, 0.85, 0.93, 0.97));
+    const fPhone = pulse(p, 0.36, 0.4, 0.86, 0.92);
+    const paying = pulse(p, B.pay[0], B.pay[0] + 0.02, B.pay[1], B.pay[1] + 0.02);
+    const sending = pulse(p, 0.37, 0.39, 0.5, 0.52);
+    const arriving = pulse(p, B.arrive[0], B.arrive[0] + 0.02, B.arrive[1], B.arrive[1] + 0.02);
+    const failing = pulse(p, B.fail[0], B.fail[0] + 0.01, B.fail[1] - 0.01, B.fail[1]);
+    const refunding = pulse(p, B.refund[0], B.refund[0] + 0.01, B.refund[1], B.refund[1] + 0.02);
 
-    this.drawPath();
-    this.drawWallet(p);
-    this.drawVault(p, time);
-    this.drawHandBack(dy, phoneIn);
-    this.drawPhone(p, dy, phoneIn);
-
-    // Solid objects replace the points once a shape has settled.
-    const coinStart = 1 - seg(p, 0.1, 0.14);
-    const coinEnd = seg(p, 0.96, 0.99);
-    const barsSolid = seg(p, 0.64, 0.67) * (1 - seg(p, 0.7, 0.72));
-    const cardSolid = seg(p, 0.77, 0.8) * (1 - seg(p, 0.85, 0.87));
-    const lock = this.lockAmount(p);
-
-    ctx.save();
-    const inPhone = p >= 0.52 && p < 0.9;
-    for (let i = 0; i < N; i++) {
-      const { pos, col } = this.particle(i, p, time);
-      const y = pos[1] + (inPhone ? dy : 0);
-      let a = 1 - Math.max(coinStart, coinEnd, barsSolid, cardSolid);
-      if (p > 0.26 && p < 0.46) a *= 1 - 0.55 * lock;
-      if (a <= 0.01) continue;
-      const r = this.wide ? 2.3 : 2.1;
-      ctx.fillStyle = rgba(col, 0.1 * a);
-      ctx.beginPath();
-      ctx.arc(pos[0], y, r * 2.6, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = rgba(col, 0.95 * a);
-      ctx.beginPath();
-      ctx.arc(pos[0], y, r, 0, Math.PI * 2);
-      ctx.fill();
+    // ---- the two legs of the route, under everything else
+    const w = this.wallet;
+    const v = this.vault;
+    const s = this.screen;
+    const vaultAt: Pt = [v.cx, v.cy];
+    const phoneAt: Pt = [s.x + s.w / 2, s.y + s.h * 0.56];
+    const march = this.reduce ? 0 : time / 60;
+    this.leg(this.coinUp, this.bend1, vaultAt, rgba(pal.line), 0);
+    this.leg(vaultAt, this.bend2, phoneAt, rgba(pal.line), 0);
+    if (paying > 0) this.leg(this.coinUp, this.bend1, vaultAt, rgba(pal.ink, paying), -march);
+    if (refunding > 0)
+      this.leg(this.coinUp, this.bend1, vaultAt, rgba(pal.brand, refunding), march);
+    if (sending + arriving > 0)
+      this.leg(vaultAt, this.bend2, phoneAt, rgba(pal.ink, sending + arriving), -march);
+    if (failing > 0) this.leg(vaultAt, this.bend2, phoneAt, rgba(pal.brand, failing), march);
+    // The delivery order travelling to the phone. The payment itself has not moved yet.
+    if (sending > 0) {
+      const phase = seg(p, [0.37, 0.5]) * 3 + (this.reduce ? 0 : time / 1500);
+      for (let i = 0; i < 3; i++) {
+        const [x, y] = bez(vaultAt, this.bend2, phoneAt, ((phase + i / 3) % 1) * 0.6);
+        const d = 15 * k;
+        ctx.fillStyle = rgba(pal.ground);
+        ctx.fillRect(x - d / 2, y - d / 2, d, d);
+        ctx.lineWidth = this.u(1.75);
+        ctx.strokeStyle = rgba(pal.ink, sending);
+        ctx.strokeRect(x - d / 2, y - d / 2, d, d);
+      }
     }
-    ctx.restore();
 
-    if (coinStart > 0.01)
-      this.drawCoin(this.wallet[0], this.wallet[1], this.coinR, time, coinStart, AMBER);
-    if (coinEnd > 0.01)
-      this.drawCoin(this.wallet[0], this.wallet[1], this.coinR, time, coinEnd, TEAL);
+    // ---- wallet, with the coin between its back and its front pocket
+    // The coin's seat above the wallet: an empty outline whenever the coin is not in it.
+    const seat = 1 - coinSolid * clamp(up);
     ctx.save();
-    ctx.translate(0, dy);
-    if (barsSolid > 0.01) this.drawBars(barsSolid, p);
-    if (cardSolid > 0.01) this.drawCard(cardSolid, time);
-    this.drawBursts(p);
+    ctx.beginPath();
+    ctx.arc(this.coinUp[0], this.coinUp[1], this.coinR, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(pal.ground);
+    ctx.fill();
+    ctx.setLineDash([this.u(3), this.u(5)]);
+    ctx.lineWidth = this.u(1.5);
+    ctx.strokeStyle = rgba(pal.line, seat);
+    ctx.stroke();
     ctx.restore();
+    const toneW = mix(pal.line, pal.ink, 0.4 + 0.6 * fWallet);
+    this.drawWalletBack(toneW, fWallet);
+    if (coinSolid > 0.01) this.drawCoin(coinAt[0], coinAt[1], this.coinR, coinSolid, up);
+    this.drawWalletFront(toneW);
+    this.drawVault(mix(pal.line, pal.ink, 0.4 + 0.6 * fVault), fVault, open, dial, time, {
+      isHeld,
+      isReleased,
+      isRefunding,
+    });
+    this.drawPhone(p, time, mix(pal.line, pal.ink, 0.4 + 0.6 * fPhone), fPhone, {
+      barsSolid,
+      cardSolid,
+    });
+
+    // ---- the token in motion
+    let dots = 1 - Math.max(coinSolid, barsSolid, cardSolid);
+    // Behind the closed escrow door the dots are out of sight.
+    if (p >= B.pay[1] && p < B.arrive[0]) dots *= clamp(open * 2);
+    if (dots > 0.01) {
+      const d = 6.4 * k;
+      ctx.globalAlpha = dots;
+      for (let i = 0; i < N; i++) {
+        const { pos, tint } = this.dot(i, p);
+        ctx.fillStyle = rgba(tint <= 0 ? pal.brand : mix(pal.brand, pal.ink, tint));
+        ctx.fillRect(pos[0] - d / 2, pos[1] - d / 2, d, d);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // ---- stamps
+    this.stamp('HELD', v.cx, v.cy, -0.2, v.w * 0.32, held, heldOff);
+    this.stamp('REFUNDED', w.cx, w.cy + w.h * 0.16, -0.14, w.w * 0.2, refunded, 0);
+
+    // ---- words
+    const small = this.scale < 0.5;
+    const away = p >= B.pay[0] + 0.02 && !isRefunded;
+    this.caption(
+      w.cx,
+      w.cy + w.h / 2,
+      'Your wallet',
+      away ? '0.00 QUSDC' : AMOUNT,
+      away ? pal.muted : pal.brand,
+      fWallet,
+    );
+    const [vaultSub, vaultColor]: [string, RGB] = isHeld
+      ? [`Holding ${AMOUNT}`, pal.brand]
+      : isReleased
+        ? ['Released', pal.ok]
+        : isRefunding
+          ? ['Refunding', pal.brand]
+          : [small ? 'QartaCheckout' : 'QartaCheckout · QIE Mainnet', pal.muted];
+    this.caption(v.cx, v.cy + v.h / 2, 'Escrow contract', vaultSub, vaultColor, fVault);
+    this.caption(
+      this.phone.cx,
+      this.phone.cy + this.phone.h / 2,
+      'Their phone',
+      '+234 803 ••• 4567',
+      pal.muted,
+      fPhone,
+    );
+    const mid1 = bez(this.coinUp, this.bend1, vaultAt, 0.5);
+    this.tag('Pay', mid1[0], mid1[1], paying, pal.ink);
+    this.tag('Refund', mid1[0], mid1[1], refunding, pal.brand);
+    const gapMid = lerp(v.cx + v.w / 2, this.phone.cx - this.phone.w / 2, 0.5);
+    this.tag('Reloadly', gapMid, v.cy - 40 * k, sending, pal.ink, 'center');
   }
 
   // ------------------------------------------------------------------ pieces
 
-  private lockAmount(p: number) {
-    return seg(p, 0.26, 0.31) * (1 - seg(p, 0.4, 0.45));
-  }
-
-  private label(text: string, x: number, y: number, color: RGB = DIM, size = 13, weight = 500) {
-    const { ctx } = this;
-    ctx.font = `${weight} ${size}px ${this.sans}`;
-    ctx.fillStyle = rgba(color, 1);
-    ctx.textAlign = 'center';
-    ctx.fillText(text, x, y);
-  }
-
-  private rr(x: number, y: number, w: number, h: number, r: number) {
+  private rr(x: number, y: number, w: number, h: number, r: number | number[]) {
     this.ctx.beginPath();
     this.ctx.roundRect(x, y, w, h, r);
   }
 
-  private drawPath() {
+  private text(
+    str: string,
+    x: number,
+    y: number,
+    size: number,
+    color: string,
+    o: { weight?: number; align?: CanvasTextAlign; font?: string; spacing?: number } = {},
+  ) {
     const { ctx } = this;
-    const [wx, wy] = this.wallet;
-    const v = this.vault;
-    const ph = this.phone;
+    ctx.font = `${o.weight ?? 500} ${size}px ${o.font ?? this.mono}`;
+    ctx.letterSpacing = `${o.spacing ?? 0}px`;
+    ctx.textAlign = o.align ?? 'center';
+    ctx.fillStyle = color;
+    ctx.fillText(str, x, y);
+    ctx.letterSpacing = '0px';
+  }
+
+  /** Dashed route line. A changing offset makes the dashes walk along it. */
+  private leg(a: Pt, c: Pt, b: Pt, color: string, offset: number) {
+    const { ctx } = this;
     ctx.save();
-    ctx.setLineDash([3, 8]);
-    ctx.strokeStyle = 'rgba(20,20,20,0.28)';
-    ctx.lineWidth = 1.5;
+    ctx.setLineDash([this.u(5), this.u(6)]);
+    ctx.lineDashOffset = this.u(offset);
+    ctx.lineWidth = this.u(1.5);
+    ctx.strokeStyle = color;
     ctx.beginPath();
-    ctx.moveTo(wx, wy);
-    ctx.quadraticCurveTo(lerp(wx, v.x, 0.5), Math.min(wy, v.y) - 150, v.x, v.y);
-    ctx.quadraticCurveTo(lerp(v.x, ph.x, 0.5), Math.min(v.y, ph.y) - 170, ph.x, ph.y - ph.h * 0.12);
+    ctx.moveTo(a[0], a[1]);
+    ctx.quadraticCurveTo(c[0], c[1], b[0], b[1]);
     ctx.stroke();
     ctx.restore();
   }
 
-  private drawWallet(p: number) {
-    const { ctx } = this;
-    const [x, y] = this.wallet;
-    const w = this.wide ? 200 : 180;
-    const h = this.wide ? 140 : 126;
-    const active = p < 0.12 || p > 0.94;
+  /** Small boxed label on the route. */
+  private tag(
+    str: string,
+    x: number,
+    y: number,
+    alpha: number,
+    color: RGB,
+    align: 'left' | 'center' = 'left',
+  ) {
+    if (alpha <= 0.01) return;
+    const { ctx, pal } = this;
+    const size = this.u(this.scale < 0.5 ? 9.5 : 11);
     ctx.save();
-    // Back panel and a card peeking out.
-    const back = ctx.createLinearGradient(x, y - h / 2, x, y + h / 2);
-    back.addColorStop(0, '#2c2722');
-    back.addColorStop(1, '#1a1714');
-    this.rr(x - w / 2, y - h / 2, w, h, 18);
-    ctx.fillStyle = back;
+    ctx.globalAlpha = clamp(alpha);
+    ctx.font = `600 ${size}px ${this.mono}`;
+    ctx.letterSpacing = `${size * 0.08}px`;
+    const label = str.toUpperCase();
+    const tw = ctx.measureText(label).width;
+    const bw = tw + size * 1.1;
+    const bh = size * 1.9;
+    const bx = align === 'left' ? x + size * 0.9 : x - bw / 2;
+    this.rr(bx, y - bh / 2, bw, bh, 0);
+    ctx.fillStyle = rgba(pal.ground);
     ctx.fill();
-    const peek = ctx.createLinearGradient(x - w / 2, 0, x + w / 4, 0);
-    peek.addColorStop(0, '#3a3220');
-    peek.addColorStop(1, '#5a4520');
-    this.rr(x - w / 2 + 16, y - h / 2 - 12, w * 0.5, 34, 6);
-    ctx.fillStyle = peek;
-    ctx.fill();
-    // Front pocket with stitching.
-    const front = ctx.createLinearGradient(x, y - h * 0.2, x, y + h / 2);
-    front.addColorStop(0, '#332d27');
-    front.addColorStop(1, '#1c1915');
-    this.rr(x - w / 2, y - h * 0.18, w, h * 0.68, 16);
-    ctx.fillStyle = front;
-    ctx.fill();
-    ctx.setLineDash([4, 4]);
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
-    ctx.lineWidth = 1;
-    this.rr(x - w / 2 + 7, y - h * 0.18 + 7, w - 14, h * 0.68 - 14, 11);
+    ctx.lineWidth = this.u(1.5);
+    ctx.strokeStyle = rgba(color);
     ctx.stroke();
-    ctx.setLineDash([]);
-    // Clasp.
-    this.rr(x + w / 2 - 38, y - 4, 38, 30, 9);
-    ctx.fillStyle = '#3a332c';
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(x + w / 2 - 18, y + 11, 5, 0, Math.PI * 2);
-    ctx.fillStyle = active ? rgba(AMBER, 0.9) : '#6b6258';
-    ctx.fill();
-    // Outline.
-    this.rr(x - w / 2, y - h / 2, w, h, 18);
-    ctx.lineWidth = 1.5;
-    ctx.strokeStyle = active ? rgba(AMBER, 0.45) : 'rgba(255,255,255,0.06)';
-    ctx.stroke();
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = rgba(color);
+    ctx.fillText(label, bx + size * 0.55 + size * 0.04, y + size * 0.06);
     ctx.restore();
-    this.label('Your wallet', x, y + h / 2 + 28);
-    if (p < 0.1) this.label('1.04 QUSDC', x, y + h / 2 + 48, AMBER, 14);
-    if (p > 0.95) this.label('Refunded 1.04 QUSDC', x, y + h / 2 + 48, TEAL, 14);
   }
 
-  private drawCoin(x: number, y: number, r: number, time: number, alpha: number, halo: RGB) {
-    const { ctx } = this;
-    const tilt = this.reduce ? 1 : 0.86 + 0.14 * Math.cos(time / 900);
+  /** Two lines under a station: its name, and what it holds right now. */
+  private caption(
+    cx: number,
+    top: number,
+    title: string,
+    sub: string,
+    subColor: RGB,
+    focus: number,
+  ) {
+    const { pal } = this;
+    const size = this.u(this.scale < 0.5 ? 10 : 12);
+    const y = top + this.u(8) + size * 1.7;
+    this.text(title.toUpperCase(), cx, y, size, rgba(mix(pal.muted, pal.ink, focus)), {
+      weight: 600,
+      spacing: size * 0.08,
+    });
+    this.text(sub, cx, y + size * 1.55, size * 0.94, rgba(subColor));
+  }
+
+  /** Rubber stamp. t lands it, off lifts it away again. */
+  private stamp(
+    str: string,
+    cx: number,
+    cy: number,
+    rot: number,
+    size: number,
+    t: number,
+    off: number,
+  ) {
+    if (t <= 0 || off >= 1) return;
+    const { ctx, pal } = this;
+    const grow = lerp(2.3, 1, backOut(clamp(t))) * (1 + off * 0.3);
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.shadowColor = rgba(halo, 0.55);
-    ctx.shadowBlur = 36;
-    ctx.translate(x, y - 6);
-    ctx.scale(tilt, 1);
-    // Edge (visible as the coin turns), rim and face.
-    ctx.fillStyle = '#5e4628';
-    ctx.beginPath();
-    ctx.ellipse(2, 3, r, r, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    const rim = ctx.createRadialGradient(-r * 0.3, -r * 0.4, r * 0.1, 0, 0, r);
-    rim.addColorStop(0, '#f1dcb0');
-    rim.addColorStop(0.6, '#c9a46a');
-    rim.addColorStop(1, '#7d6036');
-    ctx.fillStyle = rim;
-    ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
-    ctx.fill();
-    const face = ctx.createRadialGradient(r * 0.2, r * 0.3, r * 0.1, 0, 0, r * 0.8);
-    face.addColorStop(0, '#b8925a');
-    face.addColorStop(1, '#d4b47d');
-    ctx.fillStyle = face;
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 0.8, 0, Math.PI * 2);
-    ctx.fill();
-    // Milled ring.
-    ctx.setLineDash([2, 3]);
-    ctx.strokeStyle = 'rgba(80,60,30,0.55)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 0.9, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.font = `400 ${r * 1.05}px ${this.serif}`;
+    ctx.translate(cx, cy);
+    ctx.rotate(rot);
+    ctx.scale(grow, grow);
+    ctx.globalAlpha = clamp(t * 3) * (1 - off) * 0.95;
+    ctx.font = `800 ${size}px ${this.display}`;
+    ctx.letterSpacing = `${size * 0.07}px`;
+    const bw = ctx.measureText(str).width + size * 0.48;
+    const bh = size * 1.14;
+    ctx.fillStyle = rgba(pal.paper, 0.9);
+    ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+    ctx.lineWidth = Math.max(size * 0.07, this.u(2.5));
+    ctx.strokeStyle = rgba(pal.brand);
+    ctx.strokeRect(-bw / 2, -bh / 2, bw, bh);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(60,44,22,0.9)';
-    ctx.fillText('Q', 0, r * 0.06);
-    ctx.textBaseline = 'alphabetic';
-    // Moving glint.
-    const a = this.reduce ? 0.6 : (time / 1400) % (Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth = 3;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.arc(0, 0, r * 0.94, a, a + 0.6);
-    ctx.stroke();
+    ctx.fillStyle = rgba(pal.brand);
+    ctx.fillText(str, size * 0.035, size * 0.06);
     ctx.restore();
   }
 
-  private drawVault(p: number, time: number) {
-    const { ctx } = this;
-    const { x, y, s } = this.vault;
-    const lock = this.lockAmount(p);
-    const open =
-      seg(p, 0.41, 0.47) * (1 - seg(p, 0.6, 0.64)) + seg(p, 0.88, 0.9) * (1 - seg(p, 0.93, 0.95));
-    ctx.save();
-    if (lock > 0) {
-      ctx.shadowColor = rgba(AMBER, 0.45 * lock * (0.8 + 0.2 * Math.sin(time / 300)));
-      ctx.shadowBlur = 70 * lock;
-    }
-    const body = ctx.createLinearGradient(x - s / 2, y - s / 2, x + s / 2, y + s / 2);
-    body.addColorStop(0, '#34302a');
-    body.addColorStop(1, '#141210');
-    this.rr(x - s / 2, y - s / 2, s, s, 24);
-    ctx.fillStyle = body;
+  /** Hard offset shadow, the same one the site's menus cast. Grows with focus. */
+  private shadow(x: number, y: number, w: number, h: number, r: number, focus: number) {
+    const off = 9 * this.k * focus;
+    if (off < 0.5) return;
+    this.rr(x + off, y + off, w, h, r);
+    this.ctx.fillStyle = rgba(this.pal.shadow);
+    this.ctx.fill();
+  }
+
+  private drawWalletBack(tone: RGB, focus: number) {
+    const { ctx, pal, k } = this;
+    const { cx, cy, w, h } = this.wallet;
+    const x = cx - w / 2;
+    const y = cy - h / 2;
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(tone);
+    this.shadow(x, y, w, h, 14 * k, focus);
+    // A card peeking out of the back pocket.
+    this.rr(x + w * 0.08, y - 22 * k, w * 0.36, 60 * k, 7 * k);
+    ctx.fillStyle = rgba(pal.paper);
     ctx.fill();
-    ctx.shadowBlur = 0;
-    // Bevel.
-    this.rr(x - s / 2 + 8, y - s / 2 + 8, s - 16, s - 16, 18);
-    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-    ctx.lineWidth = 2;
     ctx.stroke();
-    // Bolts.
-    for (const [bx, by] of [
-      [-1, -1],
-      [1, -1],
-      [-1, 1],
-      [1, 1],
-    ] as const) {
-      const g = ctx.createRadialGradient(
-        x + bx * s * 0.38 - 1,
-        y + by * s * 0.38 - 1,
-        0,
-        x + bx * s * 0.38,
-        y + by * s * 0.38,
-        5,
-      );
-      g.addColorStop(0, '#a49a8c');
-      g.addColorStop(1, '#332e28');
-      ctx.fillStyle = g;
+    ctx.fillStyle = rgba(mix(pal.line, pal.brand, focus));
+    ctx.fillRect(x + w * 0.08 + 12 * k, y - 11 * k, w * 0.12, 7 * k);
+    this.rr(x, y, w, h, 14 * k);
+    ctx.fillStyle = rgba(pal.paper2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  private drawWalletFront(tone: RGB) {
+    const { ctx, pal, k } = this;
+    const { cx, cy, w, h } = this.wallet;
+    const x = cx - w / 2;
+    const top = cy - h * 0.18;
+    const ph = h * 0.68;
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(tone);
+    this.rr(x, top, w, ph, [4 * k, 4 * k, 14 * k, 14 * k]);
+    ctx.fillStyle = rgba(pal.paper);
+    ctx.fill();
+    ctx.stroke();
+    // Stitching.
+    ctx.save();
+    ctx.setLineDash([this.u(3), this.u(4)]);
+    ctx.lineWidth = this.u(1);
+    ctx.strokeStyle = rgba(pal.muted, 0.55);
+    this.rr(x + 10 * k, top + 10 * k, w - 20 * k, ph - 20 * k, [1, 1, 7 * k, 7 * k]);
+    ctx.stroke();
+    ctx.restore();
+    // Clasp.
+    const cw = 54 * k;
+    const ch = 36 * k;
+    const clY = top + ph * 0.5 - ch / 2;
+    this.rr(x + w - cw, clY, cw, ch, [ch / 2, 0, 0, ch / 2]);
+    ctx.fillStyle = rgba(pal.paper2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + w - cw * 0.5, clY + ch / 2, 5.5 * k, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(tone);
+    ctx.fill();
+  }
+
+  /** The token: a flat red coin with a Q cut out of it. */
+  private drawCoin(x: number, y: number, r: number, alpha: number, up: number) {
+    const { ctx, pal, k } = this;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    const off = 6 * k * clamp(up);
+    if (off > 0.5) {
+      ctx.fillStyle = rgba(pal.shadow);
       ctx.beginPath();
-      ctx.arc(x + bx * s * 0.38, y + by * s * 0.38, 4.5, 0, Math.PI * 2);
+      ctx.arc(x + off, y + off, r, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Door: swings open on its left hinge.
-    const r = s * 0.34;
-    ctx.fillStyle = '#0b0a09';
+    ctx.fillStyle = rgba(pal.brand);
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.translate(x - r, y);
-    ctx.scale(1 - open * 0.82, 1);
-    ctx.translate(r, 0);
-    const door = ctx.createRadialGradient(-r * 0.3, -r * 0.3, r * 0.1, 0, 0, r);
-    door.addColorStop(0, '#433d35');
-    door.addColorStop(1, '#1b1815');
-    ctx.fillStyle = door;
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(pal.ink);
+    ctx.stroke();
+    // Milled edge.
+    ctx.setLineDash([r * 0.05, r * 0.09]);
+    ctx.lineWidth = r * 0.07;
+    ctx.strokeStyle = rgba(pal.brandInk, 0.6);
     ctx.beginPath();
-    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.arc(x, y, r * 0.82, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Q: a ring and a tail.
+    ctx.strokeStyle = rgba(pal.brandInk);
+    ctx.lineWidth = r * 0.17;
+    ctx.lineCap = 'butt';
+    ctx.beginPath();
+    ctx.arc(x - r * 0.03, y - r * 0.03, r * 0.36, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x + r * 0.12, y + r * 0.12);
+    ctx.lineTo(x + r * 0.5, y + r * 0.5);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private drawVault(
+    tone: RGB,
+    focus: number,
+    open: number,
+    dial: number,
+    time: number,
+    state: { isHeld: boolean; isReleased: boolean; isRefunding: boolean },
+  ) {
+    const { ctx, pal, k } = this;
+    const { cx, cy, w } = this.vault;
+    const x = cx - w / 2;
+    const y = cy - w / 2;
+    const R = w * 0.31;
+    const accent = state.isHeld || state.isRefunding ? pal.brand : state.isReleased ? pal.ok : tone;
+    ctx.save();
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(tone);
+    this.shadow(x, y, w, w, 16 * k, focus);
+    this.rr(x, y, w, w, 16 * k);
+    ctx.fillStyle = rgba(pal.paper);
     ctx.fill();
-    ctx.strokeStyle = rgba(lock > 0.5 ? AMBER : DIM, 0.35 + 0.55 * lock);
-    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Inner panel.
+    ctx.lineWidth = this.u(1);
+    ctx.strokeStyle = rgba(pal.line);
+    this.rr(x + 12 * k, y + 12 * k, w - 24 * k, w - 24 * k, 8 * k);
+    ctx.stroke();
+    // Dial marks around the door.
+    ctx.strokeStyle = rgba(accent === tone ? pal.muted : accent);
+    ctx.lineWidth = this.u(1.25);
+    ctx.beginPath();
+    for (let i = 0; i < 36; i++) {
+      const a = (i / 36) * Math.PI * 2;
+      const r1 = R + 8 * k;
+      const r2 = R + (i % 3 === 0 ? 17 : 12) * k;
+      ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+      ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+    }
+    ctx.stroke();
+    // Status light.
+    const blink = state.isHeld && !this.reduce ? 0.7 + 0.3 * Math.sin(time / 320) : 1;
+    ctx.fillStyle = rgba(accent === tone ? pal.line : accent, blink);
+    ctx.fillRect(x + w - 34 * k, y + 20 * k, 13 * k, 13 * k);
+    // Inside of the safe, then the door swinging on its left hinge.
+    ctx.fillStyle = rgba(pal.shadow);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = rgba(tone);
+    ctx.fillRect(cx - R - 9 * k, cy - R * 0.6, 9 * k, 18 * k);
+    ctx.fillRect(cx - R - 9 * k, cy + R * 0.6 - 18 * k, 9 * k, 18 * k);
+    ctx.translate(cx - R, cy);
+    ctx.scale(1 - clamp(open) * 0.86, 1);
+    ctx.translate(R, 0);
+    ctx.beginPath();
+    ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(pal.paper2);
+    ctx.fill();
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(tone);
+    ctx.stroke();
+    ctx.lineWidth = this.u(1);
+    ctx.strokeStyle = rgba(pal.line);
+    ctx.beginPath();
+    ctx.arc(0, 0, R * 0.74, 0, Math.PI * 2);
     ctx.stroke();
     // Wheel handle.
-    ctx.rotate((seg(p, 0.26, 0.32) - seg(p, 0.4, 0.46)) * Math.PI * 1.5);
-    ctx.strokeStyle = rgba(lock > 0.5 ? AMBER : [176, 168, 156], 0.9);
-    ctx.lineWidth = 3;
+    ctx.rotate(dial);
+    ctx.strokeStyle = rgba(tone);
+    ctx.fillStyle = rgba(tone);
+    ctx.lineWidth = this.u(2.5);
     ctx.lineCap = 'round';
-    for (let k = 0; k < 3; k++) {
-      const a = (k * Math.PI) / 3;
+    for (let i = 0; i < 3; i++) {
+      const a = (i * Math.PI) / 3;
+      const dx = Math.cos(a) * R * 0.52;
+      const dy = Math.sin(a) * R * 0.52;
       ctx.beginPath();
-      ctx.moveTo(Math.cos(a) * r * 0.62, Math.sin(a) * r * 0.62);
-      ctx.lineTo(-Math.cos(a) * r * 0.62, -Math.sin(a) * r * 0.62);
+      ctx.moveTo(dx, dy);
+      ctx.lineTo(-dx, -dy);
       ctx.stroke();
+      for (const side of [1, -1]) {
+        ctx.beginPath();
+        ctx.arc(dx * side, dy * side, 4.5 * k, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
     ctx.beginPath();
-    ctx.arc(0, 0, r * 0.18, 0, Math.PI * 2);
-    ctx.fillStyle = '#564e44';
-    ctx.fill();
-    ctx.restore();
-    // Status light.
-    const led = lock > 0.5 ? AMBER : open > 0.3 ? GREEN : DIM;
-    ctx.save();
-    ctx.shadowColor = rgba(led, 0.9);
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = rgba(led, 1);
-    ctx.beginPath();
-    ctx.arc(x + s / 2 - 18, y - s / 2 + 18, 4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    this.label('Escrow contract', x, y + s / 2 + 28);
-    this.label('QartaCheckout on QIE Mainnet', x, y + s / 2 + 46, DIM, 11, 400);
-    if (lock > 0.6) this.label('Locked', x, y - s / 2 - 14, AMBER, 12);
-    else if (open > 0.5 && p < 0.7) this.label('Released', x, y - s / 2 - 14, GREEN, 12);
-  }
-
-  private skin(x0: number, y0: number, x1: number, y1: number) {
-    const g = this.ctx.createLinearGradient(x0, y0, x1, y1);
-    g.addColorStop(0, '#3d3731');
-    g.addColorStop(1, '#221e1a');
-    return g;
-  }
-
-  private drawHandBack(dy: number, inAmt: number) {
-    const { ctx } = this;
-    const { x, y, w, h } = this.phone;
-    ctx.save();
-    ctx.translate(0, dy);
-    ctx.globalAlpha = 0.4 + 0.6 * inAmt;
-    ctx.fillStyle = this.skin(x - w * 0.6, y, x + w * 0.6, y + h);
-    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-    ctx.lineWidth = 1.5;
-    // Palm and wrist, with the thumb's fleshy base bulging on the left.
-    ctx.beginPath();
-    ctx.moveTo(x - w * 0.5, y + h * 0.2);
-    ctx.bezierCurveTo(
-      x - w * 0.78,
-      y + h * 0.3,
-      x - w * 0.74,
-      y + h * 0.58,
-      x - w * 0.5,
-      y + h * 0.7,
-    );
-    ctx.bezierCurveTo(
-      x - w * 0.42,
-      y + h * 0.8,
-      x - w * 0.4,
-      y + h * 0.92,
-      x - w * 0.34,
-      y + h * 1.06,
-    );
-    ctx.lineTo(x + w * 0.4, y + h * 1.06);
-    ctx.bezierCurveTo(
-      x + w * 0.46,
-      y + h * 0.86,
-      x + w * 0.66,
-      y + h * 0.62,
-      x + w * 0.6,
-      y + h * 0.16,
-    );
-    ctx.closePath();
+    ctx.arc(0, 0, R * 0.17, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(pal.paper);
     ctx.fill();
     ctx.stroke();
     ctx.restore();
   }
 
-  private drawPhone(p: number, dy: number, inAmt: number) {
-    const { ctx } = this;
-    const { x, y, w, h } = this.phone;
+  private drawPhone(
+    p: number,
+    time: number,
+    tone: RGB,
+    focus: number,
+    solid: { barsSolid: number; cardSolid: number },
+  ) {
+    const { ctx, pal } = this;
+    const { cx, cy, w, h } = this.phone;
+    const x = cx - w / 2;
+    const y = cy - h / 2;
     const s = this.screen;
+    const radius = w * 0.14;
     ctx.save();
-    ctx.translate(0, dy);
-    ctx.globalAlpha = 0.4 + 0.6 * inAmt;
-    // Side buttons.
-    ctx.fillStyle = '#332e28';
-    this.rr(x - w / 2 - 3, y - h * 0.28, 4, 34, 2);
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(tone);
+    this.shadow(x, y, w, h, radius, focus);
+    // Side button.
+    ctx.fillStyle = rgba(tone);
+    ctx.fillRect(x + w, y + h * 0.2, this.u(2) + 3, h * 0.1);
+    this.rr(x, y, w, h, radius);
+    ctx.fillStyle = rgba(pal.paper);
     ctx.fill();
-    this.rr(x - w / 2 - 3, y - h * 0.18, 4, 50, 2);
-    ctx.fill();
-    this.rr(x + w / 2 - 1, y - h * 0.22, 4, 70, 2);
-    ctx.fill();
-    // Frame.
-    const frame = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
-    frame.addColorStop(0, '#433d36');
-    frame.addColorStop(0.5, '#1c1916');
-    frame.addColorStop(1, '#36302a');
-    this.rr(x - w / 2, y - h / 2, w, h, 38);
-    ctx.fillStyle = frame;
-    ctx.fill();
-    // Screen.
-    const scr = ctx.createLinearGradient(0, s.y, 0, s.y + s.h);
-    scr.addColorStop(0, '#161411');
-    scr.addColorStop(1, '#0b0a09');
-    this.rr(s.x, s.y, s.w, s.h, 28);
-    ctx.fillStyle = scr;
-    ctx.fill();
-    // Dynamic island and status bar.
-    this.rr(x - 36, s.y + 10, 72, 20, 10);
-    ctx.fillStyle = '#000';
-    ctx.fill();
-    ctx.font = `600 11px ${this.sans}`;
-    ctx.fillStyle = 'rgba(245,247,250,0.85)';
-    ctx.textAlign = 'left';
-    ctx.fillText('9:41', s.x + 18, s.y + 24);
-    for (let k = 0; k < 4; k++) {
-      ctx.fillRect(s.x + s.w - 48 + k * 4, s.y + 24 - (k + 1) * 2.4, 3, (k + 1) * 2.4);
-    }
-    this.rr(s.x + s.w - 28, s.y + 16, 18, 9, 3);
-    ctx.strokeStyle = 'rgba(245,247,250,0.7)';
-    ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.fillRect(s.x + s.w - 26, s.y + 18, 12, 5);
-    // Toasts on the screen.
-    const toast = (text: string, color: RGB, t: number) => {
-      if (t <= 0.01) return;
-      const ty = s.y + 40 + (1 - easeOut(clamp(t * 1.6))) * -24;
-      ctx.save();
-      ctx.globalAlpha = Math.min(1, t * 1.6) * (0.4 + 0.6 * inAmt);
-      this.rr(s.x + 10, ty, s.w - 20, 36, 14);
-      ctx.fillStyle = 'rgba(42,38,33,0.96)';
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(s.x + 28, ty + 18, 6, 0, Math.PI * 2);
-      ctx.fillStyle = rgba(color, 1);
-      ctx.fill();
-      ctx.font = `500 12px ${this.sans}`;
-      ctx.fillStyle = rgba(INK, 0.95);
-      ctx.textAlign = 'left';
-      ctx.fillText(text, s.x + 42, ty + 22);
-      ctx.restore();
-    };
-    toast('Airtime received · MTN', GREEN, seg(p, 0.64, 0.66) * (1 - seg(p, 0.7, 0.72)));
-    toast('Gift card code ready', AMBER, seg(p, 0.77, 0.79) * (1 - seg(p, 0.84, 0.86)));
-    toast('Delivery failed · refunding', RED, seg(p, 0.86, 0.88) * (1 - seg(p, 0.95, 0.97)));
-    // Glare.
-    ctx.save();
-    this.rr(s.x, s.y, s.w, s.h, 28);
+    this.rr(s.x, s.y, s.w, s.h, radius - 9);
+    ctx.fillStyle = rgba(pal.ground);
+    ctx.fill();
+    ctx.lineWidth = this.u(1);
+    ctx.strokeStyle = rgba(pal.line);
+    ctx.stroke();
     ctx.clip();
-    const glare = ctx.createLinearGradient(s.x, s.y, s.x + s.w, s.y + s.h * 0.6);
-    glare.addColorStop(0, 'rgba(255,255,255,0.06)');
-    glare.addColorStop(0.45, 'rgba(255,255,255,0)');
-    ctx.fillStyle = glare;
-    ctx.fillRect(s.x, s.y, s.w, s.h);
+    this.drawScreen(p, time, solid);
     ctx.restore();
-    // Hand in front: four overlapping fingers curl over the right edge, the thumb over the left.
-    ctx.lineWidth = 1.2;
-    for (let k = 3; k >= 0; k--) {
-      const fy = y + h * (0.0 + k * 0.078);
-      const fw = w * (0.26 - k * 0.018);
-      const fh = h * 0.09;
-      const fx = x + w * 0.36;
-      ctx.fillStyle = this.skin(fx, fy, fx, fy + fh);
-      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-      this.rr(fx, fy, fw, fh, fh / 2);
-      ctx.fill();
-      ctx.stroke();
-      // Knuckle crease and a soft highlight along the top of each finger.
-      ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-      ctx.beginPath();
-      ctx.moveTo(fx + fw * 0.5, fy + fh * 0.22);
-      ctx.quadraticCurveTo(fx + fw * 0.56, fy + fh * 0.5, fx + fw * 0.5, fy + fh * 0.78);
-      ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-      ctx.beginPath();
-      ctx.moveTo(fx + fh * 0.4, fy + fh * 0.2);
-      ctx.lineTo(fx + fw - fh * 0.5, fy + fh * 0.2);
-      ctx.stroke();
+    // Speaker pill.
+    this.rr(cx - w * 0.13, s.y + s.w * 0.045, w * 0.26, s.w * 0.055, s.w * 0.03);
+    ctx.fillStyle = rgba(tone);
+    ctx.fill();
+  }
+
+  /** Everything on the phone screen. The caller has already clipped to it. */
+  private drawScreen(p: number, time: number, solid: { barsSolid: number; cardSolid: number }) {
+    const { ctx, pal } = this;
+    const s = this.screen;
+    const sw = s.w;
+    const mid = s.x + sw / 2;
+
+    // Lock screen until the delivery starts.
+    const idle = 1 - seg(p, [0.36, 0.385]);
+    if (idle > 0.01) {
+      ctx.globalAlpha = idle * 0.5;
+      this.text('9:41', mid, s.y + s.h * 0.34, sw * 0.32, rgba(pal.muted), {
+        weight: 800,
+        font: this.display,
+      });
+      this.text('Mon 23 Nov', mid, s.y + s.h * 0.34 + sw * 0.13, sw * 0.066, rgba(pal.muted));
+      ctx.globalAlpha = 1;
     }
-    ctx.save();
-    ctx.translate(x - w * 0.58, y + h * 0.36);
-    ctx.rotate(-0.78);
-    const tl = w * 0.6;
-    const tt = w * 0.2;
-    ctx.fillStyle = this.skin(0, -tt / 2, 0, tt / 2);
-    ctx.strokeStyle = 'rgba(0,0,0,0.35)';
-    ctx.beginPath();
-    ctx.moveTo(0, -tt * 0.62);
-    ctx.lineTo(tl - tt / 2, -tt / 2);
-    ctx.arc(tl - tt / 2, 0, tt / 2, -Math.PI / 2, Math.PI / 2);
-    ctx.lineTo(0, tt * 0.62);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    // Thumbnail and joint crease.
-    this.rr(tl - tt * 1.05, -tt * 0.34, tt * 0.62, tt * 0.56, tt * 0.22);
-    ctx.fillStyle = 'rgba(255,255,255,0.1)';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(0,0,0,0.22)';
-    ctx.beginPath();
-    ctx.moveTo(tl * 0.5, -tt * 0.42);
-    ctx.quadraticCurveTo(tl * 0.54, 0, tl * 0.5, tt * 0.42);
-    ctx.stroke();
-    ctx.restore();
-    ctx.restore();
-    ctx.restore();
+
+    // Notification slip: slides in from the top and reports the order's state.
+    const slipIn = easeOut(seg(p, [0.365, 0.4]));
+    if (slipIn > 0.01) {
+      const pad = sw * 0.06;
+      const x = s.x + pad;
+      const w = sw - pad * 2;
+      const h = sw * 0.47;
+      const y = s.y + sw * 0.19 - (1 - slipIn) * (h + sw * 0.3);
+      const gift = p >= 0.71 && p < 0.825;
+      const delivered = p >= 0.49 && p < 0.825;
+      const failed = p >= 0.825;
+      const back = p >= BEATS.refund[1];
+      const state = back ? pal.brand : failed ? pal.danger : delivered ? pal.ok : pal.muted;
+
+      ctx.fillStyle = rgba(pal.shadow);
+      ctx.fillRect(x + sw * 0.016, y + sw * 0.016, w, h);
+      ctx.fillStyle = rgba(pal.paper);
+      ctx.fillRect(x, y, w, h);
+      ctx.lineWidth = this.u(1.5);
+      ctx.strokeStyle = rgba(pal.ink);
+      ctx.strokeRect(x, y, w, h);
+
+      const left = x + sw * 0.055;
+      const right = x + w - sw * 0.055;
+      const ty = y + sw * 0.115;
+      this.text(gift ? 'GIFT CARD' : 'MTN NIGERIA', left, ty, sw * 0.072, rgba(pal.ink), {
+        weight: 600,
+        align: 'left',
+        spacing: sw * 0.004,
+      });
+      this.text(
+        gift ? 'Code ready to reveal' : '₦1,500 airtime',
+        left,
+        ty + sw * 0.088,
+        sw * 0.06,
+        rgba(pal.muted),
+        { align: 'left' },
+      );
+      // Ten squares that fill as the top-up travels.
+      const cells = 10;
+      const filled = failed ? 6 : delivered ? cells : Math.round(seg(p, BEATS.send) * cells);
+      const cw = (right - left) / cells;
+      const py = ty + sw * 0.135;
+      for (let i = 0; i < cells; i++) {
+        ctx.fillStyle = rgba(i < filled ? (state === pal.muted ? pal.ink : state) : pal.line);
+        ctx.fillRect(left + i * cw, py, cw - sw * 0.012, sw * 0.034);
+      }
+      const dotsText = this.reduce ? '...' : '.'.repeat(1 + (Math.floor(time / 380) % 3));
+      const word = back
+        ? 'REFUNDED'
+        : failed
+          ? 'FAILED'
+          : delivered
+            ? 'DELIVERED'
+            : `SENDING${dotsText}`;
+      const sy = py + sw * 0.034 + sw * 0.095;
+      this.text(word, left, sy, sw * 0.062, rgba(state), {
+        weight: 600,
+        align: 'left',
+        spacing: sw * 0.005,
+      });
+      // Tick or cross at the right end of the status line.
+      const g = sw * 0.03;
+      const gx = right - g;
+      const gy = sy - sw * 0.022;
+      ctx.lineWidth = sw * 0.014;
+      ctx.lineCap = 'square';
+      ctx.strokeStyle = rgba(state);
+      ctx.beginPath();
+      if (failed && !back) {
+        ctx.moveTo(gx - g, gy - g);
+        ctx.lineTo(gx + g, gy + g);
+        ctx.moveTo(gx + g, gy - g);
+        ctx.lineTo(gx - g, gy + g);
+      } else if (delivered || back) {
+        ctx.moveTo(gx - g, gy);
+        ctx.lineTo(gx - g * 0.3, gy + g * 0.8);
+        ctx.lineTo(gx + g, gy - g * 0.8);
+      }
+      ctx.stroke();
+      ctx.lineCap = 'butt';
+    }
+
+    if (solid.barsSolid > 0.01) this.drawBars(solid.barsSolid, p);
+    if (solid.cardSolid > 0.01) this.drawCard(solid.cardSolid);
+
+    // The other ending: nothing arrived.
+    const failed = seg(p, [0.85, 0.875]);
+    if (failed > 0.01) {
+      const cy = s.y + s.h * 0.6;
+      const g = sw * 0.085;
+      ctx.globalAlpha = failed;
+      ctx.lineWidth = this.u(2);
+      ctx.strokeStyle = rgba(pal.danger);
+      ctx.strokeRect(mid - g * 1.7, cy - g * 1.7, g * 3.4, g * 3.4);
+      ctx.lineWidth = sw * 0.022;
+      ctx.beginPath();
+      ctx.moveTo(mid - g * 0.75, cy - g * 0.75);
+      ctx.lineTo(mid + g * 0.75, cy + g * 0.75);
+      ctx.moveTo(mid + g * 0.75, cy - g * 0.75);
+      ctx.lineTo(mid - g * 0.75, cy + g * 0.75);
+      ctx.stroke();
+      this.text('NOT DELIVERED', mid, cy + g * 3.1, sw * 0.066, rgba(pal.danger), {
+        weight: 600,
+        spacing: sw * 0.005,
+      });
+      this.text(
+        p >= BEATS.refund[1] ? 'Payment returned' : 'Returning payment',
+        mid,
+        cy + g * 3.1 + sw * 0.095,
+        sw * 0.058,
+        rgba(pal.muted),
+      );
+      ctx.globalAlpha = 1;
+    }
   }
 
   private drawBars(alpha: number, p: number) {
-    const { ctx } = this;
+    const { ctx, pal } = this;
     const s = this.screen;
+    const mid = s.x + s.w / 2;
     ctx.save();
     ctx.globalAlpha = alpha;
-    const grow = easeOut(seg(p, 0.64, 0.68));
-    this.barRects.forEach((b, i) => {
-      const hh = b.h * (0.6 + 0.4 * clamp(grow * 1.4 - i * 0.12));
-      const g = ctx.createLinearGradient(0, b.y + b.h - hh, 0, b.y + b.h);
-      g.addColorStop(0, '#b7d8bd');
-      g.addColorStop(1, '#5f8f69');
-      ctx.shadowColor = rgba(GREEN, 0.5);
-      ctx.shadowBlur = 16;
-      this.rr(b.x, b.y + b.h - hh, b.w, hh, 5);
-      ctx.fillStyle = g;
-      ctx.fill();
+    ctx.fillStyle = rgba(pal.ink);
+    for (const b of this.bars) ctx.fillRect(b.x, b.y, b.w, b.h);
+    const base = this.bars[0]!.y + this.bars[0]!.h;
+    ctx.fillRect(
+      this.bars[0]!.x,
+      base + s.w * 0.03,
+      this.bars[3]!.x + this.bars[3]!.w - this.bars[0]!.x,
+      this.u(2),
+    );
+    // The amount rises into place a moment after the bars.
+    const t = easeOut(seg(p, [0.655, 0.685]));
+    ctx.globalAlpha = alpha * t;
+    const ay = base + s.w * 0.3 + (1 - t) * s.w * 0.05;
+    this.text('+₦1,500', mid, ay, s.w * 0.24, rgba(pal.ink), {
+      weight: 800,
+      font: this.display,
     });
-    ctx.shadowBlur = 0;
-    const base = this.barRects[0]!.y + this.barRects[0]!.h;
-    ctx.font = `400 ${this.wide ? 34 : 30}px ${this.serif}`;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = rgba(GREEN, 1);
-    ctx.fillText('+₦1,500', s.x + s.w / 2, base + 46);
-    this.label('Airtime delivered', s.x + s.w / 2, base + 68, DIM, 12);
+    this.text('AIRTIME RECEIVED', mid, ay + s.w * 0.1, s.w * 0.058, rgba(pal.muted), {
+      weight: 600,
+      spacing: s.w * 0.005,
+    });
     ctx.restore();
   }
 
-  private drawCard(alpha: number, time: number) {
-    const { ctx } = this;
+  private drawCard(alpha: number) {
+    const { ctx, pal } = this;
     const c = this.card;
     const s = this.screen;
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.shadowColor = 'rgba(0,0,0,0.35)';
-    ctx.shadowBlur = 24;
-    const g = ctx.createLinearGradient(c.x, c.y, c.x + c.w, c.y + c.h);
-    g.addColorStop(0, '#e9d3a6');
-    g.addColorStop(0.55, '#c9a46a');
-    g.addColorStop(1, '#7d6036');
-    this.rr(c.x, c.y, c.w, c.h, 12);
-    ctx.fillStyle = g;
+    const r = c.w * 0.05;
+    this.rr(c.x + c.w * 0.03, c.y + c.w * 0.03, c.w, c.h, r);
+    ctx.fillStyle = rgba(pal.shadow);
     ctx.fill();
-    ctx.shadowBlur = 0;
-    // Chip.
-    const chip = ctx.createLinearGradient(c.x + c.w * 0.1, 0, c.x + c.w * 0.28, 0);
-    chip.addColorStop(0, '#f8e3b0');
-    chip.addColorStop(1, '#c9a24f');
-    this.rr(c.x + c.w * 0.1, c.y + c.h * 0.32, c.w * 0.18, c.h * 0.26, 4);
-    ctx.fillStyle = chip;
+    this.rr(c.x, c.y, c.w, c.h, r);
+    ctx.fillStyle = rgba(pal.paper);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(90,60,10,0.4)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(c.x + c.w * 0.19, c.y + c.h * 0.32);
-    ctx.lineTo(c.x + c.w * 0.19, c.y + c.h * 0.58);
-    ctx.moveTo(c.x + c.w * 0.1, c.y + c.h * 0.45);
-    ctx.lineTo(c.x + c.w * 0.28, c.y + c.h * 0.45);
+    ctx.lineWidth = this.u(2);
+    ctx.strokeStyle = rgba(pal.ink);
     ctx.stroke();
-    ctx.font = `600 10px ${this.sans}`;
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(18,12,2,0.7)';
-    ctx.fillText('GIFT CARD', c.x + c.w * 0.1, c.y + c.h * 0.22);
-    ctx.font = `500 11px ${this.mono}`;
-    ctx.fillText('•••• •••• 4F2A', c.x + c.w * 0.1, c.y + c.h * 0.84);
-    // Shimmer sweep.
-    ctx.save();
-    this.rr(c.x, c.y, c.w, c.h, 12);
-    ctx.clip();
-    const sx = c.x - c.w + ((time / 1600) % 1) * c.w * 3;
-    const sh = ctx.createLinearGradient(sx, 0, sx + c.w * 0.5, 0);
-    sh.addColorStop(0, 'rgba(255,255,255,0)');
-    sh.addColorStop(0.5, 'rgba(255,255,255,0.35)');
-    sh.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = sh;
-    ctx.fillRect(c.x, c.y, c.w, c.h);
-    ctx.restore();
-    this.label('Code ready to reveal', s.x + s.w / 2, c.y + c.h + 30, DIM, 12);
+    // The same card as the Qarta Pay mark: a rule and one red block.
+    ctx.lineWidth = this.u(1.5);
+    ctx.beginPath();
+    ctx.moveTo(c.x, c.y + c.h * 0.3);
+    ctx.lineTo(c.x + c.w, c.y + c.h * 0.3);
+    ctx.stroke();
+    this.text('GIFT CARD', c.x + c.w * 0.08, c.y + c.h * 0.2, c.w * 0.062, rgba(pal.ink), {
+      weight: 600,
+      align: 'left',
+      spacing: c.w * 0.006,
+    });
+    ctx.fillStyle = rgba(pal.brand);
+    ctx.fillRect(c.x + c.w * 0.08, c.y + c.h * 0.46, c.w * 0.2, c.h * 0.2);
+    this.text('•••• •••• 4F2A', c.x + c.w * 0.08, c.y + c.h * 0.88, c.w * 0.068, rgba(pal.ink), {
+      align: 'left',
+    });
+    this.text(
+      'CODE DELIVERED',
+      s.x + s.w / 2,
+      c.y + c.h + s.w * 0.17,
+      s.w * 0.058,
+      rgba(pal.muted),
+      { weight: 600, spacing: s.w * 0.005 },
+    );
     ctx.restore();
   }
-
-  /** A ring of sparks the moment a delivery shape settles. */
-  private drawBursts(p: number) {
-    const { ctx } = this;
-    const s = this.screen;
-    for (const [start, col, cy] of [
-      [0.645, GREEN, this.barRects[0]!.y + this.barRects[0]!.h * 0.2],
-      [0.775, AMBER, this.card.y + this.card.h / 2],
-    ] as const) {
-      const t = seg(p, start, start + 0.04);
-      if (t <= 0 || t >= 1) continue;
-      ctx.save();
-      for (let k = 0; k < 18; k++) {
-        const a = (k / 18) * Math.PI * 2 + hash(k, 3.1);
-        const d = easeOut(t) * (s.w * 0.55) * (0.7 + 0.3 * hash(k, 9.7));
-        ctx.fillStyle = rgba(col, 1 - t);
-        ctx.beginPath();
-        ctx.arc(
-          s.x + s.w / 2 + Math.cos(a) * d,
-          cy + Math.sin(a) * d,
-          2.2 * (1 - t) + 0.6,
-          0,
-          Math.PI * 2,
-        );
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-  }
-}
-
-function q0(rects: Box[]): Box {
-  return rects[0] ?? { x: 0, y: 0, w: 0, h: 0 };
 }

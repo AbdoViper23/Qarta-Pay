@@ -1,42 +1,47 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { TokenScene } from './tokenScene';
+import { CHAPTER_STARTS, TokenScene } from './tokenScene';
 
 /**
- * Pinned scroll story of one payment (drawing in tokenScene.ts): the token waits in the
- * escrow, re-forms as airtime or a gift card on a phone, or flies back as a refund.
+ * Pinned scroll story of one payment (drawing in tokenScene.ts): the token is held in the
+ * escrow while the top-up is delivered, re-forms as airtime or a gift card on the phone, or
+ * goes back to the wallet as a refund.
  */
 const CHAPTERS = [
   {
+    label: 'Wallet',
     title: 'It starts as a token.',
     text: "1.04 QUSDC sits in your wallet. Real value, but it can't top up a phone on its own.",
   },
   {
+    label: 'Escrow',
     title: 'It waits in the contract.',
     text: "You pay, and the token drops into the QartaCheckout escrow on QIE Mainnet. Nobody can spend it while it's locked, including us.",
   },
   {
+    label: 'Delivery',
     title: 'Delivery happens first.',
     text: 'We send the top-up through Reloadly. The contract lets go of the payment only once the delivery lands.',
   },
   {
+    label: 'Arrival',
     title: 'Same value, new shape.',
     text: 'The token arrives as ₦1,500 of airtime on their phone, or as a gift card code in your hand.',
   },
   {
+    label: 'Refund',
     title: 'Or it comes back.',
     text: 'If delivery fails, the escrow sends the token straight back to your wallet. After two hours you can reclaim it yourself.',
   },
 ];
 
-/** Where each chapter starts on the scene timeline (tokenScene.ts). */
-const STARTS = [0, 0.1, 0.42, 0.58, 0.84, 1];
 const chapterAt = (p: number) => {
   let k = 0;
-  while (k < CHAPTERS.length - 1 && p >= STARTS[k + 1]!) k += 1;
+  while (k < CHAPTERS.length - 1 && p >= CHAPTER_STARTS[k + 1]!) k += 1;
   return k;
 };
+const two = (n: number) => String(n).padStart(2, '0');
 
 export function TokenJourney() {
   const section = useRef<HTMLElement>(null);
@@ -54,47 +59,75 @@ export function TokenJourney() {
     let shown = 0;
     let frame = 0;
     let visible = false;
-    let last = -1;
+    let chapter = -1;
+    let before = 0;
 
     const read = () => {
       const r = el.getBoundingClientRect();
       target = Math.min(1, Math.max(0, -r.top / Math.max(1, r.height - window.innerHeight)));
     };
-    const tick = (time: number) => {
-      shown = reduce ? target : shown + (target - shown) * 0.12;
+    const paint = (time: number) => {
       scene.draw(shown, time);
       const k = chapterAt(shown);
-      if (k !== last) {
-        last = k;
+      if (k !== chapter) {
+        chapter = k;
         setActive(k);
       }
       rail.current.forEach((bar, i) => {
-        const t = (shown - STARTS[i]!) / (STARTS[i + 1]! - STARTS[i]!);
-        if (bar) bar.style.width = `${Math.min(1, Math.max(0, t)) * 100}%`;
+        const t = (shown - CHAPTER_STARTS[i]!) / (CHAPTER_STARTS[i + 1]! - CHAPTER_STARTS[i]!);
+        if (bar) bar.style.transform = `scaleX(${Math.min(1, Math.max(0, t))})`;
       });
+    };
+    const tick = (time: number) => {
+      // The scene trails the scrollbar a little, at the same speed on any refresh rate.
+      const dt = Math.min(64, time - before);
+      before = time;
+      shown = reduce ? target : shown + (target - shown) * (1 - Math.exp(-dt / 110));
+      paint(time);
       if (visible) frame = requestAnimationFrame(tick);
     };
     // Draw only while the section is on screen.
     const io = new IntersectionObserver(([entry]) => {
       visible = Boolean(entry?.isIntersecting);
       cancelAnimationFrame(frame);
+      before = performance.now();
       if (visible) frame = requestAnimationFrame(tick);
     });
     io.observe(el);
-    const onResize = () => scene.resize();
+    const onResize = () => {
+      scene.resize();
+      paint(performance.now());
+    };
+    const sized = new ResizeObserver(onResize);
+    sized.observe(cv);
+    // Light and dark mode: the scene reads its colours from the page.
+    const themed = new MutationObserver(() => {
+      scene.readTheme();
+      paint(performance.now());
+    });
+    themed.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     window.addEventListener('scroll', read, { passive: true });
-    window.addEventListener('resize', onResize);
     void document.fonts?.ready.then(onResize);
     read();
     shown = target;
-    scene.draw(shown, 0);
+    paint(0);
     return () => {
       io.disconnect();
+      sized.disconnect();
+      themed.disconnect();
       cancelAnimationFrame(frame);
       window.removeEventListener('scroll', read);
-      window.removeEventListener('resize', onResize);
     };
   }, []);
+
+  /** Scrolls to the point of chapter i where its picture has settled. */
+  const jump = (i: number) => {
+    const el = section.current;
+    if (!el) return;
+    const p = CHAPTER_STARTS[i]! + (CHAPTER_STARTS[i + 1]! - CHAPTER_STARTS[i]!) * 0.7;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top: top + p * (el.offsetHeight - window.innerHeight) });
+  };
 
   return (
     <section
@@ -103,45 +136,84 @@ export function TokenJourney() {
       className="relative h-[560vh]"
       aria-label="How escrow protects you"
     >
-      <div className="sticky top-0 mx-auto grid h-dvh max-w-6xl grid-rows-[auto_1fr] content-start gap-2 px-4 pt-24 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:grid-rows-1 md:content-center md:items-center md:gap-8 md:pt-20 md:pb-4">
+      <div className="sticky top-0 mx-auto grid h-dvh max-w-6xl grid-rows-[auto_1fr] content-start gap-2 px-4 pt-20 pb-3 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:grid-rows-1 md:content-center md:items-center md:gap-8 md:pt-20 md:pb-4">
         <div className="min-w-0">
-          <p className="text-xs font-semibold tabular-nums uppercase">
-            <span className="text-brand">{active + 1}</span> of {CHAPTERS.length}
+          <p className="flex items-center justify-between gap-4 text-xs font-semibold uppercase md:justify-start">
+            <span>
+              <span className="mr-2 inline-block size-2 bg-brand align-middle" aria-hidden />
+              How escrow protects you
+            </span>
+            <span className="tabular-nums text-muted" aria-hidden>
+              <span className="text-brand">{two(active + 1)}</span> / {two(CHAPTERS.length)}
+            </span>
           </p>
-          <div className="relative mt-3 min-h-44 md:min-h-60 [@media(max-height:560px)]:min-h-36">
+
+          {/* Screen readers get the whole story as a list; the stack below is the visual copy. */}
+          <ol className="sr-only">
+            {CHAPTERS.map((chapter) => (
+              <li key={chapter.title}>
+                <h3>{chapter.title}</h3>
+                <p>{chapter.text}</p>
+              </li>
+            ))}
+          </ol>
+          {/* All five share one grid cell, so the block is as tall as the longest chapter. */}
+          <div aria-hidden className="mt-3 grid md:mt-5">
             {CHAPTERS.map((chapter, i) => (
-              <article
+              <div
                 key={chapter.title}
-                aria-hidden={i !== active}
-                className={`absolute inset-0 transition-all duration-500 ${i === active ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'}`}
+                className={`col-start-1 row-start-1 transition-[opacity,translate] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  i === active
+                    ? 'translate-y-0 opacity-100'
+                    : `opacity-0 ${i < active ? '-translate-y-5' : 'translate-y-5'}`
+                }`}
               >
-                <h2 className="font-display text-5xl leading-[0.9] font-extrabold uppercase text-balance md:text-6xl lg:text-7xl [@media(max-height:560px)]:text-4xl">
+                <h2 className="font-display text-[2.6rem] leading-[0.9] font-extrabold uppercase text-balance sm:text-5xl md:text-6xl lg:text-7xl [@media(max-height:560px)]:text-4xl">
                   {chapter.title}
                 </h2>
-                <p className="mt-4 max-w-md text-sm leading-7 text-muted md:text-[15px] [@media(max-height:560px)]:mt-2 [@media(max-height:560px)]:text-xs">
+                <p className="mt-3 max-w-md text-[13px] leading-6 text-muted md:mt-5 md:text-[15px] md:leading-7 [@media(max-height:560px)]:mt-2 [@media(max-height:560px)]:text-xs">
                   {chapter.text}
                 </p>
-              </article>
+              </div>
             ))}
           </div>
-          <div className="mt-4 flex gap-1.5" aria-hidden>
+
+          <ol className="mt-2 flex gap-1.5 md:mt-5">
             {CHAPTERS.map((chapter, i) => (
-              <span key={chapter.title} className="h-1 max-w-14 flex-1 overflow-hidden bg-line">
-                <span
-                  ref={(node) => {
-                    rail.current[i] = node;
-                  }}
-                  className="block h-full w-0 bg-ink"
-                />
-              </span>
+              <li key={chapter.title} className="max-w-20 flex-1">
+                <button
+                  type="button"
+                  onClick={() => jump(i)}
+                  aria-label={`Step ${i + 1} of ${CHAPTERS.length}: ${chapter.title}`}
+                  aria-current={i === active ? 'step' : undefined}
+                  className="group block w-full py-2 text-left"
+                >
+                  <span className="block h-1 overflow-hidden bg-line">
+                    <span
+                      ref={(node) => {
+                        rail.current[i] = node;
+                      }}
+                      style={{ transform: 'scaleX(0)' }}
+                      className={`block h-full origin-left ${i === active ? 'bg-brand' : 'bg-ink'}`}
+                    />
+                  </span>
+                  <span
+                    className={`mt-2 hidden text-[10px] font-semibold tracking-wider uppercase transition-colors sm:block ${
+                      i === active ? 'text-ink' : 'text-muted group-hover:text-ink'
+                    }`}
+                  >
+                    {chapter.label}
+                  </span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
         <canvas
           ref={canvas}
           role="img"
-          aria-label="A token moves from a wallet into an escrow vault, then becomes airtime and a gift card on a phone held in a hand, or flies back to the wallet as a refund."
-          className="h-full min-h-0 w-full md:h-[min(80vh,660px)]"
+          aria-label="A red coin lifts out of a wallet, breaks into dots and drops into an escrow safe that locks and is stamped HELD. The phone shows the top-up being sent; once it is delivered the safe opens and the dots re-form on the phone as airtime, then as a gift card. In the other ending delivery fails and the dots return to the wallet, stamped REFUNDED."
+          className="h-full min-h-0 w-full md:h-[min(84vh,700px)]"
         />
       </div>
     </section>

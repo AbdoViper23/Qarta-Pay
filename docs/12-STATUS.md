@@ -2,7 +2,7 @@
 
 Read this first if you are picking the project up, human or agent. It says where the work stands, what was decided, and what is blocked on whom. Update it at the end of every working session.
 
-Last updated: **24 Nov 2026**.
+Last updated: **26 Nov 2026**.
 
 ## Where we are
 
@@ -12,8 +12,8 @@ Last updated: **24 Nov 2026**.
 | Step 2 — contract + sweep script | Code and tests done. **Deployed and verified on testnet** (19 Nov, `probe-results.md` §7). Waits for: team review of the contract and sweep script |
 | Step 3 — backend | Tested end to end on anvil and **on testnet** (fake supplier): QUSDC and QIE orders settled, failed delivery refunded on-chain. Waits for: Reloadly sandbox credentials to run it against the real supplier |
 | Hosting | **Vercel free plan**, one project `qarta-pay` (web + API as Vercel Services, Neon Postgres), on testnet. No background loops there: requests and a cron drive the jobs (`13-RUNBOOK.md` §3). 23 Nov: testnet rpc1 down, only rpc4/rpc5 answer (8-14 s); API and web now fall back across all six testnet RPCs, and the API starts without the chain (quotes return 503 until it answers) |
-| Step 4 — frontend | Built; full flow checked against the local stack. 24 Nov: landing token journey redrawn in the receipt style (follows light and dark mode, shows delivery before release); checked in headless Chromium at 360–1920 px wide, not yet on a real phone. Waits for: a non-developer test on a phone, and a test inside QIE Wallet |
-| Step 5 — mainnet go-live | Commands ready in `13-RUNBOOK.md`. Waits for: Reloadly live approval and float, wallets, hosting, domain |
+| Step 4 — frontend | Built; full flow checked against the local stack. 24 Nov: landing token journey redrawn in the receipt style (follows light and dark mode, shows delivery before release); checked in headless Chromium at 360–1920 px wide, not yet on a real phone. Waits for: a non-developer test on a phone, and a test inside QIE Wallet. 26 Nov: the order page has a real progress bar. It creeps forward inside each status and reaches 100 % only at SETTLED (`apps/web/src/lib/progress.ts`, tested). Checked in headless Chromium at 360, 420 and 1280 px against a mock API. The team bought on testnet from MetaMask after switching the wallet's RPC to rpc5 (testnet rpc1/2/6 fail TLS and rpc3 has no DNS) |
+| Step 5 — mainnet go-live | Commands ready in `13-RUNBOOK.md`. Reloadly answered (support reply: register and fund, no conditions); the float is a $50 crypto top-up, kept small because unused balance comes back only by bank wire (`08-RELOADLY-REFERENCE.md`). Mainnet QIEDex and oracle are live (`07-QIE-REFERENCE.md`, 26 Nov readings). The mainnet native symbol is now `QIEV3`, as the organizers list it. Waits for: float funded, new mainnet wallets, deploy |
 | Steps 6–7 — launch, P1, submission | Not started. P1 (cashback, gift to `name.qie`, Telegram bot) is not built |
 
 **The product works end to end on a local chain today:** `pnpm dev:local` starts the chain, contracts, database, API and web app; a quote → pay → deliver → settle run through the HTTP API was checked on 18 Nov 2026.

@@ -9,8 +9,17 @@ Collected 15–17 Nov 2026. Re-check every address on the explorer before sendin
 | Chain ID | `1990` (`0x7c6`) | `1983` (`0x7bf`) |
 | RPC | `https://rpc1mainnet.qie.digital` … `https://rpc5mainnet.qie.digital` (all five answered on 17 Nov 2026) | `https://rpc1testnet.qie.digital` … `https://rpc6testnet.qie.digital` (list from QIE support, 23 Nov 2026; that day only rpc4 and rpc5 answered, in 8-14 s) |
 | Explorer | `https://mainnet.qie.digital` | `https://testnet.qie.digital` |
-| Native coin | QIE, 18 decimals | QIE, 18 decimals |
+| Native coin | QIE, 18 decimals. Wallet symbol `QIEV3`, network name "QIEMainnet" (organizers' hackathon Telegram, 26 Nov 2026; older docs said `QIE`) | QIE, 18 decimals, symbol `QIE` |
 | Faucet | — | `https://www.qie.digital/faucet` |
+
+The organizers' list of 26 Nov 2026 names the same hosts: mainnet RPC1–RPC5 = rpc1, rpc2, rpc5, rpc4, rpc3; testnet rpc1–rpc6 (rpc1 recommended). On 26 Nov: all five mainnet RPCs answered in about 1 s. On testnet only rpc4 and rpc5 answered: rpc1, rpc2 and rpc6 failed the TLS handshake and rpc3 has no DNS record. `chainid.network` has no entry for 1990 and lists 1983 as "Krown Mainnet", so wallets may warn when adding testnet.
+
+Liveness check, mainnet block 12,175,811 (26 Nov 2026) **[VERIFIED]**:
+- The QIEDex router reports `factory()` = the factory above and `WETH()` = WQIE.
+- `getPair(WQIE, QUSDC)` returns `0x73a3…4DFe`, holding 28,733 WQIE and 4,553.6 QUSDC (about $9.1k). Its last trade was about 18 minutes before the read.
+- `getAmountsOut(1 QIE)` returns 0.158 QUSDC.
+- The oracle read $0.1726, updated 19 s before the read, so the pool traded 8.2% below the oracle.
+- Gas price was 1.125 gwei.
 
 Older listings with chain IDs `5656` or `9731` are outdated. CoinMarketCap lists a different testnet RPC host; use the one above from the official docs.
 
@@ -102,6 +111,7 @@ No official developer documentation found. The addresses came from a third-party
 - Read order for name display: resolver `resolve` → Registry B `userDomain` → short address.
 - Forward: `domainExist(string)` and `domainInfo(string)` with the full name including `.qie`. `domainInfo` returns `(string name, address nft, address owner, uint256 registeredAt, uint256 tokenId)`. `resolver(string)` returns `(uint256 tokenId, address owner)` and is the call the official app uses.
 - Name NFT: `0x9aab56e7727af53A3131985BFB16d845319b7bdc` (`ownerOf(tokenId)`).
+- Official HTTP API (announced by the organizers in the hackathon Telegram, 26 Nov 2026): free, no key, read-only. Forward lookup `GET https://sdk-live.qie.digital/api/v1/domains/public/lookup/<name>.qie` **[VERIFIED: live call 26 Nov 2026]**: `molivo.qie` → `{"status":"SUCCESS","data":{"owner":"0xfDe4…6c0fde","domainName":"molivo.qie","domainType":"free"}}`. That matches the on-chain reverse result above. The organizers say it also resolves address → name, but that endpoint path is not confirmed yet. Qarta Pay reads the contracts directly and does not need this API.
 - Product facts **[VERIFIED: press]**: names are a one-off purchase with no renewal; a QIE ID is required before completing QIE Pass KYC. Purchase site: `https://id.qie.digital/`.
 
 ## QIE Pass (reusable KYC identity)

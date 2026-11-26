@@ -5,21 +5,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { useConnection, usePublicClient, useReadContract, useWriteContract } from 'wagmi';
+import { OrderProgress } from '@/components/OrderProgress';
 import { Button, Card, ExternalLink, Notice } from '@/components/ui';
 import { api, type OrderStatus } from '@/lib/api';
 import { appChain, txLink } from '@/lib/chains';
 import { friendlyError } from '@/lib/errors';
 import { trimDecimals } from '@/lib/format';
 import { useAppConfig } from '@/lib/hooks';
+import { isInFlow } from '@/lib/progress';
 import { useSignIn } from '@/lib/siwe';
 
 const FINAL: OrderStatus[] = ['SETTLED', 'REFUNDED', 'EXPIRED', 'NEEDS_REVIEW'];
-
-const STEPS = [
-  { label: 'Paid', reached: ['PAID', 'FULFILLING', 'DELIVERED', 'SETTLED'] },
-  { label: 'Delivering', reached: ['FULFILLING', 'DELIVERED', 'SETTLED'] },
-  { label: 'Delivered', reached: ['DELIVERED', 'SETTLED'] },
-] as const;
 
 export default function OrderPage() {
   const { id } = useParams<{ id: string }>();
@@ -96,21 +92,11 @@ export default function OrderPage() {
     <div className="space-y-5 pt-2">
       <h1 className="text-2xl font-extrabold">{order.productName}</h1>
       <Card className="space-y-4">
-        <StatusLine status={order.status} refundedByPayer={order.refundedByPayer} />
-        {!['REFUNDED', 'EXPIRED', 'QUOTED', 'REFUND_PENDING'].includes(order.status) && (
-          <ol className="grid grid-cols-3 gap-2 text-center text-sm">
-            {STEPS.map((step) => {
-              const done = (step.reached as readonly string[]).includes(order.status);
-              return (
-                <li
-                  key={step.label}
-                  className={`border-2 px-2 py-3 font-semibold transition-colors duration-300 ${done ? 'border-ink bg-ink text-surface' : 'border-ink/20 text-muted'}`}
-                >
-                  {step.label}
-                </li>
-              );
-            })}
-          </ol>
+        {!['QUOTED', 'PAID', 'FULFILLING'].includes(order.status) && (
+          <StatusLine status={order.status} refundedByPayer={order.refundedByPayer} />
+        )}
+        {(isInFlow(order.status) || order.status === 'NEEDS_REVIEW') && (
+          <OrderProgress status={order.status} />
         )}
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
           <dt className="text-muted">To</dt>

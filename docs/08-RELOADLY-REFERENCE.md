@@ -119,6 +119,13 @@ Cost of an order to us = sender amount for the denomination + `senderFee` − di
 - Reselling to end users makes us a **Platform Client**. The terms ask Platform Clients to contact `sales@reloadly.com` before proceeding and to disclose to end users that Reloadly is a third-party provider. **Human task — do this before going live.**
 - Wallet funding: credit card (processing fees deducted), wire transfer, or crypto payment gateway (minimum $50). Crypto payments above 1,000 EUR require KYC.
 - Prepaid: every live order deducts from the wallet. The API must refuse to quote when the balance cannot cover open orders.
+- Getting unused balance back **[VERIFIED: Corporate Client Terms, "Last updated April 26th, 2026", read 26 Nov 2026]**:
+  - §4.3.2: by email to `finance@reloadly.com`, paid to the client's corporate bank account ("Designated Account") within 14 business days. The terms describe no withdrawal to card or crypto, and no fee for it.
+  - §4.3.3: closing the account without saying where to send the balance forfeits it.
+  - §4.3.4 / §18.5: 180 days of inactivity forfeits the balance.
+  - Funding: card adds a 3% fee (§4.3.1); the minimum load is $50 (§4.4, §18.3). The terms (§18.3) name a "crypto payment gateway", but the help page `support.reloadly.com/payment-options` (read 26 Nov 2026) lists only credit card and wire, with a 100 USD minimum. Which chains and tokens the gateway accepts is **[UNVERIFIED]**: use whatever the live dashboard shows at payment time.
+  - §8: "strict no-refund policy" on sold top-ups and gift cards, except at Reloadly's discretion for transaction errors. Gift cards can be refunded only if not redeemed, not expired and undeliverable (support article "gift-card-refunds").
+  - Practical rule: fund the float in small amounts and refill from the treasury as sales come in.
 - Commission reference: about 1.5% discount for high-volume airtime **[THIRD-PARTY]**; gift card discounts vary by brand (`discountPercentage`).
 - Coverage claims: 700–800+ operators in 140+ countries; 14,000+ gift card products.
 - Sanctioned-country restrictions apply (US OFAC list).

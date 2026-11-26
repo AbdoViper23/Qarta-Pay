@@ -49,6 +49,10 @@ export interface AppConfigResponse {
     quoteTtlQusdcS: number;
     quoteTtlQieS: number;
   };
+  pricing: {
+    feePercent: string;
+    qieBufferPercent: string;
+  };
 }
 
 export interface PricesResponse {

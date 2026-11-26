@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </span>
               </Link>
               <nav aria-label="Main" className="hidden items-center gap-7 md:flex">
-                {nav.map((item) => (
+                {[...nav, { href: '/roadmap', label: 'Roadmap' }].map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -97,6 +97,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 links={[
                   { href: '/powered-by-qie', label: 'Powered by QIE' },
                   { href: '/stats', label: 'Live stats' },
+                  { href: '/roadmap', label: 'Roadmap' },
                 ]}
               />
             </div>

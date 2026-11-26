@@ -4,6 +4,8 @@ import { FinalCta } from '@/components/landing/FinalCta';
 import { Hero } from '@/components/landing/Hero';
 import { Integrations } from '@/components/landing/Integrations';
 import { Marquee } from '@/components/landing/Marquee';
+import { RoadmapTeaser } from '@/components/landing/RoadmapTeaser';
+import { Trust } from '@/components/landing/Trust';
 
 export default function LandingPage() {
   return (
@@ -11,8 +13,10 @@ export default function LandingPage() {
       <Hero />
       <Marquee />
       <TokenJourney />
+      <Trust />
       <Integrations />
       <Facts />
+      <RoadmapTeaser />
       <FinalCta />
     </>
   );

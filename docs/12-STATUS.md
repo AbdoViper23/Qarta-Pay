@@ -2,7 +2,7 @@
 
 Read this first if you are picking the project up, human or agent. It says where the work stands, what was decided, and what is blocked on whom. Update it at the end of every working session.
 
-Last updated: **26 Nov 2026**.
+Last updated: **26 Nov 2026** (evening).
 
 ## Where we are
 
@@ -17,6 +17,14 @@ Last updated: **26 Nov 2026**.
 | Steps 6–7 — launch, P1, submission | Not started. P1 (cashback, gift to `name.qie`, Telegram bot) is not built |
 
 **The product works end to end on a local chain today:** `pnpm dev:local` starts the chain, contracts, database, API and web app; a quote → pay → deliver → settle run through the HTTP API was checked on 18 Nov 2026.
+
+26 Nov, evening:
+- The fee is now 2% (`MARGIN_BPS` 200), the lowest that should not lose money. Raise it if a refill cycle costs more.
+- Checkout shows product cost + fee = you pay.
+- `/v1/config` serves the fee so the site never hard-codes it.
+- A quote larger than the free Reloadly balance gets `supplier_balance_low`.
+- The landing page has "Why you can trust it" and a roadmap teaser.
+- New `/roadmap` page with 4 phases and the business model (`apps/web/src/lib/roadmap.ts`).
 
 ## What exists in the repo
 

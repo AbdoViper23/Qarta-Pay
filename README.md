@@ -50,6 +50,15 @@ Each component is also shown live in the app on the **Powered by QIE** page (`/p
 | QIEDEX — Get QUSDC | One tap to the QIEDex swap page when the QUSDC balance is short | `apps/web/src/components/GetQusdcLink.tsx` | — (link) |
 | QIE Pass (P1, not built yet) | Cashback and higher limits for verified users | — | — (off-chain partner API) |
 
+## Roadmap
+
+Phase 1 (airtime, gift cards, escrow, QIE-native pricing) is live. Next:
+- **Phase 2:** data bundles, sending to a `.qie` name, cashback, Telegram receipts and a Mini App, and more languages.
+- **Phase 3:** utility bill payments, auto top-up, and QIE Pass accounts.
+- **Phase 4:** a checkout that other QIE apps can embed, plus bulk rewards.
+
+Details: `docs/15-ROADMAP.md` and `/roadmap` on the site.
+
 ## Run it
 
 Everything runs locally with no credentials and no real money (local chain, mock tokens, fake supplier):
@@ -90,6 +99,7 @@ Deploying to testnet/mainnet and operating the service: `docs/13-RUNBOOK.md`. Cu
 | 12 | `docs/12-STATUS.md` | Current status, decisions taken, handoff notes, what waits on a human |
 | 13 | `docs/13-RUNBOOK.md` | Deploy (testnet, mainnet), hosting, daily operations, treasury sweep |
 | 14 | `docs/14-HUMAN-SETUP-GUIDE.md` | Step-by-step guide (Arabic) for the human tasks: accounts, wallets, faucet, hosting, submission |
+| 15 | `docs/15-ROADMAP.md` | Public roadmap (phases 1–4) and business model, mirrored on the site's `/roadmap` page |
 | — | `docs/research-notes.md`, `docs/probe-results.md` | Evidence: researched answers with sources, and raw on-chain probe output |
 
 Agent instructions live in `CLAUDE.md`. Private, uncommitted context lives in `CLAUDE.local.md` (create it from `CLAUDE.local.md.template`). The first prompt to give Claude Code is in `KICKOFF-PROMPT.md`.

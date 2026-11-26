@@ -54,7 +54,11 @@ export const PHASES: Phase[] = [
         text: 'Part of the fee back to .qie name holders and QIE Pass verified users.',
       },
       { title: 'Telegram receipts', text: 'Order updates and receipts sent to Telegram.' },
-      { title: 'Arabic interface', text: 'The whole store in Arabic, then more languages.' },
+      { title: 'Telegram Mini App', text: 'Buy without leaving Telegram.' },
+      {
+        title: 'More languages',
+        text: 'The store in the languages of the countries we serve, starting with the largest.',
+      },
     ],
   },
   {
@@ -73,7 +77,6 @@ export const PHASES: Phase[] = [
         text: 'Recurring top-ups with a spending cap you set and can cancel at any time.',
       },
       { title: 'QIE Pass verified accounts', text: 'Higher limits for verified users.' },
-      { title: 'Telegram Mini App', text: 'Buy without leaving Telegram.' },
     ],
   },
   {
@@ -90,6 +93,10 @@ export const PHASES: Phase[] = [
       {
         title: 'Rewards and bulk payouts',
         text: 'Teams and communities send airtime or gift cards to many people at once, funded in QUSDC.',
+      },
+      {
+        title: 'Exploring a Qarta token',
+        text: 'Only if it gives users real value, such as lower fees or larger cashback, and only once the store has steady usage. No token or sale exists or is planned today.',
       },
     ],
   },

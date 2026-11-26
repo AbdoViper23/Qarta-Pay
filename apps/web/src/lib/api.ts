@@ -131,6 +131,11 @@ export interface QuoteResponse {
     faceCurrency: string;
     productName: string;
     recipient: string | null;
+    productUsd: string;
+    feeUsd: string;
+    feePercent: string;
+    qiePriceUsd: string | null;
+    qieBufferPercent: string | null;
   };
 }
 

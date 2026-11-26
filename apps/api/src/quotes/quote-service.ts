@@ -71,6 +71,14 @@ export interface QuoteResponse {
     faceCurrency: string;
     productName: string;
     recipient: string | null;
+    /** What the product costs us at the supplier, in USD. */
+    productUsd: string;
+    /** Our fee in USD (`usd` = `productUsd` + `feeUsd`) and as a percent of the product cost. */
+    feeUsd: string;
+    feePercent: string;
+    /** QIE payments only: the USD price per QIE used, and the extra QIE added for price moves. */
+    qiePriceUsd: string | null;
+    qieBufferPercent: string | null;
   };
 }
 
@@ -138,6 +146,7 @@ export class QuoteService {
     let token: Address;
     let amount: bigint;
     let ttl: number;
+    let qiePriceUsd6: bigint | null = null;
     if (request.payToken === 'QUSDC') {
       token = this.config.addresses.qusdc;
       amount = usd6; // QUSDC has 6 decimals, 1:1 with USD
@@ -153,6 +162,7 @@ export class QuoteService {
       }
       token = NATIVE_TOKEN;
       amount = qieAmount(usd6, snapshot.qie.priceUsd6, this.config.QIE_SPREAD_BPS);
+      qiePriceUsd6 = snapshot.qie.priceUsd6;
       ttl = this.config.QUOTE_TTL_QIE_S;
     }
 
@@ -210,6 +220,12 @@ export class QuoteService {
         faceCurrency: price.faceCurrency,
         productName: price.productName,
         recipient: request.kind === 'AIRTIME' ? `+${recipientPhone}` : recipientWallet,
+        productUsd: formatUnitsPlain(price.supplierCostUsd6, 6),
+        feeUsd: formatUnitsPlain(usd6 - price.supplierCostUsd6, 6),
+        feePercent: formatUnitsPlain(this.config.MARGIN_BPS, 2),
+        qiePriceUsd: qiePriceUsd6 === null ? null : formatUnitsPlain(qiePriceUsd6, 6),
+        qieBufferPercent:
+          qiePriceUsd6 === null ? null : formatUnitsPlain(this.config.QIE_SPREAD_BPS, 2),
       },
     };
   }
@@ -240,9 +256,10 @@ export class QuoteService {
       this.balanceCache = { at: Date.now(), value: await this.supplier.balanceUsd6() };
     }
     if (this.balanceCache.value < (await supplierCostReserved(this.db)) + costUsd6) {
+      // The quote is refused before anyone pays. The exact balance is not disclosed.
       throw new QuoteError(
-        'temporarily_unavailable',
-        'temporarily unavailable, please try again later',
+        'supplier_balance_low',
+        'this amount is above what we can deliver right now; try a smaller amount',
         503,
       );
     }

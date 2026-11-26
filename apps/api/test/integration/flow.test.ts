@@ -13,11 +13,11 @@ import {
 import { mnemonicToAccount } from 'viem/accounts';
 import { foundry } from 'viem/chains';
 import { createSiweMessage } from 'viem/siwe';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { ChainStatus, CheckoutWriter } from '../../src/chain/checkout-writer';
 import { loadConfig, type AppConfig } from '../../src/config';
 import { acquireLease, releaseLease, type JobsResult } from '../../src/jobs';
-import { getOrder, transition, type OrderStatus } from '../../src/db/orders';
+import { getOrder, supplierCostReserved, transition, type OrderStatus } from '../../src/db/orders';
 import type { Db } from '../../src/db/pool';
 import { createLogger } from '../../src/log';
 import { createRuntime, type Runtime } from '../../src/runtime';
@@ -146,7 +146,14 @@ interface QuoteBody {
     expiry: string;
   };
   signature: Hex;
-  display: { usd: string; payAmount: string };
+  display: {
+    usd: string;
+    payAmount: string;
+    productUsd: string;
+    feeUsd: string;
+    feePercent: string;
+    qiePriceUsd: string | null;
+  };
 }
 
 async function requestQuote(
@@ -237,7 +244,13 @@ const supplierCalls = (orderId: Hex, method: string) =>
 describe('quote → pay → deliver → settle', () => {
   it('airtime paid in QUSDC is delivered once and settled to the treasury', async () => {
     const q = await quote(airtime('4567'));
-    expect(q.display.usd).toBe('5.2'); // $5 + 4% margin
+    expect(q.display.usd).toBe('5.25'); // $5 + 5% margin
+    expect(q.display).toMatchObject({
+      productUsd: '5',
+      feeUsd: '0.25',
+      feePercent: '5',
+      qiePriceUsd: null,
+    });
     const treasuryBefore = await qusdcBalance(treasury);
 
     await pay(q);
@@ -248,7 +261,7 @@ describe('quote → pay → deliver → settle', () => {
     const order = (await getOrder(db, q.orderId))!;
     expect(order.settleTxHash).toMatch(/^0x/);
     expect(order.deliveredAt).not.toBeNull();
-    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_200_000n);
+    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_250_000n);
     expect(await chainStatus(q.orderId)).toBe(2);
     expect(supplierCalls(q.orderId, 'sendTopup')).toBe(1);
 
@@ -530,6 +543,40 @@ describe('pricing and limits', () => {
       functionName: 'setReserves',
       args: [100_000n * 10n ** 18n, 15_000n * 10n ** 6n],
     });
+  });
+
+  it('refuses a quote the supplier balance cannot cover, and still sells what it can', async () => {
+    // Its own client address, so these quotes do not use up the shared rate-limit bucket.
+    const quoteFrom = async (body: Record<string, unknown>) => {
+      const response = await runtime.server.inject({
+        method: 'POST',
+        url: '/v1/quotes',
+        remoteAddress: '10.0.0.77',
+        payload: { payer: payer.address, ...body },
+      });
+      return { status: response.statusCode, json: response.json() as { error?: string } };
+    };
+    // $3 free at the supplier on top of what earlier open quotes already reserve.
+    supplier.balance = (await supplierCostReserved(db)) + 3_000_000n;
+    // Skip past the 30 s balance cache so the new balance is read.
+    const now = Date.now();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now + 31_000);
+    try {
+      const tooBig = await quoteFrom(airtime('4567')); // $5 product
+      expect(tooBig.status).toBe(503);
+      expect(tooBig.json.error).toBe('supplier_balance_low');
+      expect((await quoteFrom({ ...airtime('4567'), amount: '2' })).status).toBe(200);
+      // That $2 is now reserved: another $2 would need $4 of the $3.
+      expect((await quoteFrom({ ...airtime('4568'), amount: '2' })).json.error).toBe(
+        'supplier_balance_low',
+      );
+    } finally {
+      // Put the $1,000 balance back and make the cache read it, so later tests see it.
+      supplier.balance = 1_000_000_000n;
+      clock.mockReturnValue(now + 62_000);
+      await quoteFrom({ ...airtime('4569'), amount: '2' });
+      clock.mockRestore();
+    }
   });
 
   it('rejects orders above the per-order limit and invalid input', async () => {

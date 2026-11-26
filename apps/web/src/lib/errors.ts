@@ -29,6 +29,8 @@ const API_ERRORS: Record<string, string> = {
   limit_global_daily: 'Daily sales limit reached. Try again tomorrow.',
   sales_paused: 'Sales are paused right now. Please try again later.',
   temporarily_unavailable: 'Temporarily unavailable. Please try again in a few minutes.',
+  supplier_balance_low:
+    'We cannot deliver this amount right now. Try a smaller amount or come back later.',
   invalid_phone: 'That phone number does not look right for this country.',
   country_not_enabled: 'We do not sell top-ups for this country yet.',
   product_not_available: 'This gift card is not available right now.',

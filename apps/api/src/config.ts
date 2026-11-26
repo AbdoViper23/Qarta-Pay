@@ -60,7 +60,7 @@ const envSchema = z.object({
   RELOADLY_CLIENT_SECRET: z.string().min(1),
   RELOADLY_ORDER_EMAIL: z.email().default('orders@example.com'),
 
-  MARGIN_BPS: z.coerce.bigint().default(400n),
+  MARGIN_BPS: z.coerce.bigint().default(500n),
   QIE_SPREAD_BPS: z.coerce.bigint().default(150n),
   MAX_ORDER_USD: z.coerce.number().positive().default(50),
   MAX_WALLET_DAILY_USD: z.coerce.number().positive().default(100),
@@ -80,7 +80,7 @@ const envSchema = z.object({
   WORKER_POLL_MS: z.coerce.number().int().positive().default(3000),
   INDEXER_POLL_MS: z.coerce.number().int().positive().default(3000),
   FULFILLER_MIN_BALANCE_WEI: bigintString.default(10n ** 18n),
-  SUPPLIER_MIN_BALANCE_USD: z.coerce.number().min(0).default(50),
+  SUPPLIER_MIN_BALANCE_USD: z.coerce.number().min(0).default(10),
   TELEGRAM_BOT_TOKEN: z.string().optional(),
   TELEGRAM_CHAT_ID: z.string().optional(),
 

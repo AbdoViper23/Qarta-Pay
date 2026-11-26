@@ -201,12 +201,26 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
               <dd className="truncate text-right font-medium">{quote.display.recipient}</dd>
             </>
           )}
-          <dt className="text-muted">Price</dt>
-          <dd className="text-right text-lg font-bold">
+          <dt className="text-muted">Product cost</dt>
+          <dd className="text-right font-mono tabular-nums">${quote.display.productUsd}</dd>
+          <dt className="text-muted">Qarta fee ({quote.display.feePercent}%)</dt>
+          <dd className="text-right font-mono tabular-nums">${quote.display.feeUsd}</dd>
+          <dt className="border-t-2 border-ink pt-2 font-semibold">You pay</dt>
+          <dd className="border-t-2 border-ink pt-2 text-right text-lg font-bold">
             ${quote.display.usd}
             <span className="block text-sm font-normal text-muted">
               {trimDecimals(quote.display.payAmount, 6)} {quote.display.payToken}
             </span>
+          </dd>
+          {quote.display.qiePriceUsd && (
+            <dd className="col-span-2 text-xs text-muted">
+              QIE at ${trimDecimals(quote.display.qiePriceUsd, 4)}, the lower of the QIE oracle and
+              QIEDex prices, plus {quote.display.qieBufferPercent}% in case the price moves while
+              you pay.
+            </dd>
+          )}
+          <dd className="col-span-2 text-xs text-muted">
+            No other fees. The QIE network fee for the payment is a fraction of a cent.
           </dd>
           <dt className="text-muted">Price valid for</dt>
           <dd className="text-right font-medium">{expired ? 'expired' : `${secondsLeft}s`}</dd>

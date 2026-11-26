@@ -137,7 +137,7 @@ Loop: pick orders where `status IN (PAID, FULFILLING)` and `nextAttemptAt <= now
 
 | Var | Default | Meaning |
 |-----|---------|---------|
-| `MARGIN_BPS` | 400 | markup on supplier cost |
+| `MARGIN_BPS` | 500 | markup on supplier cost (raised from 400 on 26 Nov 2026 to cover converting revenue back to the Reloadly float) |
 | `QIE_SPREAD_BPS` | 150 | extra on native-QIE quotes |
 | `CASHBACK_BPS` | 100 | accrued for eligible wallets (P1) |
 | `MAX_ORDER_USD` | 50 | per order |

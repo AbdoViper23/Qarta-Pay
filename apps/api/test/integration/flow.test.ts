@@ -244,11 +244,11 @@ const supplierCalls = (orderId: Hex, method: string) =>
 describe('quote → pay → deliver → settle', () => {
   it('airtime paid in QUSDC is delivered once and settled to the treasury', async () => {
     const q = await quote(airtime('4567'));
-    expect(q.display.usd).toBe('5.25'); // $5 + 5% margin
+    expect(q.display.usd).toBe('5.1'); // $5 + 2% margin
     expect(q.display).toMatchObject({
       productUsd: '5',
-      feeUsd: '0.25',
-      feePercent: '5',
+      feeUsd: '0.1',
+      feePercent: '2',
       qiePriceUsd: null,
     });
     const treasuryBefore = await qusdcBalance(treasury);
@@ -261,7 +261,7 @@ describe('quote → pay → deliver → settle', () => {
     const order = (await getOrder(db, q.orderId))!;
     expect(order.settleTxHash).toMatch(/^0x/);
     expect(order.deliveredAt).not.toBeNull();
-    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_250_000n);
+    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_100_000n);
     expect(await chainStatus(q.orderId)).toBe(2);
     expect(supplierCalls(q.orderId, 'sendTopup')).toBe(1);
 
@@ -580,7 +580,7 @@ describe('pricing and limits', () => {
   });
 
   it('rejects orders above the per-order limit and invalid input', async () => {
-    const tooBig = await requestQuote({ ...airtime('4567'), amount: '49' }); // $49 + margin > $50
+    const tooBig = await requestQuote({ ...airtime('4567'), amount: '49.5' }); // $49.50 + 2% > $50
     expect(tooBig.status).toBe(400);
     expect(tooBig.json.error).toBe('limit_order');
     expect((await requestQuote({ ...airtime('4567'), recipientPhone: '123' })).status).toBe(400);
@@ -597,6 +597,7 @@ describe('pricing and limits', () => {
     expect(identity.qieName).toBeNull();
     const config = (await runtime.server.inject({ url: '/v1/config' })).json();
     expect(config.contracts.checkout.toLowerCase()).toBe(checkout.toLowerCase());
+    expect(config.pricing).toEqual({ feePercent: '2', qieBufferPercent: '1.5' });
     const stats = (await runtime.server.inject({ url: '/v1/stats' })).json();
     expect(stats.ordersSettled).toBeGreaterThanOrEqual(3);
   });

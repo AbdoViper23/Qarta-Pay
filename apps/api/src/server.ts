@@ -139,6 +139,11 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
         quoteTtlQusdcS: config.QUOTE_TTL_QUSDC_S,
         quoteTtlQieS: config.QUOTE_TTL_QIE_S,
       },
+      // Shown on the site so the advertised fee always matches what quotes charge.
+      pricing: {
+        feePercent: formatUnitsPlain(config.MARGIN_BPS, 2),
+        qieBufferPercent: formatUnitsPlain(config.QIE_SPREAD_BPS, 2),
+      },
     };
   });
 

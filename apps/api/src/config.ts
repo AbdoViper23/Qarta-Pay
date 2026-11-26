@@ -60,7 +60,7 @@ const envSchema = z.object({
   RELOADLY_CLIENT_SECRET: z.string().min(1),
   RELOADLY_ORDER_EMAIL: z.email().default('orders@example.com'),
 
-  MARGIN_BPS: z.coerce.bigint().default(500n),
+  MARGIN_BPS: z.coerce.bigint().default(200n),
   QIE_SPREAD_BPS: z.coerce.bigint().default(150n),
   MAX_ORDER_USD: z.coerce.number().positive().default(50),
   MAX_WALLET_DAILY_USD: z.coerce.number().positive().default(100),

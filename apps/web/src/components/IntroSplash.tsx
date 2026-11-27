@@ -1,6 +1,5 @@
 'use client';
 
-import { useAnimate } from 'motion/react';
 import { useEffect, useRef } from 'react';
 
 const SEEN_KEY = 'qarta-intro-seen';
@@ -12,102 +11,126 @@ const SEEN_KEY = 'qarta-intro-seen';
  */
 export const introScript = `(function(){try{if(location.pathname!=='/')return;if(sessionStorage.getItem('${SEEN_KEY}'))return;if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;document.documentElement.dataset.intro='on';}catch(e){}})();`;
 
+const clamp = (x: number) => Math.max(0, Math.min(1, x));
+const seg = (t: number, a: number, b: number) => clamp((t - a) / (b - a));
+const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
+const outCubic = (x: number) => 1 - (1 - x) ** 3;
+const inOutCubic = (x: number) => (x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2);
+const backOut = (x: number) => 1 + 2.70158 * (x - 1) ** 3 + 1.70158 * (x - 1) ** 2;
+function bounceOut(x: number): number {
+  const n = 7.5625;
+  const d = 2.75;
+  if (x < 1 / d) return n * x * x;
+  if (x < 2 / d) return n * (x - 1.5 / d) ** 2 + 0.75;
+  if (x < 2.5 / d) return n * (x - 2.25 / d) ** 2 + 0.9375;
+  return n * (x - 2.625 / d) ** 2 + 0.984375;
+}
+
+/** Timeline in seconds: coin drops, card grows around it, strip prints, then the fly. */
+const FLY = 1.85;
+const FLY_END = FLY + 0.7;
+
 /**
- * The logo builds itself in the middle of the screen: the card appears, the hole opens
- * around the coin, the receipt strip unrolls. Then the mark shrinks and flies into the
- * header (#brand-mark) while the overlay fades. A click skips it.
+ * "Coin drop" intro: a coin falls and bounces, the card grows around it so the hole opens,
+ * the receipt strip prints out in steps, then the mark shrinks and flies into the header
+ * (#brand-mark) while the overlay fades. A click skips it.
  */
 export function IntroSplash() {
-  const [scope, animate] = useAnimate();
-  const done = useRef(false);
+  const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (root.dataset.intro !== 'on') return;
+    const html = document.documentElement;
+    const el = root.current;
+    if (html.dataset.intro !== 'on' || !el) return;
 
+    const part = <T extends Element>(name: string) =>
+      el.querySelector(`[data-part="${name}"]`) as T;
+    const mark = part<SVGSVGElement>('mark');
+    const card = part<SVGGElement>('card');
+    const strip = part<SVGRectElement>('strip');
+    const coin = part<SVGCircleElement>('coin');
+    const word = part<HTMLParagraphElement>('word');
+    const backdrop = part<HTMLDivElement>('backdrop');
+
+    let raf = 0;
+    let flight: { dx: number; dy: number; scale: number } | null = null;
     const finish = () => {
-      if (done.current) return;
-      done.current = true;
+      cancelAnimationFrame(raf);
       try {
         sessionStorage.setItem(SEEN_KEY, '1');
       } catch {
         // storage blocked: the intro may play again next time
       }
-      delete root.dataset.intro;
+      delete html.dataset.intro;
     };
 
-    const run = async () => {
-      const ease = [0.22, 1, 0.36, 1] as const;
-      await animate(
-        '[data-part="card"]',
-        { scale: [0.5, 1.06, 1], opacity: [0, 1] },
-        { duration: 0.5, ease },
+    const start = performance.now();
+    const frame = (now: number) => {
+      const t = (now - start) / 1000;
+
+      // 1. The coin falls from above the mark and bounces to rest (SVG units).
+      coin.setAttribute('cy', String(114 - 520 * (1 - bounceOut(seg(t, 0, 0.6)))));
+      // 2. The card grows around the coin, which opens the hole.
+      const grow = seg(t, 0.62, 1.05);
+      card.style.opacity = grow > 0 ? '1' : '0';
+      card.setAttribute(
+        'transform',
+        `translate(118 114) scale(${lerp(0.28, 1, backOut(grow))}) translate(-118 -114)`,
       );
-      await animate('[data-part="hole"]', { scale: [0, 1] }, { duration: 0.38, ease });
-      animate('[data-part="word"]', { opacity: [0, 1], y: [8, 0] }, { duration: 0.35, ease });
-      await animate('[data-part="strip"]', { scaleX: [0, 1] }, { duration: 0.36, ease });
-      await new Promise((r) => setTimeout(r, 260));
+      // 3. The receipt strip prints out in short steps.
+      const p = seg(t, 1.1, 1.6);
+      strip.setAttribute('width', String(111 * (p >= 1 ? 1 : Math.floor(p * 7) / 7)));
+      const wordIn = outCubic(seg(t, 1.3, 1.6)) * (1 - seg(t, FLY, FLY + 0.2));
+      word.style.opacity = String(wordIn);
 
-      // Fly into the header mark.
-      const mark = scope.current?.querySelector('[data-part="mark"]') as HTMLElement | null;
-      const target = document.getElementById('brand-mark');
-      if (mark && target) {
-        const from = mark.getBoundingClientRect();
-        const to = target.getBoundingClientRect();
-        animate('[data-part="word"]', { opacity: 0 }, { duration: 0.2 });
-        animate('[data-part="backdrop"]', { opacity: 0 }, { duration: 0.55, delay: 0.15 });
-        await animate(
-          mark,
-          {
-            x: to.left + to.width / 2 - (from.left + from.width / 2),
-            y: to.top + to.height / 2 - (from.top + from.height / 2),
-            scale: to.width / from.width,
-          },
-          { duration: 0.7, ease: [0.65, 0, 0.35, 1] },
-        );
+      // 4. Fly into the header mark and reveal the page.
+      if (t >= FLY) {
+        if (!flight) {
+          const from = mark.getBoundingClientRect();
+          const to = document.getElementById('brand-mark')?.getBoundingClientRect();
+          flight = to
+            ? {
+                dx: to.left + to.width / 2 - (from.left + from.width / 2),
+                dy: to.top + to.height / 2 - (from.top + from.height / 2),
+                scale: to.width / from.width,
+              }
+            : { dx: 0, dy: 0, scale: 1 };
+        }
+        const f = inOutCubic(seg(t, FLY, FLY_END));
+        mark.style.transform = `translate(${flight.dx * f}px, ${flight.dy * f}px) scale(${lerp(1, flight.scale, f)})`;
+        backdrop.style.opacity = String(1 - seg(t, FLY + 0.15, FLY_END));
       }
-      finish();
-    };
-    void run();
 
-    const skip = () => finish();
-    const el = scope.current as HTMLElement | null;
-    el?.addEventListener('click', skip);
-    return () => el?.removeEventListener('click', skip);
-  }, [animate, scope]);
+      if (t >= FLY_END + 0.05) finish();
+      else raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+
+    el.addEventListener('click', finish);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener('click', finish);
+    };
+  }, []);
 
   return (
-    <div ref={scope} className="intro fixed inset-0 z-50 cursor-pointer" aria-hidden>
+    <div ref={root} className="intro fixed inset-0 z-50 cursor-pointer" aria-hidden>
       <div data-part="backdrop" className="absolute inset-0 bg-bg" />
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-6">
         <svg
           data-part="mark"
           viewBox="28 28 200 200"
+          overflow="visible"
           className="size-40 sm:size-44"
           style={{ transformOrigin: '50% 50%' }}
         >
-          <g data-part="card" style={{ transformOrigin: '128px 128px', opacity: 0 }}>
+          <g data-part="card" style={{ opacity: 0 }}>
             <rect x="28" y="28" width="200" height="200" rx="40" fill="var(--color-brand)" />
             {/* The hole and the strip are drawn in the page colour over the card. */}
-            <circle
-              data-part="hole"
-              cx="118"
-              cy="114"
-              r="58"
-              fill="var(--color-bg)"
-              style={{ transformOrigin: '118px 114px', transform: 'scale(0)' }}
-            />
-            <rect
-              data-part="strip"
-              x="118"
-              y="146"
-              width="111"
-              height="26"
-              fill="var(--color-bg)"
-              style={{ transformOrigin: '118px 159px', transform: 'scaleX(0)' }}
-            />
-            <circle cx="118" cy="114" r="30" fill="var(--color-brand)" />
+            <circle cx="118" cy="114" r="58" fill="var(--color-bg)" />
+            <rect data-part="strip" x="118" y="146" width="0" height="26" fill="var(--color-bg)" />
           </g>
+          <circle data-part="coin" cx="118" cy="-406" r="30" fill="var(--color-brand)" />
         </svg>
         <p
           data-part="word"

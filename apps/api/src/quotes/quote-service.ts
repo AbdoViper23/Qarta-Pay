@@ -160,7 +160,7 @@ export class QuoteService {
       feeWaived ? this.config.FREE_ORDER_COST_BPS : this.config.MARGIN_BPS,
     );
     await this.checkLimits(request.payer, usd6);
-    await this.checkSupplierBalance(price.supplierCostUsd6);
+    await this.checkSupplierBalance(price.supplierCostUsd6, request.payer);
 
     // 3. Token amount.
     let token: Address;
@@ -268,13 +268,19 @@ export class QuoteService {
     if (usd6 > max(this.config.MAX_ORDER_USD)) {
       throw new QuoteError('limit_order', `orders are limited to $${this.config.MAX_ORDER_USD}`);
     }
-    if ((await usdCommittedToday(this.db, payer)) + usd6 > max(this.config.MAX_WALLET_DAILY_USD)) {
+    if (
+      (await usdCommittedToday(this.db, payer, payer)) + usd6 >
+      max(this.config.MAX_WALLET_DAILY_USD)
+    ) {
       throw new QuoteError(
         'limit_wallet_daily',
         `daily limit of $${this.config.MAX_WALLET_DAILY_USD} per wallet reached`,
       );
     }
-    if ((await usdCommittedToday(this.db)) + usd6 > max(this.config.MAX_GLOBAL_DAILY_USD)) {
+    if (
+      (await usdCommittedToday(this.db, undefined, payer)) + usd6 >
+      max(this.config.MAX_GLOBAL_DAILY_USD)
+    ) {
       throw new QuoteError(
         'limit_global_daily',
         'daily sales limit reached, try again tomorrow',
@@ -284,11 +290,11 @@ export class QuoteService {
   }
 
   /** Never sell what the supplier balance cannot deliver (docs/05-BACKEND.md step 5). */
-  private async checkSupplierBalance(costUsd6: bigint): Promise<void> {
+  private async checkSupplierBalance(costUsd6: bigint, payer: Address): Promise<void> {
     if (!this.balanceCache || Date.now() - this.balanceCache.at > 30_000) {
       this.balanceCache = { at: Date.now(), value: await this.supplier.balanceUsd6() };
     }
-    if (this.balanceCache.value < (await supplierCostReserved(this.db)) + costUsd6) {
+    if (this.balanceCache.value < (await supplierCostReserved(this.db, payer)) + costUsd6) {
       // The quote is refused before anyone pays. The exact balance is not disclosed.
       throw new QuoteError(
         'supplier_balance_low',

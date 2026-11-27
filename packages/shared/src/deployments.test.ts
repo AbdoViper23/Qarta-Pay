@@ -54,7 +54,9 @@ describe('addresses', () => {
 
   it('requireAddress returns a configured address and throws for a missing one', () => {
     expect(requireAddress(1990, 'qusdc')).toBe('0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5');
-    expect(requireAddress(1990, 'qartaCheckout')).toBe('0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C');
+    expect(requireAddress(1990, 'qartaCheckout')).toBe(
+      '0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C',
+    );
     expect(requireAddress(1983, 'qusdc')).toBe('0x52259E57Ba961292a23AB4F78D3C815d84030B42');
     expect(() => requireAddress(1983, 'qiedexRouter')).toThrow();
   });

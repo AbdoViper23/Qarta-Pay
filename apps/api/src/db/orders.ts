@@ -306,24 +306,38 @@ export async function expireQuotes(db: DbClient, graceSeconds: number): Promise<
 
 /** Statuses that count against spending limits: paid or about to be paid, not refunded. */
 const COMMITTED = `(status in ('PAID', 'FULFILLING', 'DELIVERED', 'SETTLED', 'REFUND_PENDING', 'NEEDS_REVIEW')
-  or (status = 'QUOTED' and quote_expiry > now()))`;
+  or (status = 'QUOTED' and quote_expiry > now() and payer <> $EXCLUDE))`;
+// A wallet asking for a new price replaces its own earlier unpaid quotes, so those do not count
+// against it. If it pays a stale quote anyway, the supplier refuses and the order is refunded.
+const NO_WALLET = '0x0000000000000000000000000000000000000000';
 
 /** USD (6 decimals) committed since the start of the current UTC day, for one wallet or all. */
-export async function usdCommittedToday(db: DbClient, wallet?: string): Promise<bigint> {
+export async function usdCommittedToday(
+  db: DbClient,
+  wallet?: string,
+  excludeQuotesOf?: string,
+): Promise<bigint> {
   const result = await db.query<{ total: string | null }>(
     `select coalesce(sum(usd_amount), 0)::text as total from orders
-      where ${COMMITTED} and created_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc'
-        ${wallet ? 'and payer = $1' : ''}`,
-    wallet ? [wallet.toLowerCase()] : [],
+      where ${COMMITTED.replace('$EXCLUDE', '$1')} and created_at >= date_trunc('day', now() at time zone 'utc') at time zone 'utc'
+        ${wallet ? 'and payer = $2' : ''}`,
+    wallet
+      ? [(excludeQuotesOf ?? NO_WALLET).toLowerCase(), wallet.toLowerCase()]
+      : [(excludeQuotesOf ?? NO_WALLET).toLowerCase()],
   );
   return BigInt(result.rows[0]?.total ?? '0');
 }
 
 /** Supplier cost (6 decimals) of orders that may still draw on the supplier balance. */
-export async function supplierCostReserved(db: DbClient): Promise<bigint> {
+export async function supplierCostReserved(
+  db: DbClient,
+  excludeQuotesOf?: string,
+): Promise<bigint> {
   const result = await db.query<{ total: string | null }>(
     `select coalesce(sum(supplier_cost_usd), 0)::text as total from orders
-      where status in ('PAID', 'FULFILLING') or (status = 'QUOTED' and quote_expiry > now())`,
+      where status in ('PAID', 'FULFILLING')
+        or (status = 'QUOTED' and quote_expiry > now() and payer <> $1)`,
+    [(excludeQuotesOf ?? NO_WALLET).toLowerCase()],
   );
   return BigInt(result.rows[0]?.total ?? '0');
 }

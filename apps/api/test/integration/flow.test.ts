@@ -559,8 +559,9 @@ describe('pricing and limits', () => {
       });
       return { status: response.statusCode, json: response.json() as { error?: string } };
     };
-    // $3 free at the supplier on top of what earlier open quotes already reserve.
-    supplier.balance = (await supplierCostReserved(db)) + 3_000_000n;
+    // $3 free at the supplier on top of what other wallets' open quotes already reserve
+    // (this wallet's own earlier quotes do not count against it).
+    supplier.balance = (await supplierCostReserved(db, payer.address)) + 3_000_000n;
     // Skip past the 30 s balance cache so the new balance is read.
     const now = Date.now();
     const clock = vi.spyOn(Date, 'now').mockReturnValue(now + 31_000);
@@ -569,8 +570,10 @@ describe('pricing and limits', () => {
       expect(tooBig.status).toBe(503);
       expect(tooBig.json.error).toBe('supplier_balance_low');
       expect((await quoteFrom({ ...airtime('4567'), amount: '2' })).status).toBe(200);
-      // That $2 is now reserved: another $2 would need $4 of the $3.
-      expect((await quoteFrom({ ...airtime('4568'), amount: '2' })).json.error).toBe(
+      // That $2 is now reserved for another wallet: its $2 would need $4 of the $3.
+      // (The same wallet asking again replaces its own quote; see the next test.)
+      const other = mnemonicToAccount(ANVIL_MNEMONIC, { addressIndex: 13 }).address;
+      expect((await quoteFrom({ ...airtime('4568'), amount: '2', payer: other })).json.error).toBe(
         'supplier_balance_low',
       );
     } finally {
@@ -578,6 +581,41 @@ describe('pricing and limits', () => {
       supplier.balance = 1_000_000_000n;
       clock.mockReturnValue(now + 62_000);
       await quoteFrom({ ...airtime('4569'), amount: '2' });
+      clock.mockRestore();
+    }
+  });
+
+  it("a wallet's own unpaid quotes do not block its next quote; other wallets still see them", async () => {
+    const quoteAs = async (who: Address, ip: string, amount = '5') => {
+      const response = await runtime.server.inject({
+        method: 'POST',
+        url: '/v1/quotes',
+        remoteAddress: ip,
+        payload: { ...airtime('4590'), amount, payer: who },
+      });
+      return { status: response.statusCode, json: response.json() as { error?: string } };
+    };
+    const alice = mnemonicToAccount(ANVIL_MNEMONIC, { addressIndex: 11 }).address;
+    const bob = mnemonicToAccount(ANVIL_MNEMONIC, { addressIndex: 12 }).address;
+    // $6 free at the supplier on top of what other open quotes already reserve.
+    supplier.balance = (await supplierCostReserved(db)) + 6_000_000n;
+    const now = Date.now() + 400_000; // well past any balance cache an earlier test left
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+    try {
+      // Alice asks for the same $5 price four times (refreshing, changing her mind).
+      for (let i = 0; i < 4; i += 1) expect((await quoteAs(alice, '10.0.0.91')).status).toBe(200);
+      // Bob still sees Alice's open $5 quote: only $1 is free for him.
+      expect((await quoteAs(bob, '10.0.0.92')).json.error).toBe('supplier_balance_low');
+      // Alice's own repeated quotes also do not use up her daily limit ($100): 3 x $45.
+      for (let i = 0; i < 3; i += 1) {
+        supplier.balance = 1_000_000_000n;
+        clock.mockReturnValue(now + 62_000 + i * 31_000);
+        expect((await quoteAs(alice, '10.0.0.91', '45')).status).toBe(200);
+      }
+    } finally {
+      supplier.balance = 1_000_000_000n;
+      clock.mockReturnValue(now + 200_000);
+      await quoteAs(bob, '10.0.0.92', '2'); // refresh the balance cache for later tests
       clock.mockRestore();
     }
   });

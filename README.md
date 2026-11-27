@@ -101,6 +101,7 @@ Deploying to testnet/mainnet and operating the service: `docs/13-RUNBOOK.md`. Cu
 | 14 | `docs/14-HUMAN-SETUP-GUIDE.md` | Step-by-step guide (Arabic) for the human tasks: accounts, wallets, faucet, hosting, submission |
 | 15 | `docs/15-ROADMAP.md` | Public roadmap (phases 1–4) and business model, mirrored on the site's `/roadmap` page |
 | 16 | `docs/16-BRAND.md` | Logo idea, construction, files (`apps/web/public/brand/`), colours and usage rules |
+| 17 | `docs/17-DEMO-SCRIPT.md` | Demo video script: timeline, voice-over, captions, recording checklist (`demo/` holds the scenes and storyboard) |
 | — | `docs/research-notes.md`, `docs/probe-results.md` | Evidence: researched answers with sources, and raw on-chain probe output |
 
 Agent instructions live in `CLAUDE.md`. Private, uncommitted context lives in `CLAUDE.local.md` (create it from `CLAUDE.local.md.template`). The first prompt to give Claude Code is in `KICKOFF-PROMPT.md`.

@@ -181,7 +181,7 @@ Structured logs (pino) with `orderId` on every line; never log gift card codes, 
 
 ## Free orders (27 Nov 2026)
 
-- **At quote time.** A quote is free (margin 0, `fee_waived = true`) when both hold:
+- **At quote time.** A quote is free (`fee_waived = true`; it pays `FREE_ORDER_COST_BPS` instead of `MARGIN_BPS`) when both hold:
   - the wallet has paid fewer than `FREE_ORDERS_PER_WALLET` free orders (statuses PAID, FULFILLING, DELIVERED, SETTLED, NEEDS_REVIEW);
   - the product's supplier cost is at most `FREE_ORDER_MAX_USD`.
 

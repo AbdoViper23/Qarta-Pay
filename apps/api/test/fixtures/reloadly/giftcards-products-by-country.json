@@ -17,8 +17,30 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [2, 3, 4, 5, 10, 15, 20, 25, 50, 100],
-      "fixedSenderDenominations": [2, 3, 4, 5, 10, 15, 20, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        2,
+        3,
+        4,
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        2,
+        3,
+        4,
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "2.0": 2,
         "3.0": 3,
@@ -32,7 +54,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/08ed62a9-52d3-47d2-9ad8-ae27d0a3f3a2.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/08ed62a9-52d3-47d2-9ad8-ae27d0a3f3a2.png"
+      ],
       "brand": {
         "brandId": 3,
         "brandName": "Apple",
@@ -76,7 +100,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/fbef9b57-e0b0-4ead-aee3-fdc2bc80e2db.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/fbef9b57-e0b0-4ead-aee3-fdc2bc80e2db.png"
+      ],
       "brand": {
         "brandId": 2,
         "brandName": "Amazon",
@@ -120,7 +146,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/3def-2acd-5dbf-bdfe5-starbuck.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/3def-2acd-5dbf-bdfe5-starbuck.jpeg"
+      ],
       "brand": {
         "brandId": 379,
         "brandName": "Starbucks",
@@ -160,8 +188,20 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [20, 30, 50, 60, 100],
-      "fixedSenderDenominations": [20, 30, 50, 60, 100],
+      "fixedRecipientDenominations": [
+        20,
+        30,
+        50,
+        60,
+        100
+      ],
+      "fixedSenderDenominations": [
+        20,
+        30,
+        50,
+        60,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "20.0": 20,
         "30.0": 30,
@@ -170,7 +210,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/dd02b7e3-a772-40e2-bba6-c11f9b0c3bda.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/dd02b7e3-a772-40e2-bba6-c11f9b0c3bda.jpeg"
+      ],
       "brand": {
         "brandId": 41,
         "brandName": "NetFlix",
@@ -214,7 +256,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/6808b1b1-b303-4283-a5a5-5f7fe3618324.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/6808b1b1-b303-4283-a5a5-5f7fe3618324.png"
+      ],
       "brand": {
         "brandId": 157,
         "brandName": "Airbnb",
@@ -254,8 +298,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [1, 5, 10, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [1, 5, 10, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        1,
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        1,
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "1.0": 1,
         "5.0": 5,
@@ -267,7 +329,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/4ba0f8b8-2958-46aa-a47c-3698d8d12867.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/4ba0f8b8-2958-46aa-a47c-3698d8d12867.png"
+      ],
       "brand": {
         "brandId": 82,
         "brandName": "Target",
@@ -311,7 +375,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/876a1134-913c-4824-a91d-b715dc19ff8d.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/876a1134-913c-4824-a91d-b715dc19ff8d.jpeg"
+      ],
       "brand": {
         "brandId": 520,
         "brandName": "Abercrombie & Fitch",
@@ -355,7 +421,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/nike.webp"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/nike.webp"
+      ],
       "brand": {
         "brandId": 259,
         "brandName": "Nike",
@@ -395,8 +463,28 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [1.5, 4.25, 7.5, 11, 16, 24, 32, 50, 84],
-      "fixedSenderDenominations": [1.5, 4.25, 7.5, 11, 16, 24, 32, 50, 84],
+      "fixedRecipientDenominations": [
+        1.5,
+        4.25,
+        7.5,
+        11,
+        16,
+        24,
+        32,
+        50,
+        84
+      ],
+      "fixedSenderDenominations": [
+        1.5,
+        4.25,
+        7.5,
+        11,
+        16,
+        24,
+        32,
+        50,
+        84
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "1.5": 1.5,
         "4.25": 4.25,
@@ -419,7 +507,9 @@
         "50.0": "360000 tokens",
         "84.0": "610000 tokens"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/jawaker-ed5f-edc2-adbe.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/jawaker-ed5f-edc2-adbe.jpeg"
+      ],
       "brand": {
         "brandId": 373,
         "brandName": "Jawaker",
@@ -463,7 +553,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/f321d2c5-ef00-42a1-b38d-9adce6619db9.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/f321d2c5-ef00-42a1-b38d-9adce6619db9.png"
+      ],
       "brand": {
         "brandId": 505,
         "brandName": "Under Armour®",
@@ -549,8 +641,24 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 20, 25, 50, 100],
-      "fixedSenderDenominations": [5, 10, 15, 20, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -561,7 +669,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e5921694-e2c3-4d6f-8833-3735b38a0a0f.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e5921694-e2c3-4d6f-8833-3735b38a0a0f.png"
+      ],
       "brand": {
         "brandId": 93,
         "brandName": "Xbox",
@@ -601,8 +711,14 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 25],
-      "fixedSenderDenominations": [10, 25],
+      "fixedRecipientDenominations": [
+        10,
+        25
+      ],
+      "fixedSenderDenominations": [
+        10,
+        25
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "25.0": 25
@@ -650,13 +766,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [24.99],
-      "fixedSenderDenominations": [24.99],
+      "fixedRecipientDenominations": [
+        24.99
+      ],
+      "fixedSenderDenominations": [
+        24.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "24.99": 24.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/72f60ba9-2554-4c08-995a-0198682d4d36.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/72f60ba9-2554-4c08-995a-0198682d4d36.jpg"
+      ],
       "brand": {
         "brandId": 93,
         "brandName": "Xbox",
@@ -696,8 +818,12 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [100],
-      "fixedSenderDenominations": [100],
+      "fixedRecipientDenominations": [
+        100
+      ],
+      "fixedSenderDenominations": [
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "100.0": 100
       },
@@ -744,8 +870,24 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -756,7 +898,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/890aa1f8-7a1a-49ba-a4c1-b19068296a05.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/890aa1f8-7a1a-49ba-a4c1-b19068296a05.jpg"
+      ],
       "brand": {
         "brandId": 45,
         "brandName": "Omaha Steaks",
@@ -800,7 +944,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/5b13f930-367b-4952-bcb2-8e4e5a89255f.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/5b13f930-367b-4952-bcb2-8e4e5a89255f.png"
+      ],
       "brand": {
         "brandId": 455,
         "brandName": "Ulta Beauty",
@@ -844,7 +990,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/d2de9400-07b9-443a-a476-15056ce560fa.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/d2de9400-07b9-443a-a476-15056ce560fa.jpeg"
+      ],
       "brand": {
         "brandId": 112,
         "brandName": "Crypto Voucher",
@@ -884,8 +1032,20 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 15, 25, 50, 100],
-      "fixedSenderDenominations": [10, 15, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        10,
+        15,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        10,
+        15,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "15.0": 15,
@@ -894,7 +1054,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/roblox.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/roblox.jpeg"
+      ],
       "brand": {
         "brandId": 63,
         "brandName": "Roblox",
@@ -938,7 +1100,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/h-and-m.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/h-and-m.png"
+      ],
       "brand": {
         "brandId": 220,
         "brandName": "H&M",
@@ -978,8 +1142,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -991,7 +1173,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/dfdbdcda-2234-4a6f-abaf-a9a1dd64590d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/dfdbdcda-2234-4a6f-abaf-a9a1dd64590d.jpg"
+      ],
       "brand": {
         "brandId": 59,
         "brandName": "Regal",
@@ -1031,8 +1215,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -1044,7 +1246,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/6d07ac16-a250-4435-97ba-07fa54082e1f.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/6d07ac16-a250-4435-97ba-07fa54082e1f.jpg"
+      ],
       "brand": {
         "brandId": 83,
         "brandName": "The Coffee Bean & Tea Leaf",
@@ -1088,7 +1292,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/906d4bb6-aba5-4cf2-859e-6443f0c6386c.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/906d4bb6-aba5-4cf2-859e-6443f0c6386c.jpg"
+      ],
       "brand": {
         "brandId": 66,
         "brandName": "Saks Fifth Avenue",
@@ -1132,7 +1338,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"
+      ],
       "brand": {
         "brandId": 378,
         "brandName": "Mastercard",
@@ -1172,8 +1380,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 25, 50, 80],
-      "fixedSenderDenominations": [5, 10, 15, 25, 50, 80],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        25,
+        50,
+        80
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        25,
+        50,
+        80
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -1183,7 +1405,9 @@
         "80.0": 80
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e4432a2a-3c7e-4ae4-957e-109482e51289.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e4432a2a-3c7e-4ae4-957e-109482e51289.png"
+      ],
       "brand": {
         "brandId": 33,
         "brandName": "Riot Access",
@@ -1223,14 +1447,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [50, 100],
-      "fixedSenderDenominations": [50, 100],
+      "fixedRecipientDenominations": [
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "50.0": 50,
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/66728221-8e77-4de3-bd93-10a5be828045.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/66728221-8e77-4de3-bd93-10a5be828045.jpg"
+      ],
       "brand": {
         "brandId": 8,
         "brandName": "Celebrity Cruises",
@@ -1270,13 +1502,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [14.99],
-      "fixedSenderDenominations": [14.99],
+      "fixedRecipientDenominations": [
+        14.99
+      ],
+      "fixedSenderDenominations": [
+        14.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "14.99": 14.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/4461729e-f63b-4b1e-9dd6-d448cdb67bdb.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/4461729e-f63b-4b1e-9dd6-d448cdb67bdb.jpg"
+      ],
       "brand": {
         "brandId": 79,
         "brandName": "SHENZHEN",
@@ -1316,13 +1554,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [19.99],
-      "fixedSenderDenominations": [19.99],
+      "fixedRecipientDenominations": [
+        19.99
+      ],
+      "fixedSenderDenominations": [
+        19.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "19.99": 19.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/f7c878b0-9309-4354-a0ce-b460cdf698b7.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/f7c878b0-9309-4354-a0ce-b460cdf698b7.jpg"
+      ],
       "brand": {
         "brandId": 77,
         "brandName": "Opus Magnum",
@@ -1362,13 +1606,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [9.99],
-      "fixedSenderDenominations": [9.99],
+      "fixedRecipientDenominations": [
+        9.99
+      ],
+      "fixedSenderDenominations": [
+        9.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "9.99": 9.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/aad878ff-a02a-4b19-b961-5287c701199c.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/aad878ff-a02a-4b19-b961-5287c701199c.jpg"
+      ],
       "brand": {
         "brandId": 76,
         "brandName": "MOLEK-SYNTEZ",
@@ -1408,13 +1658,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [19.99],
-      "fixedSenderDenominations": [19.99],
+      "fixedRecipientDenominations": [
+        19.99
+      ],
+      "fixedSenderDenominations": [
+        19.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "19.99": 19.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/952c43c1-cca6-4736-867c-df5b145aad5c.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/952c43c1-cca6-4736-867c-df5b145aad5c.jpg"
+      ],
       "brand": {
         "brandId": 74,
         "brandName": "EXAPUNKS",
@@ -1454,13 +1710,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [59.99],
-      "fixedSenderDenominations": [59.99],
+      "fixedRecipientDenominations": [
+        59.99
+      ],
+      "fixedSenderDenominations": [
+        59.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "59.99": 59.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/63d910be-d023-42df-ba5a-136fc8e5d32a.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/63d910be-d023-42df-ba5a-136fc8e5d32a.jpg"
+      ],
       "brand": {
         "brandId": 39,
         "brandName": "Mortal Kombat",
@@ -1500,8 +1762,14 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [29.99, 79.99],
-      "fixedSenderDenominations": [29.99, 79.99],
+      "fixedRecipientDenominations": [
+        29.99,
+        79.99
+      ],
+      "fixedSenderDenominations": [
+        29.99,
+        79.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "29.99": 29.99,
         "79.99": 79.99
@@ -1510,7 +1778,9 @@
         "29.99": "Mensual-IntegralCareFull",
         "79.99": "100.00 - USA Exempt 3 months"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/3dd90e18-efae-462a-a299-daed783c6be9.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/3dd90e18-efae-462a-a299-daed783c6be9.jpeg"
+      ],
       "brand": {
         "brandId": 1243,
         "brandName": "BestCare",
@@ -1550,13 +1820,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [29.99],
-      "fixedSenderDenominations": [29.99],
+      "fixedRecipientDenominations": [
+        29.99
+      ],
+      "fixedSenderDenominations": [
+        29.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "29.99": 29.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/857f746a-34ac-43ad-b0a6-e85f976a9e64.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/857f746a-34ac-43ad-b0a6-e85f976a9e64.jpg"
+      ],
       "brand": {
         "brandId": 13,
         "brandName": "EA Access",
@@ -1596,13 +1872,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [29.99],
-      "fixedSenderDenominations": [29.99],
+      "fixedRecipientDenominations": [
+        29.99
+      ],
+      "fixedSenderDenominations": [
+        29.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "29.99": 29.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/9d39af32-4925-4bc5-8433-f686f2752078.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/9d39af32-4925-4bc5-8433-f686f2752078.jpg"
+      ],
       "brand": {
         "brandId": 18,
         "brandName": "PC Final Fantasy XIV 60 Days",
@@ -1642,8 +1924,18 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 20, 50],
-      "fixedSenderDenominations": [5, 10, 20, 50],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        20,
+        50
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        20,
+        50
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -1651,7 +1943,9 @@
         "50.0": 50
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/062c086f-b77d-427a-92fa-a1078f31f603.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/062c086f-b77d-427a-92fa-a1078f31f603.png"
+      ],
       "brand": {
         "brandId": 1245,
         "brandName": "Airalo",
@@ -1737,13 +2031,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [20],
-      "fixedSenderDenominations": [20],
+      "fixedRecipientDenominations": [
+        20
+      ],
+      "fixedSenderDenominations": [
+        20
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "20.0": 20
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/5fdf185a-4857-4bd1-a79c-1eaceb66f2ff.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/5fdf185a-4857-4bd1-a79c-1eaceb66f2ff.jpg"
+      ],
       "brand": {
         "brandId": 14,
         "brandName": "EA Apex",
@@ -1783,8 +2083,14 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [15, 25],
-      "fixedSenderDenominations": [15, 25],
+      "fixedRecipientDenominations": [
+        15,
+        25
+      ],
+      "fixedSenderDenominations": [
+        15,
+        25
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "15.0": 15,
         "25.0": 25
@@ -1832,8 +2138,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [1, 5, 10, 25, 50, 100],
-      "fixedSenderDenominations": [1, 5, 10, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        1,
+        5,
+        10,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        1,
+        5,
+        10,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "1.0": 1,
         "5.0": 5,
@@ -1843,7 +2163,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/pubg-mobile.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/pubg-mobile.jpeg"
+      ],
       "brand": {
         "brandId": 55,
         "brandName": "PUBG",
@@ -1883,8 +2205,18 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 20, 35, 50],
-      "fixedSenderDenominations": [10, 20, 35, 50],
+      "fixedRecipientDenominations": [
+        10,
+        20,
+        35,
+        50
+      ],
+      "fixedSenderDenominations": [
+        10,
+        20,
+        35,
+        50
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "20.0": 20,
@@ -1892,7 +2224,9 @@
         "50.0": 50
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/5f574207-fe49-40a2-b393-c97dd6d2d4fe.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/5f574207-fe49-40a2-b393-c97dd6d2d4fe.jpg"
+      ],
       "brand": {
         "brandId": 42,
         "brandName": "Nintendo",
@@ -1932,8 +2266,18 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [25, 50, 75, 100],
-      "fixedSenderDenominations": [25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "25.0": 25,
         "50.0": 50,
@@ -1941,7 +2285,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/d9f35de2-e87d-4697-ab23-fb04f9090931.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/d9f35de2-e87d-4697-ab23-fb04f9090931.png"
+      ],
       "brand": {
         "brandId": 53,
         "brandName": "PlayStation",
@@ -1981,8 +2327,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 15, 20, 25, 50, 100],
-      "fixedSenderDenominations": [10, 15, 20, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        10,
+        15,
+        20,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "15.0": 15,
@@ -1992,7 +2352,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/28c35815-9fdc-4d29-91c6-73e6e3b2303d.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/28c35815-9fdc-4d29-91c6-73e6e3b2303d.png"
+      ],
       "brand": {
         "brandId": 93,
         "brandName": "Xbox",
@@ -2032,8 +2394,20 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 20, 50, 100],
-      "fixedSenderDenominations": [5, 10, 20, 50, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        20,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        20,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -2042,7 +2416,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/89dfc34a-0bad-4fe6-be28-99a31551b9c1.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/89dfc34a-0bad-4fe6-be28-99a31551b9c1.png"
+      ],
       "brand": {
         "brandId": 56,
         "brandName": "Razer Gold",
@@ -2082,14 +2458,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [25, 50],
-      "fixedSenderDenominations": [25, 50],
+      "fixedRecipientDenominations": [
+        25,
+        50
+      ],
+      "fixedSenderDenominations": [
+        25,
+        50
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "25.0": 25,
         "50.0": 50
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/fa3ba21a-84a9-417b-8c0b-fe7e9b47bbc6.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/fa3ba21a-84a9-417b-8c0b-fe7e9b47bbc6.jpg"
+      ],
       "brand": {
         "brandId": 21,
         "brandName": "FragranceNet.com",
@@ -2129,14 +2513,22 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [25, 50],
-      "fixedSenderDenominations": [25, 50],
+      "fixedRecipientDenominations": [
+        25,
+        50
+      ],
+      "fixedSenderDenominations": [
+        25,
+        50
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "25.0": 25,
         "50.0": 50
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e405dfd6-d2fa-4fee-83e7-83aa5b013e42.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e405dfd6-d2fa-4fee-83e7-83aa5b013e42.png"
+      ],
       "brand": {
         "brandId": 1,
         "brandName": "1-800-PetSupplies",
@@ -2180,7 +2572,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e713b999-a0ee-43a3-b892-908ccb9f33b0.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e713b999-a0ee-43a3-b892-908ccb9f33b0.jpeg"
+      ],
       "brand": {
         "brandId": 522,
         "brandName": "Paypal",
@@ -2220,13 +2614,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [2],
-      "fixedSenderDenominations": [2],
+      "fixedRecipientDenominations": [
+        2
+      ],
+      "fixedSenderDenominations": [
+        2
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "2.0": 2
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"
+      ],
       "brand": {
         "brandId": 22,
         "brandName": "Free Fire",
@@ -2266,13 +2666,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [20],
-      "fixedSenderDenominations": [20],
+      "fixedRecipientDenominations": [
+        20
+      ],
+      "fixedSenderDenominations": [
+        20
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "20.0": 20
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"
+      ],
       "brand": {
         "brandId": 22,
         "brandName": "Free Fire",
@@ -2316,7 +2722,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/692e8143-b194-4bfd-b733-c28780487dbc.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/692e8143-b194-4bfd-b733-c28780487dbc.png"
+      ],
       "brand": {
         "brandId": 377,
         "brandName": "Visa",
@@ -2356,8 +2764,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [0.2, 0.99, 4.99, 9.99, 19.99, 29.99, 49.99, 99.99],
-      "fixedSenderDenominations": [0.2, 0.99, 4.99, 9.99, 19.99, 29.99, 49.99, 99.99],
+      "fixedRecipientDenominations": [
+        0.2,
+        0.99,
+        4.99,
+        9.99,
+        19.99,
+        29.99,
+        49.99,
+        99.99
+      ],
+      "fixedSenderDenominations": [
+        0.2,
+        0.99,
+        4.99,
+        9.99,
+        19.99,
+        29.99,
+        49.99,
+        99.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "0.2": 0.2,
         "0.99": 0.99,
@@ -2377,7 +2803,9 @@
         "49.99": "2975 Diamonds",
         "99.99": "6000 Diamonds"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/mobile-legends-diamonds.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/mobile-legends-diamonds.jpeg"
+      ],
       "brand": {
         "brandId": 38,
         "brandName": "Mobile Legends",
@@ -2417,15 +2845,25 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [25, 50, 100],
-      "fixedSenderDenominations": [25, 50, 100],
+      "fixedRecipientDenominations": [
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "25.0": 25,
         "50.0": 50,
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/455249b7-3df2-4468-bcf7-f9d78dc76690.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/455249b7-3df2-4468-bcf7-f9d78dc76690.jpg"
+      ],
       "brand": {
         "brandId": 81,
         "brandName": "StubHub",
@@ -2465,8 +2903,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -2478,7 +2934,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/db8bca4a-efcb-46fc-9c45-3a43e7cd3d8f.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/db8bca4a-efcb-46fc-9c45-3a43e7cd3d8f.png"
+      ],
       "brand": {
         "brandId": 57,
         "brandName": "Red Lobster",
@@ -2522,7 +2980,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/15137d0f-4455-404e-a9cb-ad7ae6a43042.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/15137d0f-4455-404e-a9cb-ad7ae6a43042.jpg"
+      ],
       "brand": {
         "brandId": 43,
         "brandName": "Nordstrom",
@@ -2566,7 +3026,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/3f09ca25-91b0-41b4-8d0b-e0a80eb33704.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/3f09ca25-91b0-41b4-8d0b-e0a80eb33704.png"
+      ],
       "brand": {
         "brandId": 519,
         "brandName": "Lulumelon",
@@ -2610,7 +3072,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/f4116079-ab0e-48e8-bc53-526780a5207a.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/f4116079-ab0e-48e8-bc53-526780a5207a.png"
+      ],
       "brand": {
         "brandId": 516,
         "brandName": "American Express",
@@ -2650,13 +3114,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5],
-      "fixedSenderDenominations": [5],
+      "fixedRecipientDenominations": [
+        5
+      ],
+      "fixedSenderDenominations": [
+        5
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"
+      ],
       "brand": {
         "brandId": 22,
         "brandName": "Free Fire",
@@ -2700,7 +3170,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"
+      ],
       "brand": {
         "brandId": 1242,
         "brandName": "Rewarble Mastercard USD",
@@ -2740,8 +3212,18 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [20, 25, 30, 50],
-      "fixedSenderDenominations": [20, 25, 30, 50],
+      "fixedRecipientDenominations": [
+        20,
+        25,
+        30,
+        50
+      ],
+      "fixedSenderDenominations": [
+        20,
+        25,
+        30,
+        50
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "20.0": 20,
         "25.0": 25,
@@ -2749,7 +3231,9 @@
         "50.0": 50
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/795088c7-da49-4cfa-a631-e1cc2ff6b089.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/795088c7-da49-4cfa-a631-e1cc2ff6b089.png"
+      ],
       "brand": {
         "brandId": 72,
         "brandName": "Steam",
@@ -2793,7 +3277,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/a355cac3-5b09-4d7c-b7d9-63500213ac13.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/a355cac3-5b09-4d7c-b7d9-63500213ac13.png"
+      ],
       "brand": {
         "brandId": 561,
         "brandName": "Rewarble Visa",
@@ -2833,8 +3319,18 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 25, 50, 100],
-      "fixedSenderDenominations": [10, 25, 50, 100],
+      "fixedRecipientDenominations": [
+        10,
+        25,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        10,
+        25,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "25.0": 25,
@@ -2842,7 +3338,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/4db2c3ea-5d84-4a48-a1d0-ca1f1a642da5.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/4db2c3ea-5d84-4a48-a1d0-ca1f1a642da5.jpeg"
+      ],
       "brand": {
         "brandId": 517,
         "brandName": "Crypto Giftcard",
@@ -2886,7 +3384,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/de7c4981-c29a-45ca-9ecf-ed06ea6c8455.jpeg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/de7c4981-c29a-45ca-9ecf-ed06ea6c8455.jpeg"
+      ],
       "brand": {
         "brandId": 320,
         "brandName": "Binance",
@@ -2926,15 +3426,21 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [94.99],
-      "fixedSenderDenominations": [94.99],
+      "fixedRecipientDenominations": [
+        94.99
+      ],
+      "fixedSenderDenominations": [
+        94.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "94.99": 94.99
       },
       "metadata": {
         "94.99": "13500-V-Bucks"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"
+      ],
       "brand": {
         "brandId": 20,
         "brandName": "Fortnite",
@@ -2974,15 +3480,21 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [41.99],
-      "fixedSenderDenominations": [41.99],
+      "fixedRecipientDenominations": [
+        41.99
+      ],
+      "fixedSenderDenominations": [
+        41.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "41.99": 41.99
       },
       "metadata": {
         "41.99": "5000-V-Bucks"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"
+      ],
       "brand": {
         "brandId": 20,
         "brandName": "Fortnite",
@@ -3022,15 +3534,21 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [26.99],
-      "fixedSenderDenominations": [26.99],
+      "fixedRecipientDenominations": [
+        26.99
+      ],
+      "fixedSenderDenominations": [
+        26.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "26.99": 26.99
       },
       "metadata": {
         "26.99": "2800-V-Bucks"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"
+      ],
       "brand": {
         "brandId": 20,
         "brandName": "Fortnite",
@@ -3070,15 +3588,21 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [11.99],
-      "fixedSenderDenominations": [11.99],
+      "fixedRecipientDenominations": [
+        11.99
+      ],
+      "fixedSenderDenominations": [
+        11.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "11.99": 11.99
       },
       "metadata": {
         "11.99": "1000-V-Bucks"
       },
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c940964b-0e6d-4243-8439-a9897dd0dd9d.jpg"
+      ],
       "brand": {
         "brandId": 20,
         "brandName": "Fortnite",
@@ -3122,7 +3646,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/3224fc13-bc96-486b-a354-c53ded219d3d.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/3224fc13-bc96-486b-a354-c53ded219d3d.png"
+      ],
       "brand": {
         "brandId": 154,
         "brandName": "ASOS",
@@ -3162,8 +3688,20 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [0.99, 11.99, 30.99, 49.99, 99.99],
-      "fixedSenderDenominations": [0.99, 11.99, 30.99, 49.99, 99.99],
+      "fixedRecipientDenominations": [
+        0.99,
+        11.99,
+        30.99,
+        49.99,
+        99.99
+      ],
+      "fixedSenderDenominations": [
+        0.99,
+        11.99,
+        30.99,
+        49.99,
+        99.99
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "0.99": 0.99,
         "11.99": 11.99,
@@ -3172,7 +3710,9 @@
         "99.99": 99.99
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/4aa80604-367e-42c0-a71f-3f6a08d83c0b.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/4aa80604-367e-42c0-a71f-3f6a08d83c0b.png"
+      ],
       "brand": {
         "brandId": 55,
         "brandName": "PUBG",
@@ -3212,13 +3752,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [26.95],
-      "fixedSenderDenominations": [26.95],
+      "fixedRecipientDenominations": [
+        26.95
+      ],
+      "fixedSenderDenominations": [
+        26.95
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "26.95": 26.95
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e1befb49-d765-47c0-b29a-f75601a99da5.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e1befb49-d765-47c0-b29a-f75601a99da5.jpg"
+      ],
       "brand": {
         "brandId": 37,
         "brandName": "Minecraft",
@@ -3258,13 +3804,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [25],
-      "fixedSenderDenominations": [25],
+      "fixedRecipientDenominations": [
+        25
+      ],
+      "fixedSenderDenominations": [
+        25
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "25.0": 25
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/0088f3f5-5689-4219-aa51-171e71625072.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/0088f3f5-5689-4219-aa51-171e71625072.jpg"
+      ],
       "brand": {
         "brandId": 91,
         "brandName": "Wine.com",
@@ -3304,8 +3856,24 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 15, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [10, 15, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "15.0": 15,
@@ -3316,7 +3884,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/003475d1-c14e-48cf-8e89-9d02b46d5aca.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/003475d1-c14e-48cf-8e89-9d02b46d5aca.jpg"
+      ],
       "brand": {
         "brandId": 26,
         "brandName": "Groupon",
@@ -3356,8 +3926,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [3, 5, 10, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [3, 5, 10, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        3,
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        3,
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "3.0": 3,
         "5.0": 5,
@@ -3369,7 +3957,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/9737aeb5-7166-4b46-ba1f-7bba412ba60c.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/9737aeb5-7166-4b46-ba1f-7bba412ba60c.jpg"
+      ],
       "brand": {
         "brandId": 5,
         "brandName": "Barnes & Noble",
@@ -3413,7 +4003,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/f597d1b4-d1ab-4155-9804-023a86ce50d2.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/f597d1b4-d1ab-4155-9804-023a86ce50d2.png"
+      ],
       "brand": {
         "brandId": 491,
         "brandName": "CB2",
@@ -3453,8 +4045,26 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 15, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -3466,7 +4076,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/b5a6c1e9-2055-4450-a457-c9e8e164fbe9.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/b5a6c1e9-2055-4450-a457-c9e8e164fbe9.jpg"
+      ],
       "brand": {
         "brandId": 9,
         "brandName": "Columbia Sportswear",
@@ -3556,7 +4168,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/cc58ae75-36e4-4275-922a-862d6afcf9c5.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/cc58ae75-36e4-4275-922a-862d6afcf9c5.png"
+      ],
       "brand": {
         "brandId": 281,
         "brandName": "Sephora",
@@ -3600,7 +4214,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"
+      ],
       "brand": {
         "brandId": 378,
         "brandName": "Mastercard",
@@ -3644,7 +4260,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"
+      ],
       "brand": {
         "brandId": 378,
         "brandName": "Mastercard",
@@ -3688,7 +4306,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/36eb3eae-3dcc-4d0f-b05f-4fbff95dd1a4.png"
+      ],
       "brand": {
         "brandId": 378,
         "brandName": "Mastercard",
@@ -3728,8 +4348,24 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 20, 25, 50, 75, 100],
-      "fixedSenderDenominations": [5, 10, 20, 25, 50, 75, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        20,
+        25,
+        50,
+        75,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -3740,7 +4376,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/26fabb57-1d02-45b8-9b5f-89eea274d50d.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/26fabb57-1d02-45b8-9b5f-89eea274d50d.jpg"
+      ],
       "brand": {
         "brandId": 47,
         "brandName": "Outback Steakhouse",
@@ -3780,8 +4418,24 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [5, 10, 20, 25, 35, 50, 100],
-      "fixedSenderDenominations": [5, 10, 20, 25, 35, 50, 100],
+      "fixedRecipientDenominations": [
+        5,
+        10,
+        20,
+        25,
+        35,
+        50,
+        100
+      ],
+      "fixedSenderDenominations": [
+        5,
+        10,
+        20,
+        25,
+        35,
+        50,
+        100
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "5.0": 5,
         "10.0": 10,
@@ -3792,7 +4446,9 @@
         "100.0": 100
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/e4432a2a-3c7e-4ae4-957e-109482e51289.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/e4432a2a-3c7e-4ae4-957e-109482e51289.png"
+      ],
       "brand": {
         "brandId": 33,
         "brandName": "Riot Access",
@@ -3832,15 +4488,25 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10, 30, 60],
-      "fixedSenderDenominations": [10, 30, 60],
+      "fixedRecipientDenominations": [
+        10,
+        30,
+        60
+      ],
+      "fixedSenderDenominations": [
+        10,
+        30,
+        60
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10,
         "30.0": 30,
         "60.0": 60
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/fb55ff74-1542-491a-a271-0730e5069249.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/fb55ff74-1542-491a-a271-0730e5069249.png"
+      ],
       "brand": {
         "brandId": 71,
         "brandName": "Spotify",
@@ -3884,7 +4550,9 @@
       "fixedSenderDenominations": null,
       "fixedRecipientToSenderDenominationsMap": null,
       "metadata": null,
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/aeb6b28c-7f74-4bfd-aef5-404bed5ffda7.png"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/aeb6b28c-7f74-4bfd-aef5-404bed5ffda7.png"
+      ],
       "brand": {
         "brandId": 34,
         "brandName": "Lowes",
@@ -3924,13 +4592,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [1],
-      "fixedSenderDenominations": [1],
+      "fixedRecipientDenominations": [
+        1
+      ],
+      "fixedSenderDenominations": [
+        1
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "1.0": 1
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"
+      ],
       "brand": {
         "brandId": 22,
         "brandName": "Free Fire",
@@ -3970,13 +4644,19 @@
       "senderCurrencyCode": "USD",
       "minSenderDenomination": null,
       "maxSenderDenomination": null,
-      "fixedRecipientDenominations": [10],
-      "fixedSenderDenominations": [10],
+      "fixedRecipientDenominations": [
+        10
+      ],
+      "fixedSenderDenominations": [
+        10
+      ],
       "fixedRecipientToSenderDenominationsMap": {
         "10.0": 10
       },
       "metadata": {},
-      "logoUrls": ["https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"],
+      "logoUrls": [
+        "https://cdn.reloadly.com/giftcards/c722d3a0-3e51-421e-a30a-51680a40e6ae.jpg"
+      ],
       "brand": {
         "brandId": 22,
         "brandName": "Free Fire",

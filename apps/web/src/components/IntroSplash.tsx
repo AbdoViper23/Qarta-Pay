@@ -1,8 +1,24 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 
 const SEEN_KEY = 'qarta-intro-seen';
+const DONE_EVENT = 'qarta:intro-done';
+
+/**
+ * True once the logo intro is over (or when it never runs), so page animations can wait for
+ * it instead of playing behind the overlay. False during server rendering and hydration.
+ */
+export function useIntroDone(): boolean {
+  return useSyncExternalStore(
+    (notify) => {
+      window.addEventListener(DONE_EVENT, notify);
+      return () => window.removeEventListener(DONE_EVENT, notify);
+    },
+    () => document.documentElement.dataset.intro !== 'on',
+    () => false,
+  );
+}
 
 /**
  * Runs in <head> before the first paint. The intro plays once per browser session, on the
@@ -62,6 +78,7 @@ export function IntroSplash() {
         // storage blocked: the intro may play again next time
       }
       delete html.dataset.intro;
+      window.dispatchEvent(new Event(DONE_EVENT));
     };
 
     const start = performance.now();

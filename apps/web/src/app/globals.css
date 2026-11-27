@@ -195,3 +195,18 @@ textarea:focus-visible {
 [data-theme='dark'] .dark-stamp {
   mix-blend-mode: normal;
 }
+
+/* Logo intro (components/IntroSplash.tsx): shown only while html[data-intro='on'],
+   which a head script sets before the first paint. */
+.intro {
+  display: none;
+}
+html[data-intro='on'] .intro {
+  display: block;
+}
+html[data-intro='on'] #brand-mark {
+  opacity: 0;
+}
+html[data-intro='on'] body {
+  overflow: hidden;
+}

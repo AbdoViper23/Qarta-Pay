@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Barlow_Condensed, IBM_Plex_Mono } from 'next/font/google';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { IntroSplash, introScript } from '@/components/IntroSplash';
 import { Logo } from '@/components/Logo';
 import { Providers } from '@/components/Providers';
 import { ThemeToggle, themeScript } from '@/components/ThemeToggle';
@@ -58,13 +59,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={`${barlow.variable} ${plexMono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: introScript }} />
       </head>
       <body className="grain min-h-dvh overflow-x-hidden">
         <Providers>
           <header className="fixed inset-x-0 top-0 z-40 border-b-2 border-rule bg-bg/95 backdrop-blur-sm">
             <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
               <Link href="/" aria-label="Qarta Pay home" className="flex items-center gap-2.5">
-                <Logo className="size-6" />
+                <span id="brand-mark" className="inline-flex">
+                  <Logo className="size-6" />
+                </span>
                 <span className="font-display text-2xl font-extrabold tracking-wide whitespace-nowrap uppercase">
                   Qarta Pay
                 </span>
@@ -87,6 +91,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </div>
           </header>
           <main>{children}</main>
+          <IntroSplash />
           <footer className="border-t-2 border-rule">
             <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 text-sm text-muted sm:grid-cols-[1.5fr_1fr_1fr]">
               <div className="space-y-3">

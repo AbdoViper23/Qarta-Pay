@@ -29,6 +29,7 @@ The mark does not draw a phone, a controller or a wallet, so it stays true as th
 | `qarta-lockup-on-dark.svg` | Horizontal logo on dark backgrounds (lighter red, paper text) |
 | `qarta-lockup-black.svg`, `qarta-lockup-white.svg` | One-colour horizontal logo |
 | `qarta-lockup-stacked.svg` | Symbol over wordmark, for square spaces |
+| `qarta-mark.png`, `qarta-lockup.png`, `qarta-lockup-on-dark.png`, `qarta-lockup-white.png` | Transparent PNG copies (1024 px mark, 2018 px lockups) for slides and video, where SVG is not accepted |
 | `src/app/opengraph-image.png`, `twitter-image.png` | Share preview (1200×630) for Telegram, X and WhatsApp |
 
 ## Colour

@@ -31,6 +31,12 @@ Last updated: **26 Nov 2026** (evening).
 - Checkout shows a free-order card with the slots left. It hides at zero.
 - A free quote paid past the limit is refunded before delivery.
 
+27 Nov, brand:
+- New logo (coin unrolling into a receipt strip, reading as a Q).
+- Master files are in `apps/web/public/brand/`; the rules are in `docs/16-BRAND.md`.
+- The site now has a favicon, apple icon, web manifest and a 1200×630 share image, all checked with `next build` and `next start`.
+- `NEXT_PUBLIC_SITE_URL` sets the share-preview base URL. It defaults to `https://qarta-pay.vercel.app`; set it once the domain is final.
+
 ## What exists in the repo
 
 | Path | What it is |

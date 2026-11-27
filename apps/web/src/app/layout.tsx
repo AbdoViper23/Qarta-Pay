@@ -21,10 +21,23 @@ const plexMono = IBM_Plex_Mono({
   display: 'swap',
 });
 
+const description =
+  'Spend QIE and QUSDC on mobile airtime and gift cards. Paid on QIE Mainnet, held in escrow until delivery.';
+
+// Favicon, apple-icon and share images come from the files next to this layout (icon.svg,
+// favicon.ico, apple-icon.png, opengraph-image.png, twitter-image.png): docs/16-BRAND.md.
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://qarta-pay.vercel.app'),
   title: 'Qarta Pay — spend crypto on real life',
-  description:
-    'Spend QIE and QUSDC on mobile airtime and gift cards. Paid on QIE Mainnet, held in escrow until delivery.',
+  description,
+  applicationName: 'Qarta Pay',
+  openGraph: {
+    type: 'website',
+    siteName: 'Qarta Pay',
+    title: 'Qarta Pay — spend crypto on real life',
+    description,
+  },
+  twitter: { card: 'summary_large_image', title: 'Qarta Pay', description },
 };
 
 export const viewport: Viewport = {

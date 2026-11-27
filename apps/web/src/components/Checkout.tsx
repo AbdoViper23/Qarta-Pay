@@ -174,6 +174,7 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
           left={freeOrders.left}
           total={freeOrders.total}
           maxUsd={freeOrders.maxUsd}
+          costPercent={freeOrders.costPercent}
           thisOrderFree={Boolean(quote?.display.freeOrder)}
         />
       )}
@@ -220,14 +221,26 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
             %)
           </dt>
           {quote.display.freeOrder ? (
-            <dd className="text-right">
-              <span className="mr-2 font-mono text-muted tabular-nums line-through">
-                ${quote.display.waivedFeeUsd}
-              </span>
-              <span className="bg-ok px-1.5 py-0.5 text-xs font-bold text-surface uppercase">
-                Free
-              </span>
-            </dd>
+            <>
+              <dd className="text-right">
+                <span className="mr-2 font-mono text-muted tabular-nums line-through">
+                  ${quote.display.waivedFeeUsd}
+                </span>
+                <span className="bg-ok px-1.5 py-0.5 text-xs font-bold text-surface uppercase">
+                  Free
+                </span>
+              </dd>
+              {quote.display.feeUsd !== '0' && (
+                <>
+                  <dt className="text-muted">Payment costs ({quote.display.feePercent}%)</dt>
+                  <dd className="text-right font-mono tabular-nums">${quote.display.feeUsd}</dd>
+                  <dd className="col-span-2 text-xs text-muted">
+                    Passed on at cost: what it costs us to turn your payment into the delivery. We
+                    make nothing on this order.
+                  </dd>
+                </>
+              )}
+            </>
           ) : (
             <dd className="text-right font-mono tabular-nums">${quote.display.feeUsd}</dd>
           )}

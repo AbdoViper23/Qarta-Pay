@@ -10,11 +10,14 @@ export function FreeOrdersCard({
   left,
   total,
   maxUsd,
+  costPercent,
   thisOrderFree,
 }: {
   left: number;
   total: number;
   maxUsd: number;
+  /** Payment costs passed on at cost on a free order, in percent ("0" when none). */
+  costPercent: string;
   /** Set when the current price is one of the free orders. */
   thisOrderFree: boolean;
 }) {
@@ -30,10 +33,13 @@ export function FreeOrdersCard({
         </span>
         <div className="min-w-0">
           <p className="font-display text-xl leading-tight font-extrabold uppercase">
-            Your first {total} orders are on us
+            No fee on your first {total} orders
           </p>
           <p className="mt-1 text-sm text-ink/80">
-            No Qarta fee on products up to ${maxUsd}. You pay only the product cost.
+            We take no profit on products up to ${maxUsd}.{' '}
+            {costPercent === '0'
+              ? 'You pay only the product cost.'
+              : `You pay the product cost plus ${costPercent}% payment costs, passed on at cost.`}
           </p>
         </div>
       </div>
@@ -69,7 +75,7 @@ export function FreeOrdersCard({
 
       {thisOrderFree && (
         <p className="mt-3 bg-brand px-3 py-2 text-sm font-semibold text-brand-ink">
-          This order is free: order {used + 1} of {total}.
+          No fee on this order: order {used + 1} of {total}.
         </p>
       )}
     </section>

@@ -54,6 +54,7 @@ export interface AppConfigResponse {
     qieBufferPercent: string;
     freeOrdersPerWallet: number;
     freeOrderMaxUsd: number;
+    freeOrderCostPercent: string;
   };
 }
 
@@ -154,6 +155,7 @@ export interface FreeOrdersResponse {
   total: number;
   left: number;
   maxUsd: number;
+  costPercent: string;
 }
 
 export type OrderStatus =

@@ -27,7 +27,7 @@ Last updated: **26 Nov 2026** (evening).
 - New `/roadmap` page with 4 phases and the business model (`apps/web/src/lib/roadmap.ts`).
 
 27 Nov:
-- The fee is back to 5%, and each wallet's first 3 orders are free (products up to $20, `05-BACKEND.md` "Free orders").
+- The fee is back to 5%. Each wallet's first 3 orders (products up to $20) carry no fee: they pay only `FREE_ORDER_COST_BPS` (2%) for payment costs, at cost (`05-BACKEND.md` "Free orders").
 - Checkout shows a free-order card with the slots left. It hides at zero.
 - A free quote paid past the limit is refunded before delivery.
 

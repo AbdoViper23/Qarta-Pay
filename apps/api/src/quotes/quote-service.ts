@@ -79,7 +79,10 @@ export interface QuoteResponse {
     /** QIE payments only: the USD price per QIE used, and the extra QIE added for price moves. */
     qiePriceUsd: string | null;
     qieBufferPercent: string | null;
-    /** Free-order offer: this order has no fee, and what the fee would have been. */
+    /**
+     * Free-order offer: no Qarta fee (`waivedFeeUsd` is what it would have been); `feeUsd` and
+     * `feePercent` are then the payment costs passed on at cost.
+     */
     freeOrder: boolean;
     waivedFeeUsd: string | null;
     /** Free orders the wallet still has before this one is paid, out of `freeOrdersTotal`. */
@@ -152,7 +155,10 @@ export class QuoteService {
     const feeWaived =
       freeOrdersLeft > 0 &&
       price.supplierCostUsd6 <= parseUnitsStrict(this.config.FREE_ORDER_MAX_USD.toFixed(6), 6);
-    const usd6 = usdPrice(price.supplierCostUsd6, feeWaived ? 0n : this.config.MARGIN_BPS);
+    const usd6 = usdPrice(
+      price.supplierCostUsd6,
+      feeWaived ? this.config.FREE_ORDER_COST_BPS : this.config.MARGIN_BPS,
+    );
     await this.checkLimits(request.payer, usd6);
     await this.checkSupplierBalance(price.supplierCostUsd6);
 
@@ -237,7 +243,10 @@ export class QuoteService {
         recipient: request.kind === 'AIRTIME' ? `+${recipientPhone}` : recipientWallet,
         productUsd: formatUnitsPlain(price.supplierCostUsd6, 6),
         feeUsd: formatUnitsPlain(usd6 - price.supplierCostUsd6, 6),
-        feePercent: feeWaived ? '0' : formatUnitsPlain(this.config.MARGIN_BPS, 2),
+        feePercent: formatUnitsPlain(
+          feeWaived ? this.config.FREE_ORDER_COST_BPS : this.config.MARGIN_BPS,
+          2,
+        ),
         qiePriceUsd: qiePriceUsd6 === null ? null : formatUnitsPlain(qiePriceUsd6, 6),
         qieBufferPercent:
           qiePriceUsd6 === null ? null : formatUnitsPlain(this.config.QIE_SPREAD_BPS, 2),

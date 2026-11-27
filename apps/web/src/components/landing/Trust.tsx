@@ -26,7 +26,7 @@ export function Trust() {
       title: 'The price you see is what you pay',
       text: `Product cost plus a ${fee ?? '…'}% fee, shown line by line before you pay. Nothing is added later.${
         config && config.pricing.freeOrdersPerWallet > 0
-          ? ` Your first ${config.pricing.freeOrdersPerWallet} orders have no fee at all.`
+          ? ` Your first ${config.pricing.freeOrdersPerWallet} orders have no fee: you pay only the product and its payment costs, at cost.`
           : ''
       }${buffer ? ` Paying in QIE adds ${buffer}% in case the price moves while you pay.` : ''}`,
     },
@@ -47,7 +47,7 @@ export function Trust() {
             Fee <span className="text-brand">{fee}%</span>
             {config.pricing.freeOrdersPerWallet > 0 && (
               <span className="ml-3 bg-brand px-2 py-0.5 align-middle text-sm text-brand-ink">
-                First {config.pricing.freeOrdersPerWallet} orders free
+                No fee on your first {config.pricing.freeOrdersPerWallet} orders
               </span>
             )}
           </p>

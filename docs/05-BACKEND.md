@@ -140,6 +140,7 @@ Loop: pick orders where `status IN (PAID, FULFILLING)` and `nextAttemptAt <= now
 | `MARGIN_BPS` | 500 | markup on supplier cost. 27 Nov 2026: 5%, with each wallet's first orders free (below) |
 | `FREE_ORDERS_PER_WALLET` | 3 | a wallet's first N paid orders carry no fee; 0 turns the offer off |
 | `FREE_ORDER_MAX_USD` | 20 | free orders cover products up to this supplier cost; larger ones pay the fee and use no free slot |
+| `FREE_ORDER_COST_BPS` | 200 | what a free order still pays: our cost of turning crypto revenue back into the Reloadly float, with no profit, so a new wallet costs us nothing. Set it from the first real refill cycle |
 | `QIE_SPREAD_BPS` | 150 | extra on native-QIE quotes |
 | `CASHBACK_BPS` | 100 | accrued for eligible wallets (P1) |
 | `MAX_ORDER_USD` | 50 | per order |

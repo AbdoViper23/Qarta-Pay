@@ -605,6 +605,7 @@ describe('pricing and limits', () => {
       qieBufferPercent: '1.5',
       freeOrdersPerWallet: 0,
       freeOrderMaxUsd: 20,
+      freeOrderCostPercent: '2',
     });
     const stats = (await runtime.server.inject({ url: '/v1/stats' })).json();
     expect(stats.ordersSettled).toBeGreaterThanOrEqual(3);
@@ -652,8 +653,9 @@ describe('free orders', () => {
       for (let i = 0; i < 3; i += 1) {
         const q = await quoteFor(buyer, `710${i}`);
         expect(q.display).toMatchObject({
-          usd: '5',
-          feeUsd: '0',
+          usd: '5.1', // $5 + 2% payment costs, no Qarta fee
+          feeUsd: '0.1',
+          feePercent: '2',
           freeOrder: true,
           waivedFeeUsd: '0.25',
           freeOrdersLeft: 3 - i,

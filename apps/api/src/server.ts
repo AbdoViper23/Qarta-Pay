@@ -145,6 +145,7 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
         qieBufferPercent: formatUnitsPlain(config.QIE_SPREAD_BPS, 2),
         freeOrdersPerWallet: config.FREE_ORDERS_PER_WALLET,
         freeOrderMaxUsd: config.FREE_ORDER_MAX_USD,
+        freeOrderCostPercent: formatUnitsPlain(config.FREE_ORDER_COST_BPS, 2),
       },
     };
   });
@@ -174,7 +175,13 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
     const wallet = walletParam.parse((request.params as { wallet: string }).wallet);
     const total = config.FREE_ORDERS_PER_WALLET;
     const used = total > 0 ? await freeOrdersUsed(db, wallet) : 0;
-    return { wallet, total, left: Math.max(0, total - used), maxUsd: config.FREE_ORDER_MAX_USD };
+    return {
+      wallet,
+      total,
+      left: Math.max(0, total - used),
+      maxUsd: config.FREE_ORDER_MAX_USD,
+      costPercent: formatUnitsPlain(config.FREE_ORDER_COST_BPS, 2),
+    };
   });
 
   app.get('/v1/identity/:wallet', async (request) => {

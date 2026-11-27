@@ -65,6 +65,11 @@ const envSchema = z.object({
   FREE_ORDERS_PER_WALLET: z.coerce.number().int().min(0).default(3),
   /** Free orders cover products up to this supplier cost in USD; larger ones pay the fee. */
   FREE_ORDER_MAX_USD: z.coerce.number().positive().default(20),
+  /**
+   * Free orders still pay what they cost us to process (turning crypto revenue back into the
+   * supplier float), with no profit on top, so a new wallet costs us nothing.
+   */
+  FREE_ORDER_COST_BPS: z.coerce.bigint().min(0n).default(200n),
   QIE_SPREAD_BPS: z.coerce.bigint().default(150n),
   MAX_ORDER_USD: z.coerce.number().positive().default(50),
   MAX_WALLET_DAILY_USD: z.coerce.number().positive().default(100),

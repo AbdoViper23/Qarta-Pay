@@ -24,7 +24,6 @@ const CONTRACT_ERRORS: Record<string, string> = {
 
 const API_ERRORS: Record<string, string> = {
   qie_price_unavailable: 'QIE price check unavailable right now. Pay with QUSDC.',
-  limit_order: 'This order is above the per-order limit.',
   limit_wallet_daily: 'You reached the daily limit for this wallet. Try again tomorrow.',
   limit_global_daily: 'Daily sales limit reached. Try again tomorrow.',
   sales_paused: 'Sales are paused right now. Please try again later.',
@@ -37,8 +36,18 @@ const API_ERRORS: Record<string, string> = {
   invalid_amount: 'Choose one of the offered amounts.',
 };
 
+/** The API says `orders are limited to $50`: say it is a temporary limit that will be lifted. */
+function orderLimitMessage(error: ApiError): string {
+  const limit = /\$\s?([\d.]+)/.exec(error.message)?.[1];
+  const cap = limit ? `$${limit}` : 'a set amount';
+  return `For now, orders are limited to ${cap} each. This is a temporary limit and we will lift it soon. Please choose a smaller amount.`;
+}
+
 export function friendlyError(error: unknown): string {
-  if (error instanceof ApiError) return API_ERRORS[error.code] ?? error.message;
+  if (error instanceof ApiError) {
+    if (error.code === 'limit_order') return orderLimitMessage(error);
+    return API_ERRORS[error.code] ?? error.message;
+  }
   const text = collectText(error);
   if (/user (rejected|denied)|rejected the request|4001/i.test(text))
     return 'You cancelled in your wallet.';

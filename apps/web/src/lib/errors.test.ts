@@ -9,6 +9,12 @@ describe('friendlyError', () => {
     );
   });
 
+  it('names the per-order limit and says it is temporary', () => {
+    expect(friendlyError(new ApiError('limit_order', 'orders are limited to $50', 400))).toBe(
+      'For now, orders are limited to $50 each. This is a temporary limit and we will lift it soon. Please choose a smaller amount.',
+    );
+  });
+
   it('maps contract custom errors found anywhere in the cause chain', () => {
     const error = {
       shortMessage: 'execution reverted',

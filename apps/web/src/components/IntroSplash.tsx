@@ -26,13 +26,13 @@ function bounceOut(x: number): number {
   return n * (x - 2.625 / d) ** 2 + 0.984375;
 }
 
-/** Timeline in seconds: coin drops, card grows around it, strip prints, then the fly. */
+/** Timeline in seconds: coin drops, card grows around it, strip slides out, then the fly. */
 const FLY = 1.85;
 const FLY_END = FLY + 0.7;
 
 /**
  * "Coin drop" intro: a coin falls and bounces, the card grows around it so the hole opens,
- * the receipt strip prints out in steps, then the mark shrinks and flies into the header
+ * the receipt strip slides out, then the mark shrinks and flies into the header
  * (#brand-mark) while the overlay fades. A click skips it.
  */
 export function IntroSplash() {
@@ -77,9 +77,8 @@ export function IntroSplash() {
         'transform',
         `translate(118 114) scale(${lerp(0.28, 1, backOut(grow))}) translate(-118 -114)`,
       );
-      // 3. The receipt strip prints out in short steps.
-      const p = seg(t, 1.1, 1.6);
-      strip.setAttribute('width', String(111 * (p >= 1 ? 1 : Math.floor(p * 7) / 7)));
+      // 3. The receipt strip slides out of the hole and eases to a stop.
+      strip.setAttribute('width', String(111 * outCubic(seg(t, 1.05, 1.6))));
       const wordIn = outCubic(seg(t, 1.3, 1.6)) * (1 - seg(t, FLY, FLY + 0.2));
       word.style.opacity = String(wordIn);
 
@@ -122,7 +121,7 @@ export function IntroSplash() {
           viewBox="28 28 200 200"
           overflow="visible"
           className="size-40 sm:size-44"
-          style={{ transformOrigin: '50% 50%' }}
+          style={{ transformOrigin: '50% 50%', willChange: 'transform' }}
         >
           <g data-part="card" style={{ opacity: 0 }}>
             <rect x="28" y="28" width="200" height="200" rx="40" fill="var(--color-brand)" />

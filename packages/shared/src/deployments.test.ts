@@ -31,7 +31,8 @@ describe('chain config', () => {
 describe('addresses', () => {
   it('has a distinct mainnet address for every QIE ecosystem contract', () => {
     const { qartaCheckout, ...ecosystem } = qieMainnetConfig.addresses;
-    expect(qartaCheckout).toBeNull(); // not deployed yet
+    // Deployed 27 Nov 2026, block 12216426, verified on mainnet.qie.digital.
+    expect(qartaCheckout).toBe('0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C');
     const values = Object.values(ecosystem);
     expect(values.every((address) => address !== null)).toBe(true);
     expect(new Set(values).size).toBe(values.length);
@@ -53,9 +54,7 @@ describe('addresses', () => {
 
   it('requireAddress returns a configured address and throws for a missing one', () => {
     expect(requireAddress(1990, 'qusdc')).toBe('0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5');
-    expect(() => requireAddress(1990, 'qartaCheckout')).toThrow(
-      'No qartaCheckout address configured for chain 1990',
-    );
+    expect(requireAddress(1990, 'qartaCheckout')).toBe('0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C');
     expect(requireAddress(1983, 'qusdc')).toBe('0x52259E57Ba961292a23AB4F78D3C815d84030B42');
     expect(() => requireAddress(1983, 'qiedexRouter')).toThrow();
   });

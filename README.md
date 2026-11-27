@@ -39,7 +39,7 @@ Each component is also shown live in the app on the **Powered by QIE** page (`/p
 
 | Component | What it does for the user | Code | Contract address |
 |-----------|---------------------------|------|------------------|
-| QIE Mainnet — `QartaCheckout` escrow | Payment held until delivery; automatic refund on failure; self-refund after 2 h | `contracts/src/QartaCheckout.sol` | TBD after mainnet deploy |
+| QIE Mainnet — `QartaCheckout` escrow | Payment held until delivery; automatic refund on failure; self-refund after 2 h | `contracts/src/QartaCheckout.sol` | [`0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C`](https://mainnet.qie.digital/address/0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C) (verified) |
 | QIE Wallet | Connect and pay with the chain's own wallet, listed first (EIP-6963 `me.qiewallet`, `window.qie`) | `apps/web/src/lib/wagmi.ts`, `apps/web/src/components/WalletButton.tsx` | — |
 | QIE (native coin) | Pay with QIE directly | `contracts/src/QartaCheckout.sol` (`pay`, native branch), `apps/api/src/quotes/pricing.ts` (`qieAmount`) | native coin |
 | QIE Stable Coin (QUSDC) | Pay at a stable price; default pay token | `contracts/src/QartaCheckout.sol` (`pay`, ERC-20 branch), `apps/web/src/components/Checkout.tsx` | `0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5` |

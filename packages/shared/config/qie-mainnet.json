@@ -12,7 +12,7 @@
   "explorerUrl": "https://mainnet.qie.digital",
   "getLogsMaxBlockRange": 10000,
   "addresses": {
-    "qartaCheckout": null,
+    "qartaCheckout": "0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C",
     "qusdc": "0x3F43DA82eC9A4f5285F10FaF1F26EcA7319E5DA5",
     "wqie": "0x0087904D95BEe9E5F24dc8852804b547981A9139",
     "qieUsdFeed": "0x3Bc617cF3A4Bb77003e4c556B87b13D556903D17",

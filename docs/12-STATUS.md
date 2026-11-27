@@ -37,6 +37,13 @@ Last updated: **26 Nov 2026** (evening).
 - The site now has a favicon, apple icon, web manifest and a 1200×630 share image, all checked with `next build` and `next start`.
 - `NEXT_PUBLIC_SITE_URL` sets the share-preview base URL. It defaults to `https://qarta-pay.vercel.app`; set it once the domain is final.
 
+27 Nov, **mainnet deploy**:
+- `QartaCheckout` is at `0x9d75D6ffa4EEA5F30B3B5Fb9609dD7D8e1940d5C`, deployed in block 12216426 by tx `0x3a42a671…5dff8`.
+- The source is verified on mainnet.qie.digital.
+- Owner and treasury are the team's main wallet. The quote signer and the fulfiller are new server-only keys, stored in Vercel only.
+- On-chain reads confirmed every constructor value: the oracle, 86,400 s max age, 1,000 bps tolerance, the guard on, a 7,200 s refund timeout, QUSDC allowed, not paused.
+- Telegram alerts go to the team chat (test message delivered).
+
 ## What exists in the repo
 
 | Path | What it is |

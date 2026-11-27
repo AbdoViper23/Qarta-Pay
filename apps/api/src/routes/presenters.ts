@@ -23,6 +23,7 @@ export function presentOrder(order: Order) {
     settleTxHash: order.settleTxHash,
     refundTxHash: order.refundTxHash,
     refundedByPayer: order.refundedByPayer,
+    feeWaived: order.feeWaived,
     quoteExpiry: order.quoteExpiry.toISOString(),
     paidAt: order.paidAt?.toISOString() ?? null,
     deliveredAt: order.deliveredAt?.toISOString() ?? null,

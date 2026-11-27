@@ -137,7 +137,9 @@ Loop: pick orders where `status IN (PAID, FULFILLING)` and `nextAttemptAt <= now
 
 | Var | Default | Meaning |
 |-----|---------|---------|
-| `MARGIN_BPS` | 200 | markup on supplier cost. 26 Nov 2026 decision: launch at the lowest fee that does not lose money. The supplier discount plus 2% should cover converting revenue back into the Reloadly float; raise it if a refill cycle shows otherwise |
+| `MARGIN_BPS` | 500 | markup on supplier cost. 27 Nov 2026: 5%, with each wallet's first orders free (below) |
+| `FREE_ORDERS_PER_WALLET` | 3 | a wallet's first N paid orders carry no fee; 0 turns the offer off |
+| `FREE_ORDER_MAX_USD` | 20 | free orders cover products up to this supplier cost; larger ones pay the fee and use no free slot |
 | `QIE_SPREAD_BPS` | 150 | extra on native-QIE quotes |
 | `CASHBACK_BPS` | 100 | accrued for eligible wallets (P1) |
 | `MAX_ORDER_USD` | 50 | per order |
@@ -175,3 +177,18 @@ Structured logs (pino) with `orderId` on every line; never log gift card codes, 
 
 - Unit: pricing/rounding, limits, quote signing (signature verifies against the contract in an anvil test), state transitions.
 - Integration: anvil + deployed contract + Reloadly sandbox (or recorded fixtures): happy path, supplier refund path, duplicate event delivery, worker crash between supplier call and DB write (must not double-fulfil).
+
+## Free orders (27 Nov 2026)
+
+- **At quote time.** A quote is free (margin 0, `fee_waived = true`) when both hold:
+  - the wallet has paid fewer than `FREE_ORDERS_PER_WALLET` free orders (statuses PAID, FULFILLING, DELIVERED, SETTLED, NEEDS_REVIEW);
+  - the product's supplier cost is at most `FREE_ORDER_MAX_USD`.
+
+  Unpaid quotes do not count, so refreshing a price never uses up the offer.
+- **What still applies.** The QIE buffer (`QIE_SPREAD_BPS`) still applies to free orders paid in QIE, because it covers price movement, not our fee.
+- **At delivery time.** A wallet can hold several free quotes and pay them all. The worker therefore checks each paid free order before calling the supplier. If the wallet already has `FREE_ORDERS_PER_WALLET` free orders paid earlier (by block, then id), the order goes to REFUND_PENDING and the payer gets the payment back. Nothing is delivered, so nothing is lost.
+- **Endpoints and display.**
+  - `GET /v1/free-orders/:wallet` returns `{ total, left, maxUsd }`.
+  - `/v1/config` `pricing` carries the offer.
+  - Quote `display` has `freeOrder`, `waivedFeeUsd`, `freeOrdersLeft` and `freeOrdersTotal`.
+  - The order view has `feeWaived`.

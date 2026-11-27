@@ -60,7 +60,11 @@ const envSchema = z.object({
   RELOADLY_CLIENT_SECRET: z.string().min(1),
   RELOADLY_ORDER_EMAIL: z.email().default('orders@example.com'),
 
-  MARGIN_BPS: z.coerce.bigint().default(200n),
+  MARGIN_BPS: z.coerce.bigint().default(500n),
+  /** A wallet's first N paid orders carry no Qarta fee (0 turns the offer off). */
+  FREE_ORDERS_PER_WALLET: z.coerce.number().int().min(0).default(3),
+  /** Free orders cover products up to this supplier cost in USD; larger ones pay the fee. */
+  FREE_ORDER_MAX_USD: z.coerce.number().positive().default(20),
   QIE_SPREAD_BPS: z.coerce.bigint().default(150n),
   MAX_ORDER_USD: z.coerce.number().positive().default(50),
   MAX_WALLET_DAILY_USD: z.coerce.number().positive().default(100),

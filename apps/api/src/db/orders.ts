@@ -51,6 +51,8 @@ export interface Order {
   settleTxHash: Hex | null;
   refundTxHash: Hex | null;
   refundedByPayer: boolean;
+  /** Quoted without the Qarta fee, as one of the wallet's free orders. */
+  feeWaived: boolean;
   reviewReason: string | null;
   attempts: number;
   nextAttemptAt: Date | null;
@@ -130,6 +132,7 @@ function toOrder(row: Row): Order {
     settleTxHash: row.settle_tx_hash as Hex | null,
     refundTxHash: row.refund_tx_hash as Hex | null,
     refundedByPayer: row.refunded_by_payer as boolean,
+    feeWaived: row.fee_waived as boolean,
     reviewReason: row.review_reason as string | null,
     attempts: row.attempts as number,
     nextAttemptAt: date(row.next_attempt_at),
@@ -156,14 +159,16 @@ export interface NewOrder {
   faceCurrency: string;
   productName: string;
   recipientWallet: Address;
+  feeWaived?: boolean;
 }
 
 export async function insertOrder(db: DbClient, order: NewOrder): Promise<void> {
   await db.query(
     `insert into orders (id, status, kind, payer, pay_token, pay_amount, usd_amount, supplier_cost_usd,
        quote_expiry, country_code, operator_id, product_id, recipient_phone, supplier_amount,
-       face_value, face_currency, product_name, recipient_wallet)
-     values ($1, 'QUOTED', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+       face_value, face_currency, product_name, recipient_wallet, fee_waived)
+     values ($1, 'QUOTED', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17,
+       $18)`,
     [
       order.id.toLowerCase(),
       order.kind,
@@ -182,8 +187,36 @@ export async function insertOrder(db: DbClient, order: NewOrder): Promise<void> 
       order.faceCurrency,
       order.productName,
       order.recipientWallet.toLowerCase(),
+      order.feeWaived ?? false,
     ],
   );
+}
+
+/** Statuses in which a free order counts as used: paid, and not refunded. */
+const FREE_ORDER_USED = `('PAID', 'FULFILLING', 'DELIVERED', 'SETTLED', 'NEEDS_REVIEW')`;
+
+/** How many free orders this wallet has paid for (a refunded one gives its slot back). */
+export async function freeOrdersUsed(db: DbClient, wallet: string): Promise<number> {
+  const result = await db.query<{ n: string }>(
+    `select count(*)::text as n from orders
+      where payer = $1 and fee_waived and status in ${FREE_ORDER_USED}`,
+    [wallet.toLowerCase()],
+  );
+  return Number(result.rows[0]?.n ?? '0');
+}
+
+/**
+ * Free orders of the same wallet paid before `order` (earlier block, then lower id). The worker
+ * uses it to refund a free order paid after the wallet already used all of its free orders.
+ */
+export async function freeOrdersPaidBefore(db: DbClient, order: Order): Promise<number> {
+  const result = await db.query<{ n: string }>(
+    `select count(*)::text as n from orders
+      where payer = $1 and fee_waived and id <> $2 and status in ${FREE_ORDER_USED}
+        and (paid_block < $3 or (paid_block = $3 and id < $2))`,
+    [order.payer.toLowerCase(), order.id.toLowerCase(), (order.paidBlock ?? 0n).toString()],
+  );
+  return Number(result.rows[0]?.n ?? '0');
 }
 
 export async function getOrder(db: DbClient, id: string, forUpdate = false): Promise<Order | null> {

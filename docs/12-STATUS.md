@@ -26,6 +26,11 @@ Last updated: **26 Nov 2026** (evening).
 - The landing page has "Why you can trust it" and a roadmap teaser.
 - New `/roadmap` page with 4 phases and the business model (`apps/web/src/lib/roadmap.ts`).
 
+27 Nov:
+- The fee is back to 5%, and each wallet's first 3 orders are free (products up to $20, `05-BACKEND.md` "Free orders").
+- Checkout shows a free-order card with the slots left. It hides at zero.
+- A free quote paid past the limit is refunded before delivery.
+
 ## What exists in the repo
 
 | Path | What it is |

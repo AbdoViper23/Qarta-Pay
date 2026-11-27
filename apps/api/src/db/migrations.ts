@@ -82,4 +82,11 @@ create table job_lease (
 );
 `,
   },
+  {
+    name: '003_free_orders.sql',
+    sql: `
+-- A wallet's first orders carry no Qarta fee. The flag is set when the quote is made.
+alter table orders add column fee_waived boolean not null default false;
+`,
+  },
 ];

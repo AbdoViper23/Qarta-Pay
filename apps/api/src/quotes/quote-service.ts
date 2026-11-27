@@ -6,7 +6,7 @@ import { z } from 'zod';
 import type { Catalog } from '../catalog/catalog';
 import { ContractLimitsError } from '../chain/contract-limits';
 import type { AppConfig } from '../config';
-import { insertOrder, supplierCostReserved, usdCommittedToday } from '../db/orders';
+import { freeOrdersUsed, insertOrder, supplierCostReserved, usdCommittedToday } from '../db/orders';
 import type { Db } from '../db/pool';
 import { formatUnitsPlain, parseUnitsStrict } from '../money';
 import type { PriceService } from '../pricing/prices';
@@ -79,6 +79,12 @@ export interface QuoteResponse {
     /** QIE payments only: the USD price per QIE used, and the extra QIE added for price moves. */
     qiePriceUsd: string | null;
     qieBufferPercent: string | null;
+    /** Free-order offer: this order has no fee, and what the fee would have been. */
+    freeOrder: boolean;
+    waivedFeeUsd: string | null;
+    /** Free orders the wallet still has before this one is paid, out of `freeOrdersTotal`. */
+    freeOrdersLeft: number;
+    freeOrdersTotal: number;
   };
 }
 
@@ -137,8 +143,16 @@ export class QuoteService {
       recipientWallet = request.recipientWallet ?? request.payer;
     }
 
-    // 2. Price in USD and limits.
-    const usd6 = usdPrice(price.supplierCostUsd6, this.config.MARGIN_BPS);
+    // 2. Price in USD and limits. A wallet's first orders carry no fee (docs/05-BACKEND.md).
+    const freeOrdersTotal = this.config.FREE_ORDERS_PER_WALLET;
+    const freeOrdersLeft =
+      freeOrdersTotal > 0
+        ? Math.max(0, freeOrdersTotal - (await freeOrdersUsed(this.db, request.payer)))
+        : 0;
+    const feeWaived =
+      freeOrdersLeft > 0 &&
+      price.supplierCostUsd6 <= parseUnitsStrict(this.config.FREE_ORDER_MAX_USD.toFixed(6), 6);
+    const usd6 = usdPrice(price.supplierCostUsd6, feeWaived ? 0n : this.config.MARGIN_BPS);
     await this.checkLimits(request.payer, usd6);
     await this.checkSupplierBalance(price.supplierCostUsd6);
 
@@ -187,6 +201,7 @@ export class QuoteService {
       faceCurrency: price.faceCurrency,
       productName: price.productName,
       recipientWallet,
+      feeWaived,
     });
 
     const quote: Quote = { orderId, payer: request.payer, token, amount, usdAmount: usd6, expiry };
@@ -222,10 +237,19 @@ export class QuoteService {
         recipient: request.kind === 'AIRTIME' ? `+${recipientPhone}` : recipientWallet,
         productUsd: formatUnitsPlain(price.supplierCostUsd6, 6),
         feeUsd: formatUnitsPlain(usd6 - price.supplierCostUsd6, 6),
-        feePercent: formatUnitsPlain(this.config.MARGIN_BPS, 2),
+        feePercent: feeWaived ? '0' : formatUnitsPlain(this.config.MARGIN_BPS, 2),
         qiePriceUsd: qiePriceUsd6 === null ? null : formatUnitsPlain(qiePriceUsd6, 6),
         qieBufferPercent:
           qiePriceUsd6 === null ? null : formatUnitsPlain(this.config.QIE_SPREAD_BPS, 2),
+        freeOrder: feeWaived,
+        waivedFeeUsd: feeWaived
+          ? formatUnitsPlain(
+              usdPrice(price.supplierCostUsd6, this.config.MARGIN_BPS) - price.supplierCostUsd6,
+              6,
+            )
+          : null,
+        freeOrdersLeft,
+        freeOrdersTotal,
       },
     };
   }

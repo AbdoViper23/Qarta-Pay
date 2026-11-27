@@ -25,8 +25,10 @@ export function Trust() {
     {
       title: 'The price you see is what you pay',
       text: `Product cost plus a ${fee ?? '…'}% fee, shown line by line before you pay. Nothing is added later.${
-        buffer ? ` Paying in QIE adds ${buffer}% in case the price moves while you pay.` : ''
-      }`,
+        config && config.pricing.freeOrdersPerWallet > 0
+          ? ` Your first ${config.pricing.freeOrdersPerWallet} orders have no fee at all.`
+          : ''
+      }${buffer ? ` Paying in QIE adds ${buffer}% in case the price moves while you pay.` : ''}`,
     },
     {
       title: 'Check everything',
@@ -40,12 +42,14 @@ export function Trust() {
         <h2 className="max-w-[14ch] font-display text-5xl leading-[0.9] font-extrabold uppercase sm:text-6xl">
           Why you can trust it.
         </h2>
-        {fee && (
+        {fee && config && (
           <p className="font-display text-2xl font-bold uppercase">
             Fee <span className="text-brand">{fee}%</span>
-            <span className="ml-3 text-sm font-normal tracking-normal text-muted normal-case">
-              We run at the lowest fee that covers our costs.
-            </span>
+            {config.pricing.freeOrdersPerWallet > 0 && (
+              <span className="ml-3 bg-brand px-2 py-0.5 align-middle text-sm text-brand-ink">
+                First {config.pricing.freeOrdersPerWallet} orders free
+              </span>
+            )}
           </p>
         )}
       </Reveal>

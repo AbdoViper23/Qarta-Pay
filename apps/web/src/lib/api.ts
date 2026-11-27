@@ -52,6 +52,8 @@ export interface AppConfigResponse {
   pricing: {
     feePercent: string;
     qieBufferPercent: string;
+    freeOrdersPerWallet: number;
+    freeOrderMaxUsd: number;
   };
 }
 
@@ -140,7 +142,18 @@ export interface QuoteResponse {
     feePercent: string;
     qiePriceUsd: string | null;
     qieBufferPercent: string | null;
+    freeOrder: boolean;
+    waivedFeeUsd: string | null;
+    freeOrdersLeft: number;
+    freeOrdersTotal: number;
   };
+}
+
+export interface FreeOrdersResponse {
+  wallet: Address;
+  total: number;
+  left: number;
+  maxUsd: number;
 }
 
 export type OrderStatus =
@@ -172,6 +185,7 @@ export interface OrderView {
   settleTxHash: Hex | null;
   refundTxHash: Hex | null;
   refundedByPayer: boolean;
+  feeWaived: boolean;
   quoteExpiry: string;
   paidAt: string | null;
   deliveredAt: string | null;
@@ -192,6 +206,7 @@ export interface StatsResponse {
 export const api = {
   config: () => call<AppConfigResponse>('/v1/config'),
   prices: () => call<PricesResponse>('/v1/prices'),
+  freeOrders: (wallet: Address) => call<FreeOrdersResponse>(`/v1/free-orders/${wallet}`),
   identity: (wallet: Address) =>
     call<{ wallet: Address; qieName: string | null }>(`/v1/identity/${wallet}`),
   detect: (phone: string, country: string) =>

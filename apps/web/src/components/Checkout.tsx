@@ -15,7 +15,8 @@ import { api, type PayToken, type QuoteRequest, type QuoteResponse } from '@/lib
 import { appChain } from '@/lib/chains';
 import { friendlyError } from '@/lib/errors';
 import { trimDecimals } from '@/lib/format';
-import { usePrices } from '@/lib/hooks';
+import { useAppConfig, useFreeOrders, usePrices } from '@/lib/hooks';
+import { FreeOrdersCard } from './FreeOrders';
 import { GetQusdcLink } from './GetQusdcLink';
 import { Button, Card, Chip, Notice } from './ui';
 
@@ -35,6 +36,8 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
   const publicClient = usePublicClient();
   const { mutateAsync: writeContract } = useWriteContract();
   const { data: prices } = usePrices();
+  const { data: config } = useAppConfig();
+  const { data: freeOrders } = useFreeOrders(address);
   const [payToken, setPayToken] = useState<PayToken>('QUSDC');
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -166,6 +169,14 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
 
   return (
     <Card className="space-y-4">
+      {freeOrders && freeOrders.total > 0 && freeOrders.left > 0 && (
+        <FreeOrdersCard
+          left={freeOrders.left}
+          total={freeOrders.total}
+          maxUsd={freeOrders.maxUsd}
+          thisOrderFree={Boolean(quote?.display.freeOrder)}
+        />
+      )}
       <div>
         <p className="mb-2 text-sm font-medium text-muted">Pay with</p>
         <div className="flex gap-2">
@@ -203,8 +214,23 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
           )}
           <dt className="text-muted">Product cost</dt>
           <dd className="text-right font-mono tabular-nums">${quote.display.productUsd}</dd>
-          <dt className="text-muted">Qarta fee ({quote.display.feePercent}%)</dt>
-          <dd className="text-right font-mono tabular-nums">${quote.display.feeUsd}</dd>
+          <dt className="text-muted">
+            Qarta fee (
+            {quote.display.freeOrder ? config?.pricing.feePercent : quote.display.feePercent}
+            %)
+          </dt>
+          {quote.display.freeOrder ? (
+            <dd className="text-right">
+              <span className="mr-2 font-mono text-muted tabular-nums line-through">
+                ${quote.display.waivedFeeUsd}
+              </span>
+              <span className="bg-ok px-1.5 py-0.5 text-xs font-bold text-surface uppercase">
+                Free
+              </span>
+            </dd>
+          ) : (
+            <dd className="text-right font-mono tabular-nums">${quote.display.feeUsd}</dd>
+          )}
           <dt className="border-t-2 border-ink pt-2 font-semibold">You pay</dt>
           <dd className="border-t-2 border-ink pt-2 text-right text-lg font-bold">
             ${quote.display.usd}
@@ -217,6 +243,13 @@ export function Checkout({ draft, summary }: { draft: Draft | null; summary: str
               QIE at ${trimDecimals(quote.display.qiePriceUsd, 4)}, the lower of the QIE oracle and
               QIEDex prices, plus {quote.display.qieBufferPercent}% in case the price moves while
               you pay.
+            </dd>
+          )}
+          {!quote.display.freeOrder && quote.display.freeOrdersLeft > 0 && freeOrders && (
+            <dd className="col-span-2 text-xs text-muted">
+              Free orders cover products up to ${freeOrders.maxUsd}, so this one has the normal fee.
+              You still have {quote.display.freeOrdersLeft} free{' '}
+              {quote.display.freeOrdersLeft === 1 ? 'order' : 'orders'} for a smaller amount.
             </dd>
           )}
           <dd className="col-span-2 text-xs text-muted">

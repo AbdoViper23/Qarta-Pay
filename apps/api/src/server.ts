@@ -8,7 +8,7 @@ import { AuthError, issueNonce, readSession, verifySignIn } from './auth/siwe';
 import type { Catalog } from './catalog/catalog';
 import { decryptCodes } from './codes';
 import type { AppConfig } from './config';
-import { getOrder, listOrdersByWallet } from './db/orders';
+import { freeOrdersUsed, getOrder, listOrdersByWallet } from './db/orders';
 import type { Db } from './db/pool';
 import type { JobsResult } from './jobs';
 import type { Logger } from './log';
@@ -143,6 +143,8 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
       pricing: {
         feePercent: formatUnitsPlain(config.MARGIN_BPS, 2),
         qieBufferPercent: formatUnitsPlain(config.QIE_SPREAD_BPS, 2),
+        freeOrdersPerWallet: config.FREE_ORDERS_PER_WALLET,
+        freeOrderMaxUsd: config.FREE_ORDER_MAX_USD,
       },
     };
   });
@@ -166,6 +168,13 @@ export async function buildServer(deps: ServerDeps): Promise<FastifyInstance> {
       reason: snapshot.qie.enabled ? null : snapshot.qie.reason,
       readAt: snapshot.readAt.toISOString(),
     };
+  });
+
+  app.get('/v1/free-orders/:wallet', async (request) => {
+    const wallet = walletParam.parse((request.params as { wallet: string }).wallet);
+    const total = config.FREE_ORDERS_PER_WALLET;
+    const used = total > 0 ? await freeOrdersUsed(db, wallet) : 0;
+    return { wallet, total, left: Math.max(0, total - used), maxUsd: config.FREE_ORDER_MAX_USD };
   });
 
   app.get('/v1/identity/:wallet', async (request) => {

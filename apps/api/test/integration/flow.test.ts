@@ -118,6 +118,8 @@ beforeAll(async () => {
     RELOADLY_CLIENT_SECRET: 'unused',
     WEB_ORIGIN: 'http://localhost:3000',
     PRICE_CACHE_MS: '0',
+    // The free-order offer is off here so prices stay fixed; its own test turns it on.
+    FREE_ORDERS_PER_WALLET: '0',
     LOG_LEVEL: 'silent',
   });
   supplier = new FakeSupplier();
@@ -153,6 +155,7 @@ interface QuoteBody {
     feeUsd: string;
     feePercent: string;
     qiePriceUsd: string | null;
+    freeOrder: boolean;
   };
 }
 
@@ -182,9 +185,9 @@ const airtime = (phoneSuffix: string, payToken = 'QUSDC') => ({
   amount: '5',
 });
 
-async function pay(q: QuoteBody): Promise<void> {
+async function pay(q: QuoteBody, who = payer): Promise<void> {
   const native = q.quote.token === '0x0000000000000000000000000000000000000000';
-  const hash = await wallet().writeContract({
+  const hash = await wallet(who).writeContract({
     address: checkout,
     abi: qartaCheckoutAbi,
     functionName: 'pay',
@@ -244,11 +247,11 @@ const supplierCalls = (orderId: Hex, method: string) =>
 describe('quote → pay → deliver → settle', () => {
   it('airtime paid in QUSDC is delivered once and settled to the treasury', async () => {
     const q = await quote(airtime('4567'));
-    expect(q.display.usd).toBe('5.1'); // $5 + 2% margin
+    expect(q.display.usd).toBe('5.25'); // $5 + 5% margin
     expect(q.display).toMatchObject({
       productUsd: '5',
-      feeUsd: '0.1',
-      feePercent: '2',
+      feeUsd: '0.25',
+      feePercent: '5',
       qiePriceUsd: null,
     });
     const treasuryBefore = await qusdcBalance(treasury);
@@ -261,7 +264,7 @@ describe('quote → pay → deliver → settle', () => {
     const order = (await getOrder(db, q.orderId))!;
     expect(order.settleTxHash).toMatch(/^0x/);
     expect(order.deliveredAt).not.toBeNull();
-    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_100_000n);
+    expect(await qusdcBalance(treasury)).toBe(treasuryBefore + 5_250_000n);
     expect(await chainStatus(q.orderId)).toBe(2);
     expect(supplierCalls(q.orderId, 'sendTopup')).toBe(1);
 
@@ -580,7 +583,7 @@ describe('pricing and limits', () => {
   });
 
   it('rejects orders above the per-order limit and invalid input', async () => {
-    const tooBig = await requestQuote({ ...airtime('4567'), amount: '49.5' }); // $49.50 + 2% > $50
+    const tooBig = await requestQuote({ ...airtime('4567'), amount: '49.5' }); // $49.50 + 5% > $50
     expect(tooBig.status).toBe(400);
     expect(tooBig.json.error).toBe('limit_order');
     expect((await requestQuote({ ...airtime('4567'), recipientPhone: '123' })).status).toBe(400);
@@ -597,9 +600,106 @@ describe('pricing and limits', () => {
     expect(identity.qieName).toBeNull();
     const config = (await runtime.server.inject({ url: '/v1/config' })).json();
     expect(config.contracts.checkout.toLowerCase()).toBe(checkout.toLowerCase());
-    expect(config.pricing).toEqual({ feePercent: '2', qieBufferPercent: '1.5' });
+    expect(config.pricing).toEqual({
+      feePercent: '5',
+      qieBufferPercent: '1.5',
+      freeOrdersPerWallet: 0,
+      freeOrderMaxUsd: 20,
+    });
     const stats = (await runtime.server.inject({ url: '/v1/stats' })).json();
     expect(stats.ordersSettled).toBeGreaterThanOrEqual(3);
+  });
+});
+
+describe('free orders', () => {
+  /** A fresh wallet with QUSDC and an approval, so earlier orders of `payer` do not count. */
+  async function freshBuyer(index: number) {
+    const buyer = mnemonicToAccount(ANVIL_MNEMONIC, { addressIndex: index });
+    await wallet(deployer).writeContract({
+      address: qusdc,
+      abi: mintAbi,
+      functionName: 'mint',
+      args: [buyer.address, 200n * 10n ** 6n],
+    });
+    const hash = await wallet(buyer).writeContract({
+      address: qusdc,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [checkout, 2n ** 255n],
+    });
+    await publicClient().waitForTransactionReceipt({ hash });
+    return buyer;
+  }
+  // Its own client address, so these quotes do not use up the shared rate-limit bucket.
+  async function quoteFor(buyer: { address: Address }, phoneSuffix: string): Promise<QuoteBody> {
+    const response = await runtime.server.inject({
+      method: 'POST',
+      url: '/v1/quotes',
+      remoteAddress: '10.0.0.88',
+      payload: { ...airtime(phoneSuffix), payer: buyer.address },
+    });
+    expect(response.statusCode, response.body).toBe(200);
+    return response.json() as QuoteBody;
+  }
+  const freeLeft = async (buyer: { address: Address }) =>
+    (await runtime.server.inject({ url: `/v1/free-orders/${buyer.address}` })).json().left;
+
+  it('the first 3 paid orders of a wallet carry no fee, the 4th pays it', async () => {
+    config.FREE_ORDERS_PER_WALLET = 3;
+    try {
+      const buyer = await freshBuyer(7);
+      expect(await freeLeft(buyer)).toBe(3);
+      for (let i = 0; i < 3; i += 1) {
+        const q = await quoteFor(buyer, `710${i}`);
+        expect(q.display).toMatchObject({
+          usd: '5',
+          feeUsd: '0',
+          freeOrder: true,
+          waivedFeeUsd: '0.25',
+          freeOrdersLeft: 3 - i,
+          freeOrdersTotal: 3,
+        });
+        await pay(q, buyer);
+        await driveTo(q.orderId, 'SETTLED');
+      }
+      expect(await freeLeft(buyer)).toBe(0);
+      const fourth = await quoteFor(buyer, '7104');
+      expect(fourth.display).toMatchObject({ usd: '5.25', freeOrder: false, freeOrdersLeft: 0 });
+    } finally {
+      config.FREE_ORDERS_PER_WALLET = 0;
+    }
+  });
+
+  it('a free quote paid after the free orders ran out is refunded, never delivered', async () => {
+    config.FREE_ORDERS_PER_WALLET = 1;
+    try {
+      const buyer = await freshBuyer(8);
+      // Two quotes taken before paying either: both are free at quote time.
+      const first = await quoteFor(buyer, '7201');
+      const second = await quoteFor(buyer, '7202');
+      expect(first.display.freeOrder && second.display.freeOrder).toBe(true);
+      await pay(first, buyer);
+      await pay(second, buyer);
+      await driveTo(first.orderId, 'SETTLED');
+      await driveTo(second.orderId, 'REFUNDED');
+      expect(supplierCalls(second.orderId, 'sendTopup')).toBe(0);
+      // The wallet's one free order is used; the refunded extra one does not change that.
+      expect(await freeLeft(buyer)).toBe(0);
+    } finally {
+      config.FREE_ORDERS_PER_WALLET = 0;
+    }
+  });
+
+  it('free orders cover products up to FREE_ORDER_MAX_USD only', async () => {
+    config.FREE_ORDERS_PER_WALLET = 3;
+    config.FREE_ORDER_MAX_USD = 4;
+    try {
+      const q = await quoteFor(await freshBuyer(9), '7301'); // $5 product
+      expect(q.display).toMatchObject({ usd: '5.25', freeOrder: false, freeOrdersLeft: 3 });
+    } finally {
+      config.FREE_ORDERS_PER_WALLET = 0;
+      config.FREE_ORDER_MAX_USD = 20;
+    }
   });
 });
 

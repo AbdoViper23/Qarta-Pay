@@ -109,6 +109,13 @@ export default function OrderPage() {
           <dd className="text-right">
             ${order.usdAmount} ({trimDecimals(order.payAmount, 6)} {order.payToken})
           </dd>
+          {order.feeWaived && (
+            <dd className="col-span-2 text-right">
+              <span className="bg-ok px-1.5 py-0.5 text-xs font-bold text-surface uppercase">
+                Free order: no Qarta fee
+              </span>
+            </dd>
+          )}
         </dl>
         <ul className="space-y-1 text-sm">
           {(order.paidTxHash ?? payTx) && (

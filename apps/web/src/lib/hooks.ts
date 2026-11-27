@@ -22,3 +22,12 @@ export function useQieName(wallet: Address | undefined) {
     select: (data) => data.qieName,
   });
 }
+
+/** How many fee-free orders this wallet has left; refetched whenever a page mounts. */
+export function useFreeOrders(wallet: Address | undefined) {
+  return useQuery({
+    queryKey: ['free-orders', wallet?.toLowerCase()],
+    queryFn: () => api.freeOrders(wallet!),
+    enabled: Boolean(wallet),
+  });
+}

@@ -3,7 +3,7 @@ import { ChainStatus, type CheckoutWriter } from '../chain/checkout-writer';
 import type { ContractLimits } from '../chain/contract-limits';
 import { encryptCodes } from '../codes';
 import type { AppConfig } from '../config';
-import { lockWork, patchOrder, transition, type Order } from '../db/orders';
+import { freeOrdersPaidBefore, lockWork, patchOrder, transition, type Order } from '../db/orders';
 import { withTransaction, type Db } from '../db/pool';
 import type { Logger } from '../log';
 import { SupplierRejectedError, type DeliveryRef, type Supplier } from '../supplier/types';
@@ -85,6 +85,19 @@ export class FulfilmentWorker {
   }
 
   private async startDelivery(order: Order): Promise<void> {
+    // A wallet can hold several free quotes at once. Only its first FREE_ORDERS_PER_WALLET paid
+    // ones are delivered at the free price; a later one is refunded before anything is delivered.
+    if (
+      order.feeWaived &&
+      (await freeOrdersPaidBefore(this.db, order)) >= this.config.FREE_ORDERS_PER_WALLET
+    ) {
+      await transition(this.db, order.id, ['PAID'], 'REFUND_PENDING', {
+        reviewReason: 'free order limit already used by this wallet',
+        nextAttemptAt: null,
+      });
+      return;
+    }
+
     if (Date.now() >= (await this.cutoff(order)).getTime()) {
       await transition(this.db, order.id, ['PAID'], 'REFUND_PENDING', {
         reviewReason: 'fulfilment cutoff passed before delivery started',

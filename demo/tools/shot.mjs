@@ -9,7 +9,13 @@ const H = Number(process.env.H ?? 1080);
 const port = 9400 + Math.floor(Math.random() * 400);
 const chrome = spawn(
   process.env.CHROME,
-  ['--no-sandbox', '--headless', `--remote-debugging-port=${port}`, `--window-size=${W},${H}`, 'about:blank'],
+  [
+    '--no-sandbox',
+    '--headless',
+    `--remote-debugging-port=${port}`,
+    `--window-size=${W},${H}`,
+    'about:blank',
+  ],
   { stdio: 'ignore' },
 );
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -27,7 +33,10 @@ let id = 0;
 const pending = new Map();
 ws.onmessage = (m) => {
   const msg = JSON.parse(m.data);
-  if (msg.id && pending.has(msg.id)) pending.get(msg.id)(msg), pending.delete(msg.id);
+  if (msg.id && pending.has(msg.id)) {
+    pending.get(msg.id)(msg);
+    pending.delete(msg.id);
+  }
 };
 const send = (method, params = {}) =>
   new Promise((r) => {
@@ -36,7 +45,12 @@ const send = (method, params = {}) =>
     ws.send(JSON.stringify({ id: i, method, params }));
   });
 await send('Page.enable');
-await send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+await send('Emulation.setDeviceMetricsOverride', {
+  width: W,
+  height: H,
+  deviceScaleFactor: 1,
+  mobile: false,
+});
 await send('Page.navigate', { url });
 await sleep(Number(waitMs));
 const shot = await send('Page.captureScreenshot', { format: 'png' });
